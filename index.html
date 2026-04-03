@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">덕선필름 | 전북 영상 촬영·편집</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #faf8f4;
+  --white: #ffffff;
+  --text: #2d2b27;
+  --mid: #6b6760;
+  --light: #a09d97;
+  --point: #e8833a;
+  --point-light: #fdf0e6;
+  --border: #ede9e2;
+  --navy: #1e2d4a;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Pretendard', sans-serif; background: var(--cream); color: var(--text); font-weight: 400; line-height: 1.7; overflow-x: hidden; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(250,248,244,0.95); backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 5%; height: 62px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--text); text-decoration: none; }
+.nav-logo span { color: var(--point); }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a { font-size: 0.85rem; color: var(--mid); text-decoration: none; transition: color 0.2s; }
+.nav-links a:hover { color: var(--point); }
+.nav-cta { background: var(--point); color: white !important; padding: 0.45rem 1.1rem; border-radius: 100px; font-size: 0.82rem !important; font-weight: 500 !important; }
+
+/* HERO */
+#hero { padding-top: 62px; min-height: 100vh; display: flex; align-items: center; background: var(--cream); }
+.hero-inner { width: 90%; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; padding: 4rem 0; }
+.hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--point-light); color: var(--point); font-size: 0.78rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 100px; margin-bottom: 1.4rem; }
+.hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--point); border-radius: 50%; }
+.hero-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; line-height: 1.3; letter-spacing: -0.03em; margin-bottom: 1.2rem; }
+.hero-title .point { color: var(--point); }
+.hero-desc { font-size: 0.95rem; color: var(--mid); line-height: 1.9; margin-bottom: 2rem; }
+.hero-buttons { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+.btn-primary { background: var(--point); color: white; padding: 0.75rem 1.6rem; border-radius: 100px; text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: opacity 0.2s; }
+.btn-primary:hover { opacity: 0.88; }
+.btn-secondary { background: var(--white); color: var(--text); padding: 0.75rem 1.6rem; border-radius: 100px; text-decoration: none; font-size: 0.88rem; border: 1.5px solid var(--border); transition: border-color 0.2s; }
+.btn-secondary:hover { border-color: var(--point); color: var(--point); }
+.hero-right { position: relative; }
+.hero-card-main { background: var(--navy); border-radius: 20px; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+.hero-card-float { position: absolute; bottom: -20px; left: -24px; background: white; border-radius: 14px; padding: 1rem 1.2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.8rem; }
+.float-icon { width: 40px; height: 40px; background: var(--point-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.float-label { font-size: 0.72rem; color: var(--light); }
+.float-value { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+/* TRUST BAR */
+.trust-bar { background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1.2rem 5%; display: flex; align-items: center; justify-content: center; gap: 3rem; flex-wrap: wrap; }
+.trust-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--mid); }
+
+/* SECTIONS */
+section { padding: 5rem 5%; }
+.section-header { text-align: center; margin-bottom: 3rem; }
+.section-tag { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--point); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.section-title { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; letter-spacing: -0.03em; color: var(--text); margin-bottom: 0.6rem; }
+.section-sub { font-size: 0.9rem; color: var(--mid); }
+
+/* SERVICES */
+#services { background: var(--white); }
+.services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 960px; margin: 0 auto; }
+.service-card { background: var(--cream); border-radius: 16px; padding: 2rem 1.6rem; transition: transform 0.2s; }
+.service-card:hover { transform: translateY(-4px); }
+.service-emoji { font-size: 2rem; margin-bottom: 1rem; display: block; }
+.service-name { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+.service-desc { font-size: 0.83rem; color: var(--mid); line-height: 1.7; }
+.service-tag { display: inline-block; margin-top: 1rem; font-size: 0.72rem; color: var(--point); background: var(--point-light); padding: 0.2rem 0.6rem; border-radius: 100px; }
+
+/* WORK */
+#work { background: var(--cream); }
+.work-tabs { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
+.tab-btn { font-family: 'Pretendard', sans-serif; font-size: 0.82rem; padding: 0.45rem 1.1rem; border-radius: 100px; border: 1.5px solid var(--border); background: var(--white); color: var(--mid); cursor: pointer; transition: all 0.2s; }
+.tab-btn:hover, .tab-btn.active { background: var(--point); border-color: var(--point); color: white; }
+/* WORK SECTIONS */
+#work { background: var(--cream); }
+.work-section { margin-bottom: 4rem; max-width: 960px; margin-left: auto; margin-right: auto; }
+.work-section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1.5px solid var(--border); }
+.work-section-left {}
+.work-section-cat { font-size: 1.15rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.work-section-desc { font-size: 0.82rem; color: var(--mid); margin-top: 0.3rem; }
+.work-section-right { display: flex; align-items: center; gap: 0.8rem; }
+.work-section-count { font-size: 0.75rem; color: var(--light); }
+.work-view-all { font-size: 0.78rem; color: var(--point); font-weight: 600; background: none; border: none; border-bottom: 1px solid var(--point-light); padding-bottom: 1px; cursor: pointer; font-family: 'Pretendard', sans-serif; transition: border-color 0.2s; }
+.work-view-all:hover { border-bottom-color: var(--point); }
+.work-slider-wrap { position: relative; }
+.work-slider { display: flex; gap: 0.8rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 4px; scroll-behavior: smooth; }
+.work-slider::-webkit-scrollbar { display: none; }
+.work-slider .work-card { flex: 0 0 calc(25% - 0.6rem); min-width: 180px; scroll-snap-align: start; }
+.slider-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: white; border: 1.5px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; color: var(--text); transition: all 0.2s; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.slider-btn:hover { background: var(--point); color: white; border-color: var(--point); }
+.slider-btn.prev { left: -18px; }
+.slider-btn.next { right: -18px; }
+.slider-btn.hide { display: none; }
+.work-card { border-radius: 12px; overflow: hidden; background: var(--white); border: 1px solid var(--border); cursor: pointer; }
+.work-card-thumb { position: relative; aspect-ratio: 16/10; overflow: hidden; background: var(--navy); }
+.work-thumb { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; display: block; }
+.work-card:hover .work-thumb { transform: scale(1.04); }
+.work-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: var(--navy); }
+.work-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.2s; }
+.work-card:hover .work-overlay { background: rgba(0,0,0,0.1); }
+.work-info { padding: 0.5rem 0.55rem 0.55rem; }
+.work-name { font-size: 0.78rem; font-weight: 600; color: var(--text); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.work-empty { text-align: center; padding: 2rem; color: var(--light); font-size: 0.85rem; background: var(--white); border-radius: 12px; border: 1.5px dashed var(--border); }
+
+/* YOUTUBE INLINE PLAYER */
+.yt-player-wrap { overflow: hidden; max-height: 0; transition: max-height 0.45s cubic-bezier(.4,0,.2,1), opacity 0.35s ease, margin 0.35s ease; opacity: 0; margin-top: 0; }
+.yt-player-wrap.open { max-height: 600px; opacity: 1; margin-top: 1rem; }
+.yt-player-inner { position: relative; background: #000; border-radius: 14px; overflow: hidden; }
+.yt-player-inner iframe { width: 100%; aspect-ratio: 16/9; display: block; border: none; }
+.yt-player-close { position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; transition: background .2s; }
+.yt-player-close:hover { background: var(--point); }
+.work-card.playing .work-overlay { background: rgba(232,131,58,.18) !important; }
+
+/* PROCESS */
+#process { background: var(--white); }
+.process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; max-width: 960px; margin: 0 auto; position: relative; }
+.process-steps::before { content: ''; position: absolute; top: 28px; left: 12%; right: 12%; height: 1px; background: var(--border); }
+.step { text-align: center; position: relative; z-index: 1; }
+.step-num { width: 56px; height: 56px; background: var(--point-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.1rem; font-weight: 700; color: var(--point); border: 2px solid white; }
+.step-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; }
+.step-desc { font-size: 0.78rem; color: var(--mid); line-height: 1.6; }
+
+/* ABOUT */
+#about { background: var(--cream); }
+.about-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; max-width: 960px; margin: 0 auto; }
+.about-img { background: var(--navy); border-radius: 20px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 3rem; overflow: hidden; }
+.about-img img { width: 100%; height: 100%; object-fit: cover; }
+.about-title { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 1rem; }
+.about-desc { font-size: 0.9rem; color: var(--mid); line-height: 1.9; margin-bottom: 1.8rem; }
+.about-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+.chip { font-size: 0.78rem; padding: 0.3rem 0.8rem; background: var(--white); border: 1.5px solid var(--border); border-radius: 100px; color: var(--mid); }
+.about-stats { display: flex; gap: 2rem; }
+.stat-num { font-size: 2rem; font-weight: 700; color: var(--point); line-height: 1; }
+.stat-label { font-size: 0.75rem; color: var(--light); margin-top: 0.2rem; }
+
+/* CONTACT */
+#contact { background: var(--navy); color: white; }
+.contact-inner { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; }
+#contact .section-tag { color: #f4a96e; }
+#contact .section-title { color: white; text-align: left; }
+#contact .section-sub { color: rgba(255,255,255,0.55); text-align: left; }
+#contact .section-header { text-align: left; margin-bottom: 2rem; }
+.contact-items { display: flex; flex-direction: column; gap: 1rem; }
+.contact-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; background: rgba(255,255,255,0.06); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
+.contact-icon { width: 38px; height: 38px; background: rgba(232,131,58,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.contact-label { font-size: 0.72rem; color: rgba(255,255,255,0.45); }
+.contact-val { font-size: 0.9rem; color: rgba(255,255,255,0.85); }
+.contact-form { display: flex; flex-direction: column; gap: 1rem; }
+.form-label { font-size: 0.75rem; color: rgba(255,255,255,0.45); margin-bottom: 0.3rem; display: block; }
+.form-input, .form-textarea { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 0.75rem 1rem; color: white; font-family: 'Pretendard', sans-serif; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
+.form-input:focus, .form-textarea:focus { border-color: var(--point); }
+.form-textarea { resize: none; }
+.form-input::placeholder, .form-textarea::placeholder { color: rgba(255,255,255,0.25); }
+.form-submit { background: var(--point); color: white; border: none; border-radius: 100px; padding: 0.85rem 1.8rem; font-family: 'Pretendard', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; align-self: flex-start; }
+.form-submit:hover { opacity: 0.85; }
+
+footer { background: #141e30; padding: 1.5rem 5%; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+.footer-logo { font-size: 0.95rem; font-weight: 700; color: rgba(255,255,255,0.35); }
+.footer-copy { font-size: 0.75rem; color: rgba(255,255,255,0.2); }
+
+.fade { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.fade.on { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 860px) {
+  .hero-inner, .about-inner, .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+  .services-grid { grid-template-columns: 1fr 1fr; }
+  .work-grid-4 { grid-template-columns: 1fr 1fr; }
+  .process-steps { grid-template-columns: 1fr 1fr; }
+  .process-steps::before { display: none; }
+  .trust-bar { gap: 1.2rem; }
+  .nav-links li:not(:last-child) { display: none; }
+}
+@media (max-width: 560px) {
+  .services-grid { grid-template-columns: 1fr; }
+  .work-grid-4 { grid-template-columns: 1fr 1fr; }
+  section { padding: 4rem 5%; }
+}
+</style>
+</head>
+<body>
+
+<nav id="mainNav">
+  <a href="#hero" class="nav-logo" id="navLogo">덕선<span>필름</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#services" id="navMenu1">서비스</a></li>
+    <li><a href="#work" id="navMenu2">작업물</a></li>
+    <li><a href="#about" id="navMenu3">소개</a></li>
+    <li><a href="#contact" class="nav-cta" id="navMenu4">문의하기</a></li>
+  </ul>
+</nav>
+
+<section id="hero">
+  <div class="hero-inner">
+    <div class="fade">
+      <div class="hero-badge" id="heroBadge">전북 기반 영상 제작</div>
+      <h1 class="hero-title" id="heroTitle">소중한 순간을<br><span class="point">오래 기억되는</span><br>영상으로 만듭니다</h1>
+      <p class="hero-desc" id="heroDesc">행사, 웨딩, 기업 홍보까지—<br>현장의 감동을 그대로 담아 전달합니다.<br>전북 전주 기반, 전국 출장 가능합니다.</p>
+      <div class="hero-buttons">
+        <a href="#work" class="btn-primary">작업물 보기</a>
+        <a href="#contact" class="btn-secondary">문의하기</a>
+      </div>
+    </div>
+    <div class="fade">
+      <div class="hero-card-main">🎬</div>
+      <div class="hero-card-float">
+        <div class="float-icon">🎬</div>
+        <div>
+          <div class="float-label">누적 제작</div>
+          <div class="float-value" id="heroStat">150건 이상</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="trust-bar" id="trustBar">
+  <div class="trust-item">📍 <span id="trust1">전북 전주 기반</span></div>
+  <div class="trust-item">🚗 <span id="trust2">전국 출장 가능</span></div>
+  <div class="trust-item">⚡ <span id="trust3">빠른 납품</span></div>
+  <div class="trust-item">🤖 <span id="trust4">AI 활용 제작</span></div>
+  <div class="trust-item">💬 <span id="trust5">카카오톡 상담</span></div>
+</div>
+
+<section id="services">
+  <div class="section-header fade">
+    <span class="section-tag">Services</span>
+    <h2 class="section-title" id="servicesTitle">이런 영상 만들어드려요</h2>
+    <p class="section-sub" id="servicesSub">촬영부터 편집, 납품까지 한 번에</p>
+  </div>
+  <div class="services-grid" id="servicesGrid"></div>
+</section>
+
+<section id="work">
+  <div class="section-header fade">
+    <span class="section-tag">Work</span>
+    <h2 class="section-title" id="workTitle">작업물</h2>
+    <p class="section-sub" id="workSub">다양한 현장에서 쌓아온 결과물입니다</p>
+  </div>
+  <div id="workSections"></div>
+</section>
+
+<section id="process">
+  <div class="section-header fade">
+    <span class="section-tag">Process</span>
+    <h2 class="section-title" id="processTitle">이렇게 진행돼요</h2>
+    <p class="section-sub" id="processSub">처음이셔도 걱정 마세요, 친절하게 안내해드립니다</p>
+  </div>
+  <div class="process-steps" id="processSteps"></div>
+</section>
+
+<section id="about">
+  <div class="about-inner">
+    <div class="about-img fade" id="aboutImg">🎥</div>
+    <div class="fade">
+      <p class="section-tag">About</p>
+      <h2 class="about-title" id="aboutTitle">안녕하세요,<br>덕선필름입니다 👋</h2>
+      <p class="about-desc" id="aboutDesc">전북에서 영상 촬영·편집으로 활동한 지 5년이 됐어요.<br>행사 현장부터 웨딩, 기업 홍보 영상까지 다양하게 경험했고,<br>요즘은 AI 툴도 적극 활용해서 더 빠르고 깔끔하게<br>작업물을 만들어드리고 있어요.</p>
+      <div class="about-chips" id="aboutChips"></div>
+      <div class="about-stats" id="aboutStats"></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact-inner">
+    <div>
+      <div class="section-header fade">
+        <span class="section-tag">Contact</span>
+        <h2 class="section-title" id="contactTitle">편하게 연락 주세요</h2>
+        <p class="section-sub" id="contactSub">견적 문의, 일정 확인 모두 환영해요.<br>카카오톡으로 바로 연락하셔도 됩니다.</p>
+      </div>
+      <div class="contact-items" id="contactItems"></div>
+    </div>
+    <div class="fade">
+      <form class="contact-form" onsubmit="return false;">
+        <div><label class="form-label">이름</label><input class="form-input" type="text" placeholder="홍길동"></div>
+        <div><label class="form-label">연락처</label><input class="form-input" type="text" placeholder="010-0000-0000"></div>
+        <div><label class="form-label">촬영 종류</label><input class="form-input" type="text" placeholder="웨딩 / 행사 / 기업홍보 / 기타"></div>
+        <div><label class="form-label">문의 내용</label><textarea class="form-textarea" rows="4" placeholder="촬영 일정, 장소, 요청사항을 편하게 적어주세요 :)"></textarea></div>
+        <button type="submit" class="form-submit">문의 보내기</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-logo" id="footerLogo" onclick="adminClick()" style="cursor:default;user-select:none;">덕선필름</span>
+  <span class="footer-copy" id="footerCopy">© 2025 덕선필름. All rights reserved.</span>
+</footer>
+
+<script>
+const STORAGE_KEY = 'dsfilm_data';
+
+const DEFAULT = {
+  nav: { menu1:'서비스', menu2:'작업물', menu3:'소개', menu4:'문의하기' },
+  hero: { badge:'전북 기반 영상 제작', title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다', desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.', stat:'150건 이상' },
+  trust: ['전북 전주 기반','전국 출장 가능','빠른 납품','AI 활용 제작','카카오톡 상담'],
+  services: [
+    { emoji:'🎪', name:'행사 · 축제 영상', desc:'지역 행사, 축제, 공연 현장을 생동감 있게 담아드립니다. 주최 기관 납품 및 SNS 홍보용 제작 가능합니다.', tag:'당일 현장 대응' },
+    { emoji:'💍', name:'웨딩 영상', desc:'두 사람의 소중한 날을 오래 간직할 수 있도록 정성껏 담아드립니다. 본식 영상 및 하이라이트 편집.', tag:'감성 편집' },
+    { emoji:'🏢', name:'기업 · 홍보 영상', desc:'회사 소개, 제품 홍보, 인터뷰 영상 등 비즈니스 목적에 맞는 영상을 제작해드립니다.', tag:'AI 자막 포함' }
+  ],
+  works: [],
+  cats: ['전체','행사·축제','웨딩','기업·홍보'],
+  process: [
+    { num:'1', title:'문의 · 상담', desc:'카카오톡 또는 전화로 편하게 연락주세요. 일정, 장소, 예산 등 간단히 이야기 나눠요.' },
+    { num:'2', title:'견적 · 계약', desc:'요청 내용에 맞는 견적을 드리고, 진행 방향을 함께 확정해요.' },
+    { num:'3', title:'촬영', desc:'현장에서 최선을 다해 담아드려요. 필요 시 사전 답사도 진행합니다.' },
+    { num:'4', title:'편집 · 납품', desc:'꼼꼼하게 편집 후 전달드려요. 1회 수정 요청 가능합니다.' }
+  ],
+  about: { title:'안녕하세요,\n덕선필름입니다 👋', desc:'전북에서 영상 촬영·편집으로 활동한 지 5년이 됐어요.\n행사 현장부터 웨딩, 기업 홍보 영상까지 다양하게 경험했고,\n요즘은 AI 툴도 적극 활용해서 더 빠르고 깔끔하게\n작업물을 만들어드리고 있어요.', chips:['촬영·편집 5년','전북 기반','AI 영상 제작','전국 출장'], stats:[{num:'150+',label:'누적 프로젝트'},{num:'5년',label:'현장 경험'},{num:'⚡',label:'빠른 납품'}] },
+  contact: { title:'편하게 연락 주세요', sub:'견적 문의, 일정 확인 모두 환영해요.\n카카오톡으로 바로 연락하셔도 됩니다.', items:[{icon:'📱',label:'전화 · 문자',val:'010-0000-0000'},{icon:'✉️',label:'이메일',val:'your@email.com'},{icon:'📍',label:'활동 지역',val:'전북 전주 기반 · 전국 출장 가능'},{icon:'📸',label:'인스타그램',val:'@deoksunfilm'}] },
+  footer: { copy:'© 2025 덕선필름. All rights reserved.' }
+};
+
+function getData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT; } catch { return DEFAULT; }
+}
+
+function getYtId(url) {
+  const m = (url||'').match(/(?:youtu\.be\/|v=|embed\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function nl2br(str) { return (str||'').replace(/\n/g,'<br>'); }
+
+function render() {
+  const d = getData();
+
+  // nav
+  document.getElementById('navMenu1').textContent = d.nav.menu1;
+  document.getElementById('navMenu2').textContent = d.nav.menu2;
+  document.getElementById('navMenu3').textContent = d.nav.menu3;
+  document.getElementById('navMenu4').textContent = d.nav.menu4;
+
+  // hero
+  document.getElementById('heroBadge').textContent = d.hero.badge;
+  document.getElementById('heroTitle').innerHTML = nl2br(d.hero.title).replace('오래 기억되는','<span class="point">오래 기억되는</span>');
+  document.getElementById('heroDesc').innerHTML = nl2br(d.hero.desc);
+  document.getElementById('heroStat').textContent = d.hero.stat;
+
+  // trust
+  d.trust.forEach((t,i) => { const el = document.getElementById('trust'+(i+1)); if(el) el.textContent = t; });
+
+  // services
+  document.getElementById('servicesGrid').innerHTML = d.services.map(s => `
+    <div class="service-card fade">
+      <span class="service-emoji">${s.emoji}</span>
+      <div class="service-name">${s.name}</div>
+      <p class="service-desc">${s.desc}</p>
+      <span class="service-tag">${s.tag}</span>
+    </div>`).join('');
+
+  // works
+  renderWorks(d.works);
+
+  // process
+  document.getElementById('processSteps').innerHTML = d.process.map(p => `
+    <div class="step fade">
+      <div class="step-num">${p.num}</div>
+      <div class="step-title">${p.title}</div>
+      <p class="step-desc">${p.desc}</p>
+    </div>`).join('');
+
+  // about
+  document.getElementById('aboutTitle').innerHTML = nl2br(d.about.title);
+  document.getElementById('aboutDesc').innerHTML = nl2br(d.about.desc);
+  document.getElementById('aboutChips').innerHTML = d.about.chips.map(c=>`<span class="chip">${c}</span>`).join('');
+  document.getElementById('aboutStats').innerHTML = d.about.stats.map(s=>`<div><div class="stat-num">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
+
+  // contact
+  document.getElementById('contactTitle').textContent = d.contact.title;
+  document.getElementById('contactSub').innerHTML = nl2br(d.contact.sub);
+  document.getElementById('contactItems').innerHTML = d.contact.items.map(i=>`
+    <div class="contact-item">
+      <div class="contact-icon">${i.icon}</div>
+      <div><div class="contact-label">${i.label}</div><div class="contact-val">${i.val}</div></div>
+    </div>`).join('');
+
+  // footer
+  document.getElementById('footerCopy').textContent = d.footer.copy;
+
+  // fade observer
+  setTimeout(() => {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach((e,i) => { if(e.isIntersecting) setTimeout(()=>e.target.classList.add('on'), i*80); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade').forEach(el => io.observe(el));
+  }, 100);
+}
+
+function renderWorks(works) {
+  const d = getData();
+  const container = document.getElementById('workSections');
+  const sections = d.workSections || [];
+  if (!sections.length) {
+    container.innerHTML = '<p style="text-align:center;color:var(--light);padding:3rem;">작업물을 준비 중입니다</p>';
+    return;
+  }
+  container.innerHTML = sections.map((sec, si) => {
+    const catWorks = works.filter(w => w.cat === sec.cat);
+    let orderedWorks;
+    if (sec.workIds && sec.workIds.length > 0) {
+      orderedWorks = sec.workIds.map(id => catWorks.find(w => w.id === id)).filter(Boolean);
+      const unassigned = catWorks.filter(w => !sec.workIds.includes(w.id));
+      orderedWorks = [...orderedWorks, ...unassigned];
+    } else {
+      orderedWorks = catWorks;
+    }
+    if (!orderedWorks.length) return '';
+    // catMeta 설명 불러오기
+    const catDesc = (d.catMeta && d.catMeta[sec.cat] && d.catMeta[sec.cat].desc) ? d.catMeta[sec.cat].desc : '';
+    const cards = orderedWorks.map((w, wi) => {
+      const ytId = getYtId(w.url);
+      const thumb = w.customThumb
+        ? `<img class="work-thumb" src="${w.customThumb}" alt="${w.name}">`
+        : ytId
+          ? `<img class="work-thumb" src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="${w.name}">`
+          : `<div class="work-thumb-placeholder">🎬</div>`;
+      const hasYt = !!ytId;
+      return `<div class="work-card" id="wcard-${si}-${wi}" onclick="openYtPlayer(${si},'${ytId||''}','wcard-${si}-${wi}')">
+        <div class="work-card-thumb">
+          ${thumb}
+          <div class="work-overlay" style="${hasYt?'':'cursor:default'}"></div>
+        </div>
+        <div class="work-info">
+          <div class="work-name">${w.name}</div>
+        </div>
+      </div>`;
+    }).join('');
+    const hasMore = orderedWorks.length > 4;
+    return `<div class="work-section fade" id="wsec-${si}">
+      <div class="work-section-header">
+        <div class="work-section-left">
+          <div class="work-section-cat">${sec.cat}</div>
+          ${catDesc ? `<div class="work-section-desc">${catDesc}</div>` : ''}
+        </div>
+        <div class="work-section-right">
+          <span class="work-section-count">${orderedWorks.length}개</span>
+          ${hasMore ? `<button class="work-view-all" onclick="toggleViewAll(this, 'slider-${si}')">전체보기 →</button>` : ''}
+        </div>
+      </div>
+      <div class="work-slider-wrap">
+        ${hasMore ? `<button class="slider-btn prev" onclick="slideWork('slider-${si}',-1)">‹</button>` : ''}
+        <div class="work-slider" id="slider-${si}" onscroll="updateSliderBtns('slider-${si}')">
+          ${cards}
+        </div>
+        ${hasMore ? `<button class="slider-btn next" onclick="slideWork('slider-${si}',1)">›</button>` : ''}
+      </div>
+      <div class="yt-player-wrap" id="ytplayer-${si}">
+        <div class="yt-player-inner">
+          <button class="yt-player-close" onclick="closeYtPlayer(${si})">✕</button>
+          <div id="ytplayer-frame-${si}"></div>
+        </div>
+      </div>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  setTimeout(() => {
+    document.querySelectorAll('.work-slider').forEach(s => updateSliderBtns(s.id));
+  }, 100);
+}
+
+let currentYtSi = null, currentYtCardId = null;
+
+function openYtPlayer(si, ytId, cardId) {
+  if (!ytId) return;
+  const wrap = document.getElementById('ytplayer-' + si);
+  const frame = document.getElementById('ytplayer-frame-' + si);
+  if (!wrap || !frame) return;
+  // 같은 영상 다시 클릭하면 닫기
+  if (currentYtSi === si && currentYtCardId === cardId && wrap.classList.contains('open')) {
+    closeYtPlayer(si); return;
+  }
+  // 다른 섹션 플레이어 닫기
+  if (currentYtSi !== null && currentYtSi !== si) closeYtPlayer(currentYtSi);
+  // 재생 중 카드 표시 초기화
+  if (currentYtCardId) { const prev = document.getElementById(currentYtCardId); if (prev) prev.classList.remove('playing'); }
+  currentYtSi = si; currentYtCardId = cardId;
+  const card = document.getElementById(cardId);
+  if (card) card.classList.add('playing');
+  frame.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  wrap.classList.add('open');
+  // 플레이어 위치로 스크롤
+  setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+function closeYtPlayer(si) {
+  const wrap = document.getElementById('ytplayer-' + si);
+  const frame = document.getElementById('ytplayer-frame-' + si);
+  if (wrap) wrap.classList.remove('open');
+  if (frame) setTimeout(() => frame.innerHTML = '', 400);
+  if (currentYtCardId) { const c = document.getElementById(currentYtCardId); if (c) c.classList.remove('playing'); }
+  if (currentYtSi === si) { currentYtSi = null; currentYtCardId = null; }
+}
+
+function slideWork(sliderId, dir) {
+  const slider = document.getElementById(sliderId);
+  if (!slider) return;
+  const cardW = slider.querySelector('.work-card');
+  if (!cardW) return;
+  slider.scrollBy({ left: (cardW.offsetWidth + 12) * 2 * dir, behavior: 'smooth' });
+}
+
+function updateSliderBtns(sliderId) {
+  const slider = document.getElementById(sliderId);
+  if (!slider) return;
+  const wrap = slider.parentElement;
+  const prev = wrap.querySelector('.slider-btn.prev');
+  const next = wrap.querySelector('.slider-btn.next');
+  if (prev) prev.classList.toggle('hide', slider.scrollLeft <= 0);
+  if (next) next.classList.toggle('hide', slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 4);
+}
+
+function toggleViewAll(btn, sliderId) {
+  const slider = document.getElementById(sliderId);
+  if (!slider) return;
+  const isExpanded = slider.style.flexWrap === 'wrap';
+  if (isExpanded) {
+    slider.style.flexWrap = '';
+    slider.style.overflowX = 'auto';
+    btn.textContent = '전체보기 →';
+    slider.scrollTo({ left: 0, behavior: 'smooth' });
+    slider.parentElement.querySelectorAll('.slider-btn').forEach(b => b.classList.remove('hide'));
+    updateSliderBtns(sliderId);
+  } else {
+    slider.style.flexWrap = 'wrap';
+    slider.style.overflowX = 'visible';
+    slider.querySelectorAll('.work-card').forEach(c => { c.style.flex = '0 0 calc(25% - 0.6rem)'; });
+    btn.textContent = '접기 ↑';
+    slider.parentElement.querySelectorAll('.slider-btn').forEach(b => b.classList.add('hide'));
+  }
+}
+
+let _ac = 0, _at;
+function adminClick() {
+  _ac++;
+  clearTimeout(_at);
+  if (_ac >= 3) {
+    _ac = 0;
+    window.open('dsfilm_admin_v3.html', '_blank');
+  } else {
+    _at = setTimeout(() => { _ac = 0; }, 600);
+  }
+}
+
+render();
+</script>
+</body>
+</html>
