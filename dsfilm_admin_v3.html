@@ -1307,7 +1307,8 @@ function saveGhSettings() {
   if (!s.user || !s.repo || !s.token) { toast('⚠️ 모든 항목을 입력해주세요'); return; }
   localStorage.setItem(GH_KEY, JSON.stringify(s));
   closeGhModal();
-  toast('✅ GitHub 설정 저장됐어요!');
+  toast('✅ GitHub 설정 저장됐어요! 바로 배포할게요...');
+  setTimeout(() => deployToGithub(), 500);
 }
 
 async function deployToGithub() {
