@@ -328,6 +328,23 @@ function getData() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT; } catch { return DEFAULT; }
 }
 
+// GitHub에서 데이터 불러오기 (배포된 환경에서는 GitHub 우선)
+async function loadDataFromGithub() {
+  try {
+    // GitHub raw URL로 데이터 파일 fetch
+    const repoUrl = window.location.href.match(/github\.io\/([^/]+)/);
+    if (!repoUrl) return null; // 로컬이면 스킵
+    const user = window.location.hostname.replace('.github.io', '');
+    const repo = repoUrl[1];
+    const res = await fetch(`https://raw.githubusercontent.com/${user}/${repo}/main/dsfilm_data.json?t=${Date.now()}`);
+    if (!res.ok) return null;
+    const d = await res.json();
+    // localStorage도 업데이트 (캐시)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    return d;
+  } catch { return null; }
+}
+
 function getYtId(url) {
   const m = (url||'').match(/(?:youtu\.be\/|v=|embed\/)([a-zA-Z0-9_-]{11})/);
   return m ? m[1] : null;
@@ -555,7 +572,16 @@ function adminClick() {
   }
 }
 
-render();
+// GitHub에서 먼저 불러오고, 없으면 localStorage 사용
+(async () => {
+  const ghData = await loadDataFromGithub();
+  if (ghData) {
+    // GitHub 데이터로 렌더링
+    const origGetData = getData;
+    window._ghData = ghData;
+  }
+  render();
+})();
 </script>
 </body>
 </html>

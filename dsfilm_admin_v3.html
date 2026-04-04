@@ -161,7 +161,37 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
   <div class="hdr-logo">덕선<span>필름</span> 관리자</div>
   <div class="hdr-right">
     <button class="hdr-preview" onclick="openSite()">사이트 미리보기 →</button>
-    <button class="hdr-save" onclick="finalSave()">💾 최종 저장</button>
+    <button class="hdr-preview" onclick="openGhModal()" style="background:rgba(255,255,255,.15)" title="GitHub 배포 설정">⚙️ GitHub</button>
+    <button class="hdr-save" onclick="deployToGithub()">🚀 저장 & 배포</button>
+  </div>
+</div>
+
+<!-- GitHub 설정 모달 -->
+<div class="modal-wrap" id="ghModal">
+  <div class="modal-box" style="width:480px">
+    <div class="modal-hdr">
+      <div class="modal-title">⚙️ GitHub 배포 설정</div>
+      <button class="modal-close" onclick="closeGhModal()">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.8rem">
+      <div class="fg">
+        <label class="fl">GitHub 사용자명</label>
+        <input class="fi" id="gh-user" placeholder="예: jenzang2">
+      </div>
+      <div class="fg">
+        <label class="fl">Repository 이름</label>
+        <input class="fi" id="gh-repo" placeholder="예: dsfilm">
+      </div>
+      <div class="fg">
+        <label class="fl">Personal Access Token</label>
+        <input class="fi" id="gh-token" type="password" placeholder="ghp_xxxxxxxxxx">
+        <div class="fh">GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → <b>repo</b> 권한 체크</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:1.2rem">
+      <button class="btn b-or" style="flex:1" onclick="saveGhSettings()">저장</button>
+      <button class="btn b-gy" onclick="closeGhModal()">취소</button>
+    </div>
   </div>
 </div>
 
@@ -1251,6 +1281,91 @@ function toast(msg) {
 }
 
 function openSite() { save(); window.open('index.html', '_blank'); }
+
+// ===== GITHUB DEPLOY =====
+const GH_KEY = 'dsfilm_gh_settings';
+
+function openGhModal() {
+  const s = getGhSettings();
+  document.getElementById('gh-user').value = s.user || '';
+  document.getElementById('gh-repo').value = s.repo || '';
+  document.getElementById('gh-token').value = s.token || '';
+  document.getElementById('ghModal').classList.add('open');
+}
+function closeGhModal() { document.getElementById('ghModal').classList.remove('open'); }
+
+function getGhSettings() {
+  try { return JSON.parse(localStorage.getItem(GH_KEY)) || {}; } catch { return {}; }
+}
+
+function saveGhSettings() {
+  const s = {
+    user: document.getElementById('gh-user').value.trim(),
+    repo: document.getElementById('gh-repo').value.trim(),
+    token: document.getElementById('gh-token').value.trim()
+  };
+  if (!s.user || !s.repo || !s.token) { toast('⚠️ 모든 항목을 입력해주세요'); return; }
+  localStorage.setItem(GH_KEY, JSON.stringify(s));
+  closeGhModal();
+  toast('✅ GitHub 설정 저장됐어요!');
+}
+
+async function deployToGithub() {
+  // 1. 모든 변경사항 먼저 저장
+  ['nav','hero','about','contact'].forEach(id => { if (dirtyPanels.has(id)) applyPanel(id); });
+  localStorage.setItem(KEY, JSON.stringify(data));
+  dirtyPanels.clear();
+  document.querySelectorAll('.mi').forEach(m => m.classList.remove('dirty'));
+
+  const s = getGhSettings();
+  if (!s.user || !s.repo || !s.token) {
+    toast('⚠️ 먼저 ⚙️ GitHub 설정을 해주세요');
+    openGhModal();
+    return;
+  }
+
+  const btn = document.querySelector('.hdr-save');
+  btn.textContent = '🔄 배포 중...';
+  btn.disabled = true;
+
+  try {
+    const jsonContent = JSON.stringify(data, null, 2);
+    const b64 = btoa(unescape(encodeURIComponent(jsonContent)));
+    const apiBase = `https://api.github.com/repos/${s.user}/${s.repo}/contents`;
+    const headers = {
+      'Authorization': `token ${s.token}`,
+      'Content-Type': 'application/json'
+    };
+
+    // 기존 파일 SHA 가져오기 (업데이트 시 필요)
+    let sha = null;
+    try {
+      const res = await fetch(`${apiBase}/dsfilm_data.json`, { headers });
+      if (res.ok) { const j = await res.json(); sha = j.sha; }
+    } catch {}
+
+    // dsfilm_data.json 업로드
+    const body = { message: '데이터 업데이트 (관리자)', content: b64 };
+    if (sha) body.sha = sha;
+    const uploadRes = await fetch(`${apiBase}/dsfilm_data.json`, {
+      method: 'PUT', headers, body: JSON.stringify(body)
+    });
+
+    if (!uploadRes.ok) {
+      const err = await uploadRes.json();
+      throw new Error(err.message || '업로드 실패');
+    }
+
+    btn.textContent = '✅ 배포 완료!';
+    toast('🚀 GitHub에 배포됐어요! 1~2분 후 사이트에 반영돼요');
+    setTimeout(() => { btn.textContent = '🚀 저장 & 배포'; btn.disabled = false; }, 3000);
+  } catch (e) {
+    btn.textContent = '🚀 저장 & 배포';
+    btn.disabled = false;
+    toast('❌ 배포 실패: ' + e.message);
+    console.error(e);
+  }
+}
 
 // ===== LOGIN =====
 function checkPw() {
