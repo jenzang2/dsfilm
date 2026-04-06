@@ -289,25 +289,25 @@ footer { background: #141e30; padding: 1.5rem 5%; display: flex; align-items: ce
 .scene-card-count { font-size:.7rem; color:var(--light); margin-top:.2rem; }
 
 /* LIGHTBOX */
-.lb-wrap { position:fixed; inset:0; background:rgba(0,0,0,0.93); z-index:2000; display:none; align-items:center; justify-content:center; padding:2rem 3rem; }
+.lb-wrap { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:2000; display:none; align-items:center; justify-content:center; padding:2rem; }
 .lb-wrap.open { display:flex; }
-.lb-inner { position:relative; width:100%; max-width:880px; }
-.lb-close { position:absolute; top:-40px; right:0; background:none; border:none; color:rgba(255,255,255,.7); font-size:1.8rem; cursor:pointer; line-height:1; transition:color .2s; }
-.lb-close:hover { color:#fff; }
+.lb-inner { position:relative; width:100%; max-width:640px; background:var(--white); border-radius:16px; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,0.35); }
+.lb-close { position:absolute; top:10px; right:12px; background:rgba(0,0,0,.5); border:none; color:#fff; font-size:1.2rem; cursor:pointer; line-height:1; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:10; transition:background .2s; }
+.lb-close:hover { background:var(--point); }
 .lb-img-box { position:relative; background:#111; line-height:0; }
-.lb-img { width:100%; max-height:68vh; object-fit:contain; display:block; }
-.lb-arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); border:1.5px solid rgba(255,255,255,.2); color:#fff; width:46px; height:46px; border-radius:50%; font-size:1.4rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; z-index:10; }
-.lb-arrow:hover { background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.5); }
-.lb-arrow.prev { left:-58px; }
-.lb-arrow.next { right:-58px; }
+.lb-img { width:100%; max-height:52vh; object-fit:contain; display:block; }
+.lb-arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.4); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s; z-index:10; }
+.lb-arrow:hover { background:rgba(0,0,0,.7); }
+.lb-arrow.prev { left:8px; }
+.lb-arrow.next { right:8px; }
 .lb-arrow.hide { opacity:0; pointer-events:none; }
-.lb-info { text-align:center; margin-top:.9rem; color:#fff; }
-.lb-title { font-size:1rem; font-weight:700; }
-.lb-desc { font-size:.8rem; color:rgba(255,255,255,.55); margin-top:.3rem; line-height:1.6; }
-.lb-counter { font-size:.7rem; color:rgba(255,255,255,.35); margin-top:.4rem; }
-.lb-dots { display:flex; gap:.4rem; justify-content:center; margin-top:.6rem; flex-wrap:wrap; }
-.lb-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.25); cursor:pointer; transition:background .2s; border:none; padding:0; }
-.lb-dot.active { background:#fff; }
+.lb-info { text-align:center; padding:.8rem 1rem 1rem; background:var(--white); }
+.lb-title { font-size:.92rem; font-weight:700; color:var(--text); }
+.lb-desc { font-size:.78rem; color:var(--mid); margin-top:.25rem; line-height:1.6; }
+.lb-counter { font-size:.7rem; color:var(--light); margin-top:.3rem; }
+.lb-dots { display:flex; gap:.35rem; justify-content:center; margin-top:.5rem; flex-wrap:wrap; }
+.lb-dot { width:6px; height:6px; border-radius:50%; background:var(--border); cursor:pointer; transition:background .2s; border:none; padding:0; }
+.lb-dot.active { background:var(--point); }
 </style>
 </head>
 <body>
@@ -335,13 +335,6 @@ footer { background: #141e30; padding: 1.5rem 5%; display: flex; align-items: ce
     </div>
     <div class="fade">
       <div class="hero-card-main">🎬</div>
-      <div class="hero-card-float">
-        <div class="float-icon">🎬</div>
-        <div>
-          <div class="float-label">누적 제작</div>
-          <div class="float-value" id="heroStat">150건 이상</div>
-        </div>
-      </div>
     </div>
   </div>
 </section>
@@ -884,6 +877,8 @@ function selectWorkTab(cat) {
   renderWorkGrid(d);
 }
 
+const WORK_PAGE_SIZE = 18; // 3열 × 6줄
+
 function renderWorkGrid(d) {
   const container = document.getElementById('workSections');
   const sections = d.workSections || [];
@@ -899,23 +894,54 @@ function renderWorkGrid(d) {
     container.innerHTML = '<p style="text-align:center;color:var(--light);padding:3rem;">이 카테고리에 영상이 없습니다</p>';
     return;
   }
-  const cards = ordered.map((w, i) => {
+
+  const makeCard = (w, i) => {
     const ytId = getYtId(w.url);
     const thumb = w.customThumb
       ? `<img class="work-thumb" src="${w.customThumb}" alt="${w.name}">`
       : ytId
         ? `<img class="work-thumb" src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" alt="${w.name}">`
         : `<div class="work-thumb-placeholder">🎬</div>`;
-    // fade on 즉시 적용 (탭 전환 시 안 보이는 버그 방지)
-    return `<div class="work-card on" id="wcard-${i}" data-ytid="${ytId||''}" data-idx="${i}" onclick="openYtPlayer('${ytId||''}',${i})">
-      <div class="work-card-thumb">
-        ${thumb}
-        <div class="work-overlay"><div class="work-play-icon">▶</div></div>
-      </div>
+    return `<div class="work-card on" id="wcard-${i}" onclick="openYtPlayer('${ytId||''}',${i})">
+      <div class="work-card-thumb">${thumb}<div class="work-overlay"><div class="work-play-icon">▶</div></div></div>
       <div class="work-info"><div class="work-name">${w.name}</div></div>
     </div>`;
-  }).join('');
-  container.innerHTML = `<div class="work-grid" id="work-grid-main">${cards}</div>`;
+  };
+
+  const total = ordered.length;
+  const hasMore = total > WORK_PAGE_SIZE;
+  const initial = ordered.slice(0, WORK_PAGE_SIZE).map((w, i) => makeCard(w, i)).join('');
+  const rest = hasMore ? ordered.slice(WORK_PAGE_SIZE).map((w, i) => makeCard(w, WORK_PAGE_SIZE + i)).join('') : '';
+
+  container.innerHTML = `
+    <div class="work-grid" id="work-grid-main">${initial}</div>
+    ${hasMore ? `
+    <div id="work-more-grid" class="work-grid" style="display:none;margin-top:1.4rem">${rest}</div>
+    <div style="text-align:center;margin-top:1.8rem">
+      <button id="work-more-btn" onclick="toggleWorkMore()"
+        style="font-family:'Pretendard',sans-serif;font-size:.88rem;font-weight:600;padding:.65rem 2rem;border-radius:100px;border:1.5px solid var(--border);background:var(--white);color:var(--mid);cursor:pointer;transition:all .2s"
+        onmouseover="this.style.borderColor='var(--point)';this.style.color='var(--point)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--mid)'">
+        더보기 <span style="font-size:.8rem">▼</span> <span style="color:var(--light);font-weight:400">(${total - WORK_PAGE_SIZE}개 더)</span>
+      </button>
+    </div>` : ''}
+  `;
+}
+
+function toggleWorkMore() {
+  const moreGrid = document.getElementById('work-more-grid');
+  const btn = document.getElementById('work-more-btn');
+  if (!moreGrid || !btn) return;
+  const isOpen = moreGrid.style.display !== 'none';
+  if (isOpen) {
+    moreGrid.style.display = 'none';
+    btn.innerHTML = `더보기 <span style="font-size:.8rem">▼</span> <span style="color:var(--light);font-weight:400">(${moreGrid.querySelectorAll('.work-card').length}개 더)</span>`;
+    // 섹션 상단으로 부드럽게 스크롤
+    document.getElementById('work').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    moreGrid.style.display = 'grid';
+    btn.innerHTML = `접기 <span style="font-size:.8rem">▲</span>`;
+  }
 }
 
 let currentYtCardId = null;
@@ -946,10 +972,12 @@ function _createYtPlayer(containerId, ytId, onReady) {
 
 function openYtPlayer(ytId, idx) {
   if (!ytId) return;
-  const grid = document.getElementById('work-grid-main');
+  // 메인 그리드 또는 더보기 그리드에서 카드 찾기
+  const cardId = 'wcard-' + idx;
+  const card = document.getElementById(cardId);
+  const grid = card ? card.closest('.work-grid') : document.getElementById('work-grid-main');
   if (!grid) return;
 
-  const cardId = 'wcard-' + idx;
   if (currentYtCardId === cardId) { closeYtPlayer(); return; }
 
   if (currentYtCardId) { const prev = document.getElementById(currentYtCardId); if (prev) prev.classList.remove('playing'); }
@@ -960,7 +988,6 @@ function openYtPlayer(ytId, idx) {
   }
 
   currentYtCardId = cardId;
-  const card = document.getElementById(cardId);
   if (card) card.classList.add('playing');
 
   const rowIdx = Math.floor(idx / 3);
