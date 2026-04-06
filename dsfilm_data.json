@@ -48,6 +48,13 @@
   ],
   "works": [
     {
+      "id": 1775453222751,
+      "name": "[덕선필름] 전주 그랜드 / 시네마틱 웨딩영상 / 4K UHD (Cinematic Wedding Film)",
+      "cat": "웨딩",
+      "url": "https://youtu.be/RIQ-cqZkQ6c",
+      "desc": ""
+    },
+    {
       "id": 1775452947901,
       "name": "[덕선필름] 전주 그랜드힐스턴 본식DVD / 시네마틱 웨딩영상 / 4K UHD (Cinematic Wedding Film)",
       "cat": "웨딩",
@@ -625,7 +632,8 @@
     {
       "cat": "웨딩",
       "workIds": [
-        1775452947901
+        1775452947901,
+        1775453222751
       ]
     },
     {
