@@ -486,8 +486,25 @@ const DEFAULT = {
   footer: { copy:'© 2025 덕선필름. All rights reserved.' }
 };
 
+function deepMerge(target, source) {
+  const out = Object.assign({}, target);
+  Object.keys(source).forEach(k => {
+    if (source[k] && typeof source[k] === 'object' && !Array.isArray(source[k])) {
+      out[k] = deepMerge(target[k] || {}, source[k]);
+    } else if (out[k] === undefined || out[k] === null) {
+      out[k] = source[k];
+    }
+  });
+  return out;
+}
+
 function getData() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT; } catch { return DEFAULT; }
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!stored) return JSON.parse(JSON.stringify(DEFAULT));
+    // GitHub/localStorage 데이터에 없는 새 필드는 DEFAULT로 채움
+    return deepMerge(stored, DEFAULT);
+  } catch { return JSON.parse(JSON.stringify(DEFAULT)); }
 }
 
 // GitHub에서 데이터 불러오기
@@ -1032,11 +1049,15 @@ function adminClick() {
 
 // GitHub에서 먼저 불러오고, 없으면 localStorage 사용
 (async () => {
-  const ghData = await loadDataFromGithub();
-  if (ghData) {
-    // GitHub 데이터로 렌더링
-    const origGetData = getData;
-    window._ghData = ghData;
+  try {
+    const ghData = await loadDataFromGithub();
+    if (ghData) {
+      // GitHub 데이터 + DEFAULT 병합 후 저장 (새 필드 보장)
+      const merged = deepMerge(ghData, DEFAULT);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    }
+  } catch(e) {
+    // GitHub 로드 실패해도 localStorage로 계속 진행
   }
   render();
 })();

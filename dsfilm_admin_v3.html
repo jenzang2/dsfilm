@@ -785,8 +785,23 @@ const DEFAULT = {
   footer:{copy:'© 2025 덕선필름. All rights reserved.'}
 };
 
+function deepMerge(target, source) {
+  const out = Object.assign({}, target);
+  Object.keys(source).forEach(k => {
+    if (source[k] && typeof source[k] === 'object' && !Array.isArray(source[k])) {
+      out[k] = deepMerge(target[k] || {}, source[k]);
+    } else if (out[k] === undefined || out[k] === null) {
+      out[k] = source[k];
+    }
+  });
+  return out;
+}
+
 let data = {};
-try { data = JSON.parse(localStorage.getItem(KEY)) || JSON.parse(JSON.stringify(DEFAULT)); } catch { data = JSON.parse(JSON.stringify(DEFAULT)); }
+try {
+  const stored = JSON.parse(localStorage.getItem(KEY));
+  data = stored ? deepMerge(stored, DEFAULT) : JSON.parse(JSON.stringify(DEFAULT));
+} catch { data = JSON.parse(JSON.stringify(DEFAULT)); }
 if (!data.catMeta) data.catMeta = {};
 if (!data.workSections) data.workSections = [];
 
