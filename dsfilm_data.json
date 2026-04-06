@@ -48,6 +48,55 @@
   ],
   "works": [
     {
+      "id": 1775445183092,
+      "name": "2023문화재단박람회 스팟영상",
+      "cat": "TV스팟광고",
+      "url": "https://www.youtube.com/watch?v=97b5t6xHND4",
+      "desc": ""
+    },
+    {
+      "id": 1775445175128,
+      "name": "2022 정읍천 빛 축제 스팟영상",
+      "cat": "TV스팟광고",
+      "url": "https://www.youtube.com/watch?v=ILaBOV5Q_Do",
+      "desc": ""
+    },
+    {
+      "id": 1775445165540,
+      "name": "2024 싱스트리트 TV 스팟영상",
+      "cat": "TV스팟광고",
+      "url": "https://www.youtube.com/watch?v=8YGKWranc2w",
+      "desc": ""
+    },
+    {
+      "id": 1775445156048,
+      "name": "제20회 고창 복분자와 수박축제 TV스팟영상",
+      "cat": "TV스팟광고",
+      "url": "https://www.youtube.com/watch?v=1cUP10o5ckM",
+      "desc": ""
+    },
+    {
+      "id": 1775445136600,
+      "name": "2024 풍천장어와 함께 하는 고창복분자와 수박축제 스팟영상",
+      "cat": "TV스팟광고",
+      "url": "https://www.youtube.com/watch?v=hsfFyWf8Wfo",
+      "desc": ""
+    },
+    {
+      "id": 1775445123646,
+      "name": "제16회 김제 모악산 축제 TV스팟",
+      "cat": "TV스팟광고",
+      "url": "https://www.youtube.com/watch?v=6HjYoSmA5Hk",
+      "desc": ""
+    },
+    {
+      "id": 1775445092155,
+      "name": "2025 고창수박축제 홍보영상｜TV 광고 버전 (20초 스팟)",
+      "cat": "TV스팟광고",
+      "url": "https://www.youtube.com/watch?v=C5y17s3U-cc",
+      "desc": ""
+    },
+    {
       "id": 1775444990391,
       "name": "더빛한복 소개 및 촬영 현장",
       "cat": "기업·홍보",
@@ -461,7 +510,8 @@
     "기업·홍보",
     "전북현대모터스",
     "공모전",
-    "기타"
+    "기타",
+    "TV스팟광고"
   ],
   "catMeta": {
     "행사·축제 스케치": {
@@ -555,6 +605,18 @@
         1775443945454,
         1775443936002,
         1775443925047
+      ]
+    },
+    {
+      "cat": "TV스팟광고",
+      "workIds": [
+        1775445183092,
+        1775445175128,
+        1775445165540,
+        1775445156048,
+        1775445136600,
+        1775445123646,
+        1775445092155
       ]
     }
   ],
