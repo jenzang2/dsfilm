@@ -205,6 +205,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <div class="mi" id="mi-hero" onclick="switchPanel('hero',this)"><span>🏠</span> TITLE<span class="mi-dot"></span></div>
     <div class="mi" id="mi-services" onclick="switchPanel('services',this)"><span>📋</span> SERVICE<span class="mi-dot"></span></div>
     <div class="mi" id="mi-sections" onclick="switchPanel('sections',this)"><span>🎞️</span> WORK(제작영상)<span class="mi-dot"></span></div>
+    <div class="mi" id="mi-scenes" onclick="switchPanel('scenes',this)"><span>📷</span> SCENE(촬영현장)<span class="mi-dot"></span></div>
     <div class="mi" id="mi-process" onclick="switchPanel('process',this)"><span>🔄</span> PROCESS<span class="mi-dot"></span></div>
     <div class="mi" id="mi-about" onclick="switchPanel('about',this)"><span>👤</span> ABOUT<span class="mi-dot"></span></div>
     <div class="mi" id="mi-contact" onclick="switchPanel('contact',this)"><span>📞</span> CONTACT<span class="mi-dot"></span></div>
@@ -354,6 +355,67 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
       <div class="card">
         <div style="font-size:.82rem;font-weight:700;color:var(--mid);margin-bottom:.8rem">섹션 목록 <span style="font-weight:400;color:var(--light)">— ⠿ 드래그로 섹션 순서 변경 (영상 순서 변경은 포트폴리오 관리에서)</span></div>
         <div id="sectionsList"></div>
+      </div>
+    </div>
+
+    <!-- 촬영현장 -->
+    <div class="panel" id="panel-scenes">
+      <div class="panel-hdr">
+        <div class="panel-title">📷 SCENE (촬영현장)</div>
+        <div style="display:flex;gap:.6rem;align-items:center">
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--mid);cursor:pointer">
+            <input type="checkbox" id="vis-scenes" onchange="toggleSectionVis('scenes',this.checked)" style="width:16px;height:16px;accent-color:var(--point)">
+            메인에 표시
+          </label>
+        </div>
+      </div>
+
+      <!-- 새 현장 추가 -->
+      <div class="card">
+        <div class="card-title">새 촬영현장 추가</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+          <div class="fg">
+            <label class="fl">현장 제목 *</label>
+            <input class="fi" id="sc-title" placeholder="예: 전북현대 홈경기 촬영현장">
+          </div>
+          <div class="fg">
+            <label class="fl">설명 (선택)</label>
+            <input class="fi" id="sc-desc" placeholder="간단한 현장 설명">
+          </div>
+        </div>
+
+        <!-- 대표 썸네일 + 사진 업로드 -->
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:1rem;align-items:start">
+          <div class="fg">
+            <label class="fl">대표 썸네일</label>
+            <div id="scThumbPreview" class="thumb-drop-zone"
+              style="width:140px;height:100px;background:var(--navy);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.8rem;border:2px dashed var(--border);cursor:pointer"
+              ondragover="event.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="onScThumbDrop(event)"
+              onclick="document.getElementById('sc-thumb-file').click()" title="클릭 또는 드래그">📷</div>
+            <input type="file" id="sc-thumb-file" accept="image/*" style="display:none" onchange="onScThumbUpload()">
+            <button class="btn b-gy b-sm" style="margin-top:.3rem;width:140px" onclick="document.getElementById('sc-thumb-file').click()">📁 썸네일</button>
+          </div>
+          <div class="fg">
+            <label class="fl">슬라이드 사진 (여러 장 선택 가능)</label>
+            <label style="display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1.5px dashed var(--border);border-radius:8px;padding:.6rem .8rem;cursor:pointer;font-size:.82rem;color:var(--mid);transition:border-color .2s"
+              onmouseover="this.style.borderColor='var(--point)'" onmouseout="this.style.borderColor='var(--border)'">
+              📸 사진 추가하기 (여러 장 가능)
+              <input type="file" id="sc-photos-file" accept="image/*" multiple style="display:none" onchange="onScPhotosUpload()">
+            </label>
+            <div id="scPhotosPreview" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem"></div>
+          </div>
+        </div>
+        <button class="btn b-or" style="margin-top:1rem" onclick="addScene()">+ 촬영현장 추가</button>
+      </div>
+
+      <!-- 현장 목록 -->
+      <div class="card">
+        <div style="font-size:.82rem;font-weight:700;color:var(--mid);margin-bottom:.8rem">
+          현장 목록 <span style="font-weight:400;color:var(--light)">— ⠿ 드래그로 순서 변경</span>
+        </div>
+        <div id="scenesList"></div>
       </div>
     </div>
 
@@ -659,6 +721,41 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
   </div>
 </div>
 
+<!-- 촬영현장 수정 모달 -->
+<div class="modal-wrap" id="sceneEditModal">
+  <div class="modal-box" style="width:520px;max-height:90vh;overflow-y:auto">
+    <div class="modal-hdr">
+      <div class="modal-title">📷 촬영현장 수정</div>
+      <button class="modal-close" onclick="closeSceneEdit()">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.8rem">
+      <div class="fg"><label class="fl">현장 제목</label><input class="fi" id="sc-edit-title" placeholder="현장 제목"></div>
+      <div class="fg"><label class="fl">설명</label><input class="fi" id="sc-edit-desc" placeholder="간단한 설명"></div>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:.8rem;align-items:start">
+        <div class="fg">
+          <label class="fl">대표 썸네일</label>
+          <div id="scEditThumbPreview" style="width:120px;height:88px;background:var(--navy);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer"
+            onclick="document.getElementById('sc-edit-thumb-file').click()">📷</div>
+          <input type="file" id="sc-edit-thumb-file" accept="image/*" style="display:none" onchange="onScEditThumbUpload()">
+          <button class="btn b-gy b-sm" style="margin-top:.3rem;width:120px" onclick="document.getElementById('sc-edit-thumb-file').click()">변경</button>
+        </div>
+        <div class="fg">
+          <label class="fl">슬라이드 사진</label>
+          <label style="display:flex;align-items:center;gap:.4rem;background:var(--bg);border:1.5px dashed var(--border);border-radius:8px;padding:.5rem .7rem;cursor:pointer;font-size:.8rem;color:var(--mid)">
+            📸 사진 추가
+            <input type="file" id="sc-edit-photos-file" accept="image/*" multiple style="display:none" onchange="onScEditPhotosUpload()">
+          </label>
+          <div id="scPhotosPreviewEdit" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem"></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:1.2rem">
+      <button class="btn b-or" style="flex:1" onclick="saveSceneEdit()">저장</button>
+      <button class="btn b-gy" onclick="closeSceneEdit()">취소</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -666,8 +763,9 @@ const KEY = 'dsfilm_data';
 const ADMIN_PW = '1111';
 const DEFAULT = {
   nav:{menu1:'서비스',menu2:'작업물',menu3:'소개',menu4:'문의하기',logo:null,extraMenus:[]},
-  sectionVisibility:{services:true,work:true,process:true,about:true,contact:true},
+  sectionVisibility:{services:true,work:true,scenes:true,process:true,about:true,contact:true},
   workViewMode:'tabs',
+  scenes:[],
   hero:{badge:'전북 기반 영상 제작',title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다',desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.',stat:'150건 이상'},
   trust:['전북 전주 기반','전국 출장 가능','빠른 납품','AI 활용 제작','카카오톡 상담'],
   services:[
@@ -711,7 +809,7 @@ function clearDirty(panel) {
 // ===== PANEL SWITCHING =====
 function switchPanel(id, el) {
   if (currentPanel !== id && dirtyPanels.has(currentPanel)) {
-    const panelNames = {nav:'상단바',hero:'TITLE',about:'ABOUT',contact:'CONTACT',services:'SERVICE',process:'PROCESS',sections:'WORK(제작영상)'};
+    const panelNames = {nav:'상단바',hero:'TITLE',about:'ABOUT',contact:'CONTACT',services:'SERVICE',process:'PROCESS',sections:'WORK(제작영상)',scenes:'SCENE(촬영현장)'};
     if (confirm(`"${panelNames[currentPanel]||currentPanel}" 변경사항을 적용하지 않았어요.\n지금 적용할까요?`)) {
       applyPanel(currentPanel);
     } else {
@@ -737,6 +835,7 @@ function loadPanel(id) {
   }
   if (id === 'services') { renderServices(); loadVisCheckbox('services'); }
   if (id === 'process') { renderProcess(); loadVisCheckbox('process'); }
+  if (id === 'scenes') { renderAdminScenes(); loadVisCheckbox('scenes'); }
   if (id === 'nav') {
     if (!data.nav.extraMenus) data.nav.extraMenus = [];
     document.getElementById('nav-m1').value = data.nav.menu1 || '';
@@ -1604,6 +1703,186 @@ function clearAboutImg() {
   data.about.img = null; markDirty('about');
   const prev = document.getElementById('aboutImgPreview');
   if (prev) prev.innerHTML = '🎥';
+}
+
+// ===== 촬영현장 (SCENE) =====
+let scNewThumb = null;
+let scNewPhotos = [];
+let scDragIdx = null;
+let editSceneId = null;
+
+function onScThumbDrop(e) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) _applyScThumb(file);
+}
+function onScThumbUpload() {
+  const file = document.getElementById('sc-thumb-file').files[0];
+  if (file) _applyScThumb(file);
+}
+function _applyScThumb(file) {
+  applyImgToPreview(file, 'scThumbPreview', b64 => { scNewThumb = b64; });
+}
+
+function onScPhotosUpload() {
+  const files = Array.from(document.getElementById('sc-photos-file').files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      scNewPhotos.push(e.target.result);
+      renderScPhotosPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('sc-photos-file').value = '';
+}
+
+function renderScPhotosPreview() {
+  const el = document.getElementById('scPhotosPreview');
+  if (!el) return;
+  el.innerHTML = scNewPhotos.map((p, i) =>
+    `<div style="position:relative;width:68px;height:52px;border-radius:6px;overflow:hidden;background:var(--border)">
+      <img src="${p}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="scNewPhotos.splice(${i},1);renderScPhotosPreview()" style="position:absolute;top:1px;right:1px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+      <div style="position:absolute;bottom:1px;left:2px;font-size:.5rem;color:rgba(255,255,255,.7)">${i+1}</div>
+    </div>`
+  ).join('');
+  const el2 = document.getElementById('scPhotosPreviewEdit');
+  if (el2) renderScPhotosPreviewEdit();
+}
+
+function addScene() {
+  const title = document.getElementById('sc-title').value.trim();
+  if (!title) { toast('⚠️ 현장 제목을 입력해주세요'); return; }
+  if (!scNewPhotos.length) { toast('⚠️ 사진을 최소 1장 추가해주세요'); return; }
+  if (!data.scenes) data.scenes = [];
+  data.scenes.push({
+    id: Date.now(),
+    title,
+    desc: document.getElementById('sc-desc').value.trim(),
+    thumb: scNewThumb || scNewPhotos[0],
+    photos: [...scNewPhotos],
+    hidden: false
+  });
+  // 폼 초기화
+  document.getElementById('sc-title').value = '';
+  document.getElementById('sc-desc').value = '';
+  document.getElementById('scThumbPreview').innerHTML = '📷';
+  scNewThumb = null; scNewPhotos = [];
+  renderScPhotosPreview();
+  save(); renderAdminScenes();
+  toast('✅ 촬영현장이 추가됐어요!');
+}
+
+function renderAdminScenes() {
+  if (!data.scenes) data.scenes = [];
+  const list = document.getElementById('scenesList');
+  if (!list) return;
+  if (!data.scenes.length) {
+    list.innerHTML = '<p style="color:var(--light);font-size:.85rem;text-align:center;padding:1.5rem">아직 추가된 촬영현장이 없어요</p>';
+    return;
+  }
+  list.innerHTML = data.scenes.map((s, i) => {
+    const thumb = s.thumb
+      ? `<img src="${s.thumb}" style="width:100%;height:100%;object-fit:cover">`
+      : `<div style="width:100%;height:100%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📷</div>`;
+    return `<div style="display:flex;align-items:center;gap:.8rem;padding:.7rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:.5rem;${s.hidden?'opacity:.5':''}"
+        draggable="true"
+        ondragstart="scDragIdx=${i};this.style.opacity='.4'"
+        ondragend="this.style.opacity='';scDragIdx=null"
+        ondragover="event.preventDefault();this.style.borderColor='var(--point)'"
+        ondragleave="this.style.borderColor='var(--border)'"
+        ondrop="scDrop(event,${i})">
+      <span style="color:var(--light);cursor:grab;font-size:1rem">⠿</span>
+      <div style="width:60px;height:44px;border-radius:6px;overflow:hidden;flex-shrink:0">${thumb}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.85rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          ${s.title}
+          ${s.hidden ? `<span style="font-size:.62rem;background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;margin-left:.3rem">메인 미노출</span>` : ''}
+        </div>
+        <div style="font-size:.7rem;color:var(--light);margin-top:.1rem">사진 ${(s.photos||[]).length}장${s.desc ? ' · ' + s.desc : ''}</div>
+      </div>
+      <div style="display:flex;gap:.4rem;flex-shrink:0">
+        <button class="btn b-gy b-sm" onclick="openSceneEdit(${s.id})">수정</button>
+        <button class="btn b-rd b-sm" onclick="toggleSceneHidden(${s.id})">${s.hidden ? '표시' : '숨기기'}</button>
+        <button class="btn b-rd b-sm" style="background:var(--rl)" onclick="deleteScene(${s.id})">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function scDrop(e, toIdx) {
+  e.preventDefault(); e.currentTarget.style.borderColor = 'var(--border)';
+  if (scDragIdx === null || scDragIdx === toIdx) return;
+  const [m] = data.scenes.splice(scDragIdx, 1);
+  data.scenes.splice(toIdx, 0, m);
+  scDragIdx = null; save(); renderAdminScenes(); toast('✅ 순서 변경됐어요');
+}
+
+function toggleSceneHidden(id) {
+  const s = (data.scenes||[]).find(s => s.id === id);
+  if (!s) return;
+  s.hidden = !s.hidden;
+  save(); renderAdminScenes();
+  toast(s.hidden ? '👁️ 메인에서 숨겼어요' : '✅ 메인에 다시 표시돼요');
+}
+
+function deleteScene(id) {
+  if (!confirm('이 촬영현장을 완전히 삭제할까요?\n사진도 모두 삭제됩니다.')) return;
+  data.scenes = (data.scenes||[]).filter(s => s.id !== id);
+  save(); renderAdminScenes(); toast('🗑️ 삭제됐어요');
+}
+
+// 수정 모달
+function openSceneEdit(id) {
+  const s = (data.scenes||[]).find(s => s.id === id);
+  if (!s) return;
+  editSceneId = id;
+  scNewPhotos = [...(s.photos||[])];
+  document.getElementById('sc-edit-title').value = s.title;
+  document.getElementById('sc-edit-desc').value = s.desc || '';
+  const tp = document.getElementById('scEditThumbPreview');
+  if (tp) tp.innerHTML = s.thumb ? `<img src="${s.thumb}" style="width:100%;height:100%;object-fit:cover">` : '📷';
+  scNewThumb = s.thumb || null;
+  renderScPhotosPreviewEdit();
+  document.getElementById('sceneEditModal').classList.add('open');
+}
+function closeSceneEdit() {
+  document.getElementById('sceneEditModal').classList.remove('open');
+  editSceneId = null; scNewThumb = null; scNewPhotos = [];
+}
+function saveSceneEdit() {
+  const s = (data.scenes||[]).find(s => s.id === editSceneId);
+  if (!s) return;
+  s.title = document.getElementById('sc-edit-title').value.trim() || s.title;
+  s.desc = document.getElementById('sc-edit-desc').value.trim();
+  s.photos = [...scNewPhotos];
+  s.thumb = scNewThumb || scNewPhotos[0] || s.thumb;
+  save(); renderAdminScenes(); closeSceneEdit(); toast('✅ 수정됐어요!');
+}
+function onScEditThumbUpload() {
+  const file = document.getElementById('sc-edit-thumb-file').files[0];
+  if (file) applyImgToPreview(file, 'scEditThumbPreview', b64 => { scNewThumb = b64; });
+}
+function onScEditPhotosUpload() {
+  const files = Array.from(document.getElementById('sc-edit-photos-file').files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => { scNewPhotos.push(e.target.result); renderScPhotosPreviewEdit(); };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('sc-edit-photos-file').value = '';
+}
+function renderScPhotosPreviewEdit() {
+  const el = document.getElementById('scPhotosPreviewEdit');
+  if (!el) return;
+  el.innerHTML = scNewPhotos.map((p, i) =>
+    `<div style="position:relative;width:72px;height:54px;border-radius:6px;overflow:hidden;background:var(--border)">
+      <img src="${p}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="scNewPhotos.splice(${i},1);renderScPhotosPreviewEdit()" style="position:absolute;top:1px;right:1px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+      <div style="position:absolute;bottom:1px;left:2px;font-size:.5rem;color:rgba(255,255,255,.7)">${i+1}</div>
+    </div>`
+  ).join('');
 }
 
 // ===== 섹션 표시/숨기기 =====
