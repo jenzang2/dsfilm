@@ -814,7 +814,7 @@
     "process": false,
     "services": true,
     "work": true,
-    "scenes": false,
+    "scenes": true,
     "about": true,
     "contact": true
   },
