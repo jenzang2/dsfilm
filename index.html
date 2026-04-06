@@ -229,13 +229,6 @@ footer { background: #141e30; padding: 1.5rem 5%; display: flex; align-items: ce
     </div>
     <div class="fade">
       <div class="hero-card-main">🎬</div>
-      <div class="hero-card-float">
-        <div class="float-icon">🎬</div>
-        <div>
-          <div class="float-label">누적 제작</div>
-          <div class="float-value" id="heroStat">150건 이상</div>
-        </div>
-      </div>
     </div>
   </div>
 </section>
@@ -383,24 +376,20 @@ function render() {
   document.getElementById('navMenu3').textContent = d.nav.menu3;
   document.getElementById('navMenu4').textContent = d.nav.menu4;
 
-  // 로고 이미지
+  // 로고
   const navLogo = document.getElementById('navLogo');
   if (navLogo) {
-    if (d.nav.logo) {
-      navLogo.innerHTML = `<img src="${d.nav.logo}" alt="덕선필름 로고">`;
-    } else {
-      navLogo.innerHTML = '덕선<span>필름</span>';
-    }
+    navLogo.innerHTML = d.nav.logo
+      ? `<img src="${d.nav.logo}" alt="로고" style="height:32px;max-width:160px;object-fit:contain">`
+      : '덕선<span>필름</span>';
   }
 
-  // 추가 메뉴 (링크 연결)
+  // 추가 메뉴
   const navLinks = document.getElementById('navLinks');
-  if (navLinks && d.nav.extraMenus && d.nav.extraMenus.length > 0) {
-    // 기존 추가 메뉴 li 제거 후 재렌더
+  if (navLinks) {
     navLinks.querySelectorAll('.nav-extra').forEach(el => el.remove());
-    // nav-cta(메뉴4)는 항상 맨 끝에 유지
     const ctaLi = navLinks.querySelector('li:last-child');
-    d.nav.extraMenus.forEach(m => {
+    (d.nav.extraMenus || []).forEach(m => {
       if (!m.name) return;
       const li = document.createElement('li');
       li.className = 'nav-extra';
@@ -417,7 +406,6 @@ function render() {
   document.getElementById('heroBadge').textContent = d.hero.badge;
   document.getElementById('heroTitle').innerHTML = nl2br(d.hero.title).replace('오래 기억되는','<span class="point">오래 기억되는</span>');
   document.getElementById('heroDesc').innerHTML = nl2br(d.hero.desc);
-  document.getElementById('heroStat').textContent = d.hero.stat;
 
   // hero 이미지
   const heroEl = document.getElementById('hero');
