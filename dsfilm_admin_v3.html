@@ -377,6 +377,39 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
         <div class="fr full"><div class="fg"><label class="fl">실적 문구</label><input class="fi" id="hero-stat" oninput="markDirty('hero')"></div></div>
       </div>
       <div class="card">
+        <div class="card-title">오른쪽 이미지</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+          <div class="fg">
+            <label class="fl">이미지 업로드 <span style="font-weight:400;color:var(--light)">(없으면 기본 🎬 표시)</span></label>
+            <div id="heroImgPreview" class="thumb-drop-zone"
+              style="width:100%;aspect-ratio:4/3;background:var(--navy);border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2rem;border:2px dashed transparent;cursor:pointer"
+              ondragover="event.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="onHeroImgDrop(event)"
+              onclick="document.getElementById('hero-img-file').click()"
+              title="클릭하거나 이미지 드래그">🎬</div>
+            <input type="file" id="hero-img-file" accept="image/*" style="display:none" onchange="onHeroImgUpload()">
+            <div style="display:flex;gap:.4rem;margin-top:.5rem">
+              <button class="btn b-gy b-sm" onclick="document.getElementById('hero-img-file').click()">📁 이미지 선택</button>
+              <button class="btn b-rd b-sm" onclick="clearHeroImg()">✕ 제거</button>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl" style="margin-bottom:.5rem">표시 방식</label>
+            <div style="display:flex;flex-direction:column;gap:.5rem">
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer">
+                <input type="radio" name="hero-img-mode" value="right" id="hero-mode-right" onchange="markDirty('hero')">
+                오른쪽 카드에 이미지
+              </label>
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer">
+                <input type="radio" name="hero-img-mode" value="bg" id="hero-mode-bg" onchange="markDirty('hero')">
+                전체 배경 이미지 (텍스트만 표시)
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
         <div class="card-title">신뢰 바 문구</div>
         <div class="fr">
           <div class="fg"><label class="fl">항목 1</label><input class="fi" id="trust-0" oninput="markDirty('hero')"></div>
@@ -393,6 +426,24 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
       <div class="panel-hdr">
         <div class="panel-title">👤 소개 수정</div>
         <button class="btn-apply" onclick="applyPanel('about')">적용</button>
+      </div>
+      <div class="card">
+        <div class="card-title">왼쪽 이미지</div>
+        <div style="display:flex;gap:1rem;align-items:flex-start">
+          <div id="aboutImgPreview" class="thumb-drop-zone"
+            style="width:160px;height:160px;flex-shrink:0;background:var(--navy);border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:2px dashed transparent;cursor:pointer"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="onAboutImgDrop(event)"
+            onclick="document.getElementById('about-img-file').click()"
+            title="클릭하거나 이미지 드래그">🎥</div>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <input type="file" id="about-img-file" accept="image/*" style="display:none" onchange="onAboutImgUpload()">
+            <button class="btn b-gy b-sm" onclick="document.getElementById('about-img-file').click()">📁 이미지 선택</button>
+            <button class="btn b-rd b-sm" onclick="clearAboutImg()">✕ 제거</button>
+            <div class="fh">클릭 또는 드래그로 업로드<br>없으면 🎥 이모지 표시</div>
+          </div>
+        </div>
       </div>
       <div class="card">
         <div class="fr full"><div class="fg"><label class="fl">제목</label><textarea class="ft" id="about-title" rows="2" oninput="markDirty('about')"></textarea></div></div>
@@ -469,15 +520,29 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
 
 <!-- 서비스 수정 모달 -->
 <div class="modal-wrap" id="editServiceModal">
-  <div class="modal-box">
+  <div class="modal-box" style="width:460px">
     <div class="modal-hdr">
       <div class="modal-title">서비스 수정</div>
       <button class="modal-close" onclick="closeServiceModal()">×</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:.8rem">
-      <div class="fr">
-        <div class="fg"><label class="fl">이모지</label><input class="fi" id="sv-emoji"></div>
-        <div class="fg"><label class="fl">이름</label><input class="fi" id="sv-name"></div>
+      <!-- 아이콘/이미지 영역 -->
+      <div style="display:grid;grid-template-columns:100px 1fr;gap:.8rem;align-items:start">
+        <div class="fg">
+          <label class="fl">아이콘/이미지</label>
+          <div id="svImgPreview" class="thumb-drop-zone"
+            style="width:100px;height:100px;background:var(--bg);border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:2px dashed var(--border);cursor:pointer"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="onSvImgDrop(event)"
+            onclick="document.getElementById('sv-img-file').click()">🎪</div>
+          <input type="file" id="sv-img-file" accept="image/*" style="display:none" onchange="onSvImgUpload()">
+          <button class="btn b-rd b-sm" style="margin-top:.3rem;width:100%" onclick="clearSvImg()">✕ 제거</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <div class="fg"><label class="fl">이모지 (이미지 없을 때)</label><input class="fi" id="sv-emoji" placeholder="🎬"></div>
+          <div class="fg"><label class="fl">이름</label><input class="fi" id="sv-name"></div>
+        </div>
       </div>
       <div class="fg"><label class="fl">설명</label><textarea class="ft" id="sv-desc" rows="2"></textarea></div>
       <div class="fg"><label class="fl">태그</label><input class="fi" id="sv-tag"></div>
@@ -497,6 +562,13 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
       <button class="modal-close" onclick="closeProcessModal()">×</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:.8rem">
+      <div class="fg">
+        <label class="fl">아이콘 이모지</label>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <input class="fi" id="pr-icon" placeholder="예: 📞 💬 🎥" style="width:80px;font-size:1.2rem;text-align:center">
+          <span class="fh">단계 번호 대신 표시됩니다. 비워두면 숫자로 표시.</span>
+        </div>
+      </div>
       <div class="fg"><label class="fl">단계 제목</label><input class="fi" id="pr-title"></div>
       <div class="fg"><label class="fl">설명</label><textarea class="ft" id="pr-desc" rows="2"></textarea></div>
     </div>
@@ -511,7 +583,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
 
 <script>
 const KEY = 'dsfilm_data';
-const ADMIN_PW = 'dsfilm1234';
+const ADMIN_PW = '1111';
 const DEFAULT = {
   nav:{menu1:'서비스',menu2:'작업물',menu3:'소개',menu4:'문의하기'},
   hero:{badge:'전북 기반 영상 제작',title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다',desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.',stat:'150건 이상'},
@@ -589,11 +661,28 @@ function loadPanel(id) {
     document.getElementById('hero-desc').value = data.hero.desc;
     document.getElementById('hero-stat').value = data.hero.stat;
     data.trust.forEach((t,i) => { const el=document.getElementById('trust-'+i); if(el) el.value=t; });
+    // 이미지 미리보기
+    const heroImgPrev = document.getElementById('heroImgPreview');
+    if (heroImgPrev) {
+      if (data.hero.img) heroImgPrev.innerHTML = `<img src="${data.hero.img}" style="width:100%;height:100%;object-fit:cover">`;
+      else heroImgPrev.innerHTML = '🎬';
+    }
+    const modeRight = document.getElementById('hero-mode-right');
+    const modeBg = document.getElementById('hero-mode-bg');
+    if (modeRight && modeBg) {
+      if (data.hero.imgMode === 'bg') modeBg.checked = true;
+      else modeRight.checked = true;
+    }
   }
   if (id === 'about') {
     document.getElementById('about-title').value = data.about.title;
     document.getElementById('about-desc').value = data.about.desc;
     renderChips(); renderStats();
+    const prev = document.getElementById('aboutImgPreview');
+    if (prev) {
+      if (data.about.img) prev.innerHTML = `<img src="${data.about.img}" style="width:100%;height:100%;object-fit:cover">`;
+      else prev.innerHTML = '🎥';
+    }
   }
   if (id === 'contact') {
     document.getElementById('ct-title').value = data.contact.title;
@@ -617,6 +706,8 @@ function applyPanel(id) {
     data.hero.desc = document.getElementById('hero-desc').value;
     data.hero.stat = document.getElementById('hero-stat').value;
     data.trust = data.trust.map((_,i) => { const el=document.getElementById('trust-'+i); return el?el.value:_; });
+    const modeBg = document.getElementById('hero-mode-bg');
+    if (modeBg) data.hero.imgMode = modeBg.checked ? 'bg' : 'right';
   }
   if (id === 'about') {
     data.about.title = document.getElementById('about-title').value;
@@ -1145,16 +1236,20 @@ function dropWorkInSec(event, toSi, toWi) {
 let editServiceIdx = null;
 
 function renderServices() {
-  document.getElementById('servicesList').innerHTML = data.services.map((s,i) => `
-    <div class="card" style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem">
-      <div style="font-size:1.8rem;flex-shrink:0">${s.emoji}</div>
+  document.getElementById('servicesList').innerHTML = data.services.map((s,i) => {
+    const icon = s.img
+      ? `<div style="width:48px;height:48px;border-radius:10px;overflow:hidden;flex-shrink:0"><img src="${s.img}" style="width:100%;height:100%;object-fit:cover"></div>`
+      : `<div style="font-size:1.8rem;flex-shrink:0">${s.emoji}</div>`;
+    return `<div class="card" style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem">
+      ${icon}
       <div style="flex:1;min-width:0">
         <div style="font-size:.9rem;font-weight:600">${s.name}</div>
         <div style="font-size:.75rem;color:var(--mid);margin-top:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.desc}</div>
         <span style="font-size:.7rem;color:var(--point);background:var(--pl);padding:.15rem .5rem;border-radius:100px;margin-top:.3rem;display:inline-block">${s.tag}</span>
       </div>
       <button class="btn b-gr b-sm" onclick="openServiceModal(${i})">수정</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function addService() {
@@ -1165,23 +1260,45 @@ function addService() {
 function openServiceModal(i) {
   editServiceIdx = i;
   const s = data.services[i];
-  document.getElementById('sv-emoji').value = s.emoji;
+  document.getElementById('sv-emoji').value = s.emoji || '';
   document.getElementById('sv-name').value = s.name;
   document.getElementById('sv-desc').value = s.desc;
   document.getElementById('sv-tag').value = s.tag;
+  const prev = document.getElementById('svImgPreview');
+  if (prev) prev.innerHTML = s.img ? `<img src="${s.img}" style="width:100%;height:100%;object-fit:cover">` : (s.emoji || '🎬');
   document.getElementById('editServiceModal').classList.add('open');
 }
 
 function closeServiceModal() { document.getElementById('editServiceModal').classList.remove('open'); editServiceIdx = null; }
 
+let svImgData = null;
+function onSvImgDrop(e) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) applyImgToPreview(file, 'svImgPreview', v => svImgData = v);
+}
+function onSvImgUpload() {
+  const file = document.getElementById('sv-img-file').files[0];
+  if (file) applyImgToPreview(file, 'svImgPreview', v => svImgData = v);
+}
+function clearSvImg() {
+  svImgData = null;
+  const s = editServiceIdx !== null ? data.services[editServiceIdx] : null;
+  if (s) s.img = null;
+  document.getElementById('svImgPreview').innerHTML = document.getElementById('sv-emoji').value || '🎬';
+}
+
 function saveService() {
   if (editServiceIdx === null) return;
+  const prev = data.services[editServiceIdx];
   data.services[editServiceIdx] = {
     emoji: document.getElementById('sv-emoji').value,
     name: document.getElementById('sv-name').value.trim(),
     desc: document.getElementById('sv-desc').value.trim(),
-    tag: document.getElementById('sv-tag').value.trim()
+    tag: document.getElementById('sv-tag').value.trim(),
+    img: svImgData || (prev && prev.img) || null
   };
+  svImgData = null;
   save(); renderServices(); closeServiceModal(); markDirty('services'); toast('✅ 수정됐어요!');
 }
 
@@ -1213,6 +1330,7 @@ function addProcess() {
 
 function openProcessModal(i) {
   editProcessIdx = i;
+  document.getElementById('pr-icon').value = data.process[i].icon || '';
   document.getElementById('pr-title').value = data.process[i].title;
   document.getElementById('pr-desc').value = data.process[i].desc;
   document.getElementById('editProcessModal').classList.add('open');
@@ -1223,6 +1341,7 @@ function closeProcessModal() { document.getElementById('editProcessModal').class
 function saveProcess() {
   if (editProcessIdx === null) return;
   data.process[editProcessIdx] = {
+    icon: document.getElementById('pr-icon').value.trim(),
     title: document.getElementById('pr-title').value.trim(),
     desc: document.getElementById('pr-desc').value.trim()
   };
@@ -1278,6 +1397,50 @@ function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ===== 공통 이미지 헬퍼 =====
+function applyImgToPreview(file, previewId, cb) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const b64 = e.target.result;
+    const prev = document.getElementById(previewId);
+    if (prev) prev.innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover">`;
+    cb(b64);
+  };
+  reader.readAsDataURL(file);
+}
+
+// Hero 이미지
+function onHeroImgDrop(e) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) applyImgToPreview(file, 'heroImgPreview', v => { data.hero.img = v; markDirty('hero'); });
+}
+function onHeroImgUpload() {
+  const file = document.getElementById('hero-img-file').files[0];
+  if (file) applyImgToPreview(file, 'heroImgPreview', v => { data.hero.img = v; markDirty('hero'); });
+}
+function clearHeroImg() {
+  data.hero.img = null; markDirty('hero');
+  const prev = document.getElementById('heroImgPreview');
+  if (prev) prev.innerHTML = '🎬';
+}
+
+// About 이미지
+function onAboutImgDrop(e) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) applyImgToPreview(file, 'aboutImgPreview', v => { data.about.img = v; markDirty('about'); });
+}
+function onAboutImgUpload() {
+  const file = document.getElementById('about-img-file').files[0];
+  if (file) applyImgToPreview(file, 'aboutImgPreview', v => { data.about.img = v; markDirty('about'); });
+}
+function clearAboutImg() {
+  data.about.img = null; markDirty('about');
+  const prev = document.getElementById('aboutImgPreview');
+  if (prev) prev.innerHTML = '🎥';
 }
 
 function openSite() { save(); window.open('index.html', '_blank'); }

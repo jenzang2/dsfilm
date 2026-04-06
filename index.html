@@ -37,7 +37,12 @@ nav {
 .nav-cta { background: var(--point); color: white !important; padding: 0.45rem 1.1rem; border-radius: 100px; font-size: 0.82rem !important; font-weight: 500 !important; }
 
 /* HERO */
-#hero { padding-top: 62px; min-height: 100vh; display: flex; align-items: center; background: var(--cream); }
+#hero { padding-top: 62px; min-height: 100vh; display: flex; align-items: center; background: var(--cream); position: relative; overflow: hidden; }
+#hero.hero-bg-mode { background-size: cover; background-position: center; background-repeat: no-repeat; }
+#hero.hero-bg-mode::before { content: ''; position: absolute; inset: 0; background: rgba(250,248,244,0.82); }
+#hero.hero-bg-mode .hero-inner { position: relative; z-index: 1; }
+#hero.hero-bg-mode .hero-right { display: none; }
+#hero.hero-bg-mode .hero-inner { grid-template-columns: 1fr; max-width: 700px; }
 .hero-inner { width: 90%; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; padding: 4rem 0; }
 .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--point-light); color: var(--point); font-size: 0.78rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 100px; margin-bottom: 1.4rem; }
 .hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--point); border-radius: 50%; }
@@ -50,7 +55,8 @@ nav {
 .btn-secondary { background: var(--white); color: var(--text); padding: 0.75rem 1.6rem; border-radius: 100px; text-decoration: none; font-size: 0.88rem; border: 1.5px solid var(--border); transition: border-color 0.2s; }
 .btn-secondary:hover { border-color: var(--point); color: var(--point); }
 .hero-right { position: relative; }
-.hero-card-main { background: var(--navy); border-radius: 20px; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+.hero-card-main { background: var(--navy); border-radius: 20px; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-size: 3rem; overflow: hidden; }
+.hero-card-main img { width: 100%; height: 100%; object-fit: cover; }
 .hero-card-float { position: absolute; bottom: -20px; left: -24px; background: white; border-radius: 14px; padding: 1rem 1.2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.8rem; }
 .float-icon { width: 40px; height: 40px; background: var(--point-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
 .float-label { font-size: 0.72rem; color: var(--light); }
@@ -73,6 +79,7 @@ section { padding: 5rem 5%; }
 .service-card { background: var(--cream); border-radius: 16px; padding: 2rem 1.6rem; transition: transform 0.2s; }
 .service-card:hover { transform: translateY(-4px); }
 .service-emoji { font-size: 2rem; margin-bottom: 1rem; display: block; }
+.service-img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; margin-bottom: 1rem; display: block; }
 .service-name { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
 .service-desc { font-size: 0.83rem; color: var(--mid); line-height: 1.7; }
 .service-tag { display: inline-block; margin-top: 1rem; font-size: 0.72rem; color: var(--point); background: var(--point-light); padding: 0.2rem 0.6rem; border-radius: 100px; }
@@ -152,10 +159,18 @@ section { padding: 5rem 5%; }
 #contact .section-sub { color: rgba(255,255,255,0.55); text-align: left; }
 #contact .section-header { text-align: left; margin-bottom: 2rem; }
 .contact-items { display: flex; flex-direction: column; gap: 1rem; }
-.contact-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; background: rgba(255,255,255,0.06); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
+.contact-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; background: rgba(255,255,255,0.06); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); transition: background .2s; }
+.contact-item.clickable { cursor: pointer; text-decoration: none; }
+.contact-item.clickable:hover { background: rgba(255,255,255,0.12); }
 .contact-icon { width: 38px; height: 38px; background: rgba(232,131,58,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
 .contact-label { font-size: 0.72rem; color: rgba(255,255,255,0.45); }
 .contact-val { font-size: 0.9rem; color: rgba(255,255,255,0.85); }
+
+/* KAKAO BUTTON */
+.kakao-btn { display: flex; align-items: center; justify-content: center; gap: 0.7rem; background: #FEE500; color: #3C1E1E; border-radius: 12px; padding: 1rem 1.5rem; font-size: 1rem; font-weight: 700; text-decoration: none; transition: opacity .2s, transform .2s; margin-bottom: 1.2rem; }
+.kakao-btn:hover { opacity: .9; transform: translateY(-2px); }
+.kakao-btn-icon { width: 28px; height: 28px; }
+.kakao-btn-sub { font-size: 0.72rem; font-weight: 400; opacity: .65; margin-top: .1rem; }
 .contact-form { display: flex; flex-direction: column; gap: 1rem; }
 .form-label { font-size: 0.75rem; color: rgba(255,255,255,0.45); margin-bottom: 0.3rem; display: block; }
 .form-input, .form-textarea { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 0.75rem 1rem; color: white; font-family: 'Pretendard', sans-serif; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
@@ -280,7 +295,16 @@ footer { background: #141e30; padding: 1.5rem 5%; display: flex; align-items: ce
         <h2 class="section-title" id="contactTitle">편하게 연락 주세요</h2>
         <p class="section-sub" id="contactSub">견적 문의, 일정 확인 모두 환영해요.<br>카카오톡으로 바로 연락하셔도 됩니다.</p>
       </div>
-      <div class="contact-items" id="contactItems"></div>
+      <div class="contact-items" id="contactItems">
+        <!-- 카카오톡 문의 버튼 -->
+        <a href="https://pf.kakao.com/_xmIpuX/chat" target="_blank" class="kakao-btn fade">
+          <svg class="kakao-btn-icon" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.48 3 2 6.69 2 11.25c0 2.88 1.74 5.41 4.35 6.93-.18.65-.65 2.37-.75 2.74-.12.46.17.45.36.33.15-.1 2.37-1.6 3.33-2.25.55.08 1.12.12 1.71.12 5.52 0 10-3.69 10-8.25S17.52 3 12 3z"/></svg>
+          <div>
+            <div>카카오톡으로 문의하기</div>
+            <div class="kakao-btn-sub">빠른 답변 · 견적 상담</div>
+          </div>
+        </a>
+      </div>
     </div>
     <div class="fade">
       <form class="contact-form" onsubmit="return false;">
@@ -364,43 +388,92 @@ function render() {
   document.getElementById('heroDesc').innerHTML = nl2br(d.hero.desc);
   document.getElementById('heroStat').textContent = d.hero.stat;
 
+  // hero 이미지
+  const heroEl = document.getElementById('hero');
+  const heroCardMain = document.querySelector('.hero-card-main');
+  const heroRight = document.querySelector('#hero .hero-inner > div:last-child');
+  if (d.hero.img) {
+    if (d.hero.imgMode === 'bg') {
+      heroEl.classList.add('hero-bg-mode');
+      heroEl.style.backgroundImage = `url(${d.hero.img})`;
+      if (heroCardMain) heroCardMain.innerHTML = '🎬';
+    } else {
+      heroEl.classList.remove('hero-bg-mode');
+      heroEl.style.backgroundImage = '';
+      if (heroCardMain) heroCardMain.innerHTML = `<img src="${d.hero.img}" alt="메인 이미지">`;
+    }
+  } else {
+    heroEl.classList.remove('hero-bg-mode');
+    heroEl.style.backgroundImage = '';
+    if (heroCardMain) heroCardMain.innerHTML = '🎬';
+  }
+
   // trust
   d.trust.forEach((t,i) => { const el = document.getElementById('trust'+(i+1)); if(el) el.textContent = t; });
 
   // services
-  document.getElementById('servicesGrid').innerHTML = d.services.map(s => `
-    <div class="service-card fade">
-      <span class="service-emoji">${s.emoji}</span>
+  document.getElementById('servicesGrid').innerHTML = d.services.map(s => {
+    const icon = s.img
+      ? `<img class="service-img" src="${s.img}" alt="${s.name}">`
+      : `<span class="service-emoji">${s.emoji}</span>`;
+    return `<div class="service-card fade">
+      ${icon}
       <div class="service-name">${s.name}</div>
       <p class="service-desc">${s.desc}</p>
       <span class="service-tag">${s.tag}</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   // works
   renderWorks(d.works);
 
   // process
-  document.getElementById('processSteps').innerHTML = d.process.map(p => `
-    <div class="step fade">
-      <div class="step-num">${p.num}</div>
+  document.getElementById('processSteps').innerHTML = d.process.map((p, i) => {
+    const numDisplay = p.icon ? `<span style="font-size:1.4rem">${p.icon}</span>` : (i + 1);
+    return `<div class="step fade">
+      <div class="step-num">${numDisplay}</div>
       <div class="step-title">${p.title}</div>
       <p class="step-desc">${p.desc}</p>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   // about
   document.getElementById('aboutTitle').innerHTML = nl2br(d.about.title);
   document.getElementById('aboutDesc').innerHTML = nl2br(d.about.desc);
   document.getElementById('aboutChips').innerHTML = d.about.chips.map(c=>`<span class="chip">${c}</span>`).join('');
   document.getElementById('aboutStats').innerHTML = d.about.stats.map(s=>`<div><div class="stat-num">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
+  const aboutImg = document.getElementById('aboutImg');
+  if (aboutImg) aboutImg.innerHTML = d.about.img ? `<img src="${d.about.img}" alt="소개 이미지">` : '🎥';
 
   // contact
   document.getElementById('contactTitle').textContent = d.contact.title;
   document.getElementById('contactSub').innerHTML = nl2br(d.contact.sub);
-  document.getElementById('contactItems').innerHTML = d.contact.items.map(i=>`
-    <div class="contact-item">
-      <div class="contact-icon">${i.icon}</div>
-      <div><div class="contact-label">${i.label}</div><div class="contact-val">${i.val}</div></div>
-    </div>`).join('');
+
+  // 카카오 버튼은 고정, 아래에 contact items 추가
+  const kakaoBtn = `<a href="https://pf.kakao.com/_xmIpuX/chat" target="_blank" class="kakao-btn fade">
+    <svg style="width:28px;height:28px;flex-shrink:0" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.48 3 2 6.69 2 11.25c0 2.88 1.74 5.41 4.35 6.93-.18.65-.65 2.37-.75 2.74-.12.46.17.45.36.33.15-.1 2.37-1.6 3.33-2.25.55.08 1.12.12 1.71.12 5.52 0 10-3.69 10-8.25S17.52 3 12 3z"/></svg>
+    <div><div>카카오톡으로 문의하기</div><div class="kakao-btn-sub">빠른 답변 · 견적 상담</div></div>
+  </a>`;
+
+  const items = d.contact.items.map(i => {
+    const val = i.val || '';
+    // 전화번호 감지
+    const isPhone = val.match(/^[\d\-+ ]{7,}$/);
+    // 인스타그램 감지
+    const isInsta = val.startsWith('@') || (i.label && i.label.toLowerCase().includes('insta'));
+    let href = null;
+    if (isPhone) href = `tel:${val.replace(/[^+\d]/g,'')}`;
+    else if (isInsta) href = `https://instagram.com/${val.replace('@','')}`;
+
+    const inner = `<div class="contact-icon">${i.icon}</div>
+      <div><div class="contact-label">${i.label}</div><div class="contact-val">${val}</div></div>`;
+
+    return href
+      ? `<a href="${href}" ${isInsta?'target="_blank"':''} class="contact-item clickable">${inner}</a>`
+      : `<div class="contact-item">${inner}</div>`;
+  }).join('');
+
+  document.getElementById('contactItems').innerHTML = kakaoBtn + items;
 
   // footer
   document.getElementById('footerCopy').textContent = d.footer.copy;
