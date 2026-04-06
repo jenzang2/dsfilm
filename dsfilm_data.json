@@ -809,5 +809,8 @@
   "footer": {
     "copy": "© 2026 덕선필름. All rights reserved."
   },
-  "workViewMode": "tabs"
+  "workViewMode": "tabs",
+  "sectionVisibility": {
+    "process": false
+  }
 }
