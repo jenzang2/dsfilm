@@ -29,9 +29,8 @@ nav {
   padding: 0 5%; height: 62px;
   display: flex; align-items: center; justify-content: space-between;
 }
-.nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--text); text-decoration: none; display: flex; align-items: center; }
+.nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--text); text-decoration: none; }
 .nav-logo span { color: var(--point); }
-.nav-logo img { height: 32px; max-width: 160px; object-fit: contain; }
 .nav-links { display: flex; gap: 2rem; list-style: none; }
 .nav-links a { font-size: 0.85rem; color: var(--mid); text-decoration: none; transition: color 0.2s; }
 .nav-links a:hover { color: var(--point); }
@@ -87,48 +86,81 @@ section { padding: 5rem 5%; }
 
 /* WORK */
 #work { background: var(--cream); }
-.work-tabs { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
-.tab-btn { font-family: 'Pretendard', sans-serif; font-size: 0.82rem; padding: 0.45rem 1.1rem; border-radius: 100px; border: 1.5px solid var(--border); background: var(--white); color: var(--mid); cursor: pointer; transition: all 0.2s; }
-.tab-btn:hover, .tab-btn.active { background: var(--point); border-color: var(--point); color: white; }
-/* WORK SECTIONS */
-#work { background: var(--cream); }
-.work-section { margin-bottom: 4rem; max-width: 960px; margin-left: auto; margin-right: auto; }
-.work-section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1.5px solid var(--border); }
-.work-section-left {}
-.work-section-cat { font-size: 1.15rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
-.work-section-desc { font-size: 0.82rem; color: var(--mid); margin-top: 0.3rem; }
-.work-section-right { display: flex; align-items: center; gap: 0.8rem; }
-.work-section-count { font-size: 0.75rem; color: var(--light); }
-.work-view-all { font-size: 0.78rem; color: var(--point); font-weight: 600; background: none; border: none; border-bottom: 1px solid var(--point-light); padding-bottom: 1px; cursor: pointer; font-family: 'Pretendard', sans-serif; transition: border-color 0.2s; }
-.work-view-all:hover { border-bottom-color: var(--point); }
-.work-slider-wrap { position: relative; }
-.work-slider { display: flex; gap: 0.8rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 4px; scroll-behavior: smooth; }
-.work-slider::-webkit-scrollbar { display: none; }
-.work-slider .work-card { flex: 0 0 calc(25% - 0.6rem); min-width: 180px; scroll-snap-align: start; }
-.slider-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: white; border: 1.5px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; color: var(--text); transition: all 0.2s; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.slider-btn:hover { background: var(--point); color: white; border-color: var(--point); }
-.slider-btn.prev { left: -18px; }
-.slider-btn.next { right: -18px; }
-.slider-btn.hide { display: none; }
-.work-card { border-radius: 12px; overflow: hidden; background: var(--white); border: 1px solid var(--border); cursor: pointer; }
-.work-card-thumb { position: relative; aspect-ratio: 16/10; overflow: hidden; background: var(--navy); }
+
+/* 카테고리 탭 */
+.work-tabs { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 2.5rem; flex-wrap: wrap; }
+.tab-btn {
+  font-family: 'Pretendard', sans-serif; font-size: 0.84rem; font-weight: 600;
+  padding: 0.5rem 1.3rem; border-radius: 100px;
+  border: 1.5px solid var(--border); background: var(--white); color: var(--mid);
+  cursor: pointer; transition: all 0.2s;
+}
+.tab-btn:hover { border-color: var(--point); color: var(--point); }
+.tab-btn.active { background: var(--point); border-color: var(--point); color: white; }
+
+/* 영상 그리드 - 한 줄 3개 */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.6rem 1.4rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* 카드: 썸네일 각지게, 제목 분리 */
+.work-card {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.work-card-thumb {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  background: var(--navy);
+  border-radius: 0;
+}
 .work-thumb { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; display: block; }
 .work-card:hover .work-thumb { transform: scale(1.04); }
 .work-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: var(--navy); }
-.work-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.2s; }
-.work-card:hover .work-overlay { background: rgba(0,0,0,0.1); }
-.work-info { padding: 0.5rem 0.55rem 0.55rem; }
-.work-name { font-size: 0.78rem; font-weight: 600; color: var(--text); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.work-empty { text-align: center; padding: 2rem; color: var(--light); font-size: 0.85rem; background: var(--white); border-radius: 12px; border: 1.5px dashed var(--border); }
 
-/* YOUTUBE INLINE PLAYER */
+/* 재생 오버레이 */
+.work-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0);
+  transition: background 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.work-card:hover .work-overlay { background: rgba(0,0,0,0.15); }
+.work-play-icon {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; opacity: 0; transition: opacity 0.2s;
+  padding-left: 3px;
+}
+.work-card:hover .work-play-icon { opacity: 1; }
+.work-card.playing .work-overlay { background: rgba(232,131,58,0.18) !important; }
+.work-card.playing .work-play-icon { opacity: 1; background: rgba(232,131,58,0.9); }
+
+/* 제목 영역 - 썸네일 밖, 배경 없음 */
+.work-info { padding: 0.6rem 0 0; background: transparent; }
+.work-name {
+  font-size: 0.84rem; font-weight: 600; color: var(--text);
+  line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 유튜브 인라인 플레이어 */
 .yt-player-wrap { overflow: hidden; max-height: 0; transition: max-height 0.45s cubic-bezier(.4,0,.2,1), opacity 0.35s ease, margin 0.35s ease; opacity: 0; margin-top: 0; }
-.yt-player-wrap.open { max-height: 600px; opacity: 1; margin-top: 1rem; }
-.yt-player-inner { position: relative; background: #000; border-radius: 14px; overflow: hidden; }
+.yt-player-wrap.open { max-height: 700px; opacity: 1; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.yt-player-inner { position: relative; background: #000; overflow: hidden; }
 .yt-player-inner iframe { width: 100%; aspect-ratio: 16/9; display: block; border: none; }
 .yt-player-close { position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; transition: background .2s; }
 .yt-player-close:hover { background: var(--point); }
-.work-card.playing .work-overlay { background: rgba(232,131,58,.18) !important; }
 
 /* PROCESS */
 #process { background: var(--white); }
@@ -229,6 +261,13 @@ footer { background: #141e30; padding: 1.5rem 5%; display: flex; align-items: ce
     </div>
     <div class="fade">
       <div class="hero-card-main">🎬</div>
+      <div class="hero-card-float">
+        <div class="float-icon">🎬</div>
+        <div>
+          <div class="float-label">누적 제작</div>
+          <div class="float-value" id="heroStat">150건 이상</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -253,10 +292,17 @@ footer { background: #141e30; padding: 1.5rem 5%; display: flex; align-items: ce
 <section id="work">
   <div class="section-header fade">
     <span class="section-tag">Work</span>
-    <h2 class="section-title" id="workTitle">작업물</h2>
+    <h2 class="section-title" id="workTitle">제작영상</h2>
     <p class="section-sub" id="workSub">다양한 현장에서 쌓아온 결과물입니다</p>
   </div>
+  <div class="work-tabs" id="workTabs"></div>
   <div id="workSections"></div>
+  <div class="yt-player-wrap" id="ytplayer-global">
+    <div class="yt-player-inner">
+      <button class="yt-player-close" onclick="closeYtPlayer()">✕</button>
+      <div id="ytplayer-frame-global"></div>
+    </div>
+  </div>
 </section>
 
 <section id="process">
@@ -322,6 +368,7 @@ const STORAGE_KEY = 'dsfilm_data';
 
 const DEFAULT = {
   nav: { menu1:'서비스', menu2:'작업물', menu3:'소개', menu4:'문의하기', logo:null, extraMenus:[] },
+  sectionVisibility: { services:true, work:true, process:true, about:true, contact:true },
   hero: { badge:'전북 기반 영상 제작', title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다', desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.', stat:'150건 이상' },
   trust: ['전북 전주 기반','전국 출장 가능','빠른 납품','AI 활용 제작','카카오톡 상담'],
   services: [
@@ -375,32 +422,27 @@ function render() {
   document.getElementById('navMenu2').textContent = d.nav.menu2;
   document.getElementById('navMenu3').textContent = d.nav.menu3;
   document.getElementById('navMenu4').textContent = d.nav.menu4;
-
-  // 로고
   const navLogo = document.getElementById('navLogo');
-  if (navLogo) {
-    navLogo.innerHTML = d.nav.logo
-      ? `<img src="${d.nav.logo}" alt="로고" style="height:32px;max-width:160px;object-fit:contain">`
-      : '덕선<span>필름</span>';
-  }
-
-  // 추가 메뉴
+  if (navLogo) navLogo.innerHTML = d.nav.logo ? `<img src="${d.nav.logo}" alt="로고" style="height:32px;max-width:160px;object-fit:contain">` : '덕선<span>필름</span>';
   const navLinks = document.getElementById('navLinks');
   if (navLinks) {
     navLinks.querySelectorAll('.nav-extra').forEach(el => el.remove());
     const ctaLi = navLinks.querySelector('li:last-child');
     (d.nav.extraMenus || []).forEach(m => {
       if (!m.name) return;
-      const li = document.createElement('li');
-      li.className = 'nav-extra';
-      const a = document.createElement('a');
-      a.href = m.url || '#';
-      a.textContent = m.name;
+      const li = document.createElement('li'); li.className = 'nav-extra';
+      const a = document.createElement('a'); a.href = m.url || '#'; a.textContent = m.name;
       if (m.url && !m.url.startsWith('#')) { a.target = '_blank'; a.rel = 'noopener'; }
-      li.appendChild(a);
-      navLinks.insertBefore(li, ctaLi);
+      li.appendChild(a); navLinks.insertBefore(li, ctaLi);
     });
   }
+
+  // 섹션 visibility
+  const sv = d.sectionVisibility || {};
+  ['services','work','process','about','contact'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = (sv[id] === false) ? 'none' : '';
+  });
 
   // hero
   document.getElementById('heroBadge').textContent = d.hero.badge;
@@ -443,8 +485,8 @@ function render() {
     </div>`;
   }).join('');
 
-  // works
-  renderWorks(d.works);
+  // works - 탭 렌더
+  renderWorkTabs(d);
 
   // process
   document.getElementById('processSteps').innerHTML = d.process.map((p, i) => {
@@ -467,31 +509,22 @@ function render() {
   // contact
   document.getElementById('contactTitle').textContent = d.contact.title;
   document.getElementById('contactSub').innerHTML = nl2br(d.contact.sub);
-
-  // 카카오 버튼은 고정, 아래에 contact items 추가
   const kakaoBtn = `<a href="https://pf.kakao.com/_xmIpuX/chat" target="_blank" class="kakao-btn fade">
     <svg style="width:28px;height:28px;flex-shrink:0" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.48 3 2 6.69 2 11.25c0 2.88 1.74 5.41 4.35 6.93-.18.65-.65 2.37-.75 2.74-.12.46.17.45.36.33.15-.1 2.37-1.6 3.33-2.25.55.08 1.12.12 1.71.12 5.52 0 10-3.69 10-8.25S17.52 3 12 3z"/></svg>
     <div><div>카카오톡으로 문의하기</div><div class="kakao-btn-sub">빠른 답변 · 견적 상담</div></div>
   </a>`;
-
   const items = d.contact.items.map(i => {
     const val = i.val || '';
-    // 전화번호 감지
     const isPhone = val.match(/^[\d\-+ ]{7,}$/);
-    // 인스타그램 감지
     const isInsta = val.startsWith('@') || (i.label && i.label.toLowerCase().includes('insta'));
     let href = null;
     if (isPhone) href = `tel:${val.replace(/[^+\d]/g,'')}`;
     else if (isInsta) href = `https://instagram.com/${val.replace('@','')}`;
-
-    const inner = `<div class="contact-icon">${i.icon}</div>
-      <div><div class="contact-label">${i.label}</div><div class="contact-val">${val}</div></div>`;
-
+    const inner = `<div class="contact-icon">${i.icon}</div><div><div class="contact-label">${i.label}</div><div class="contact-val">${val}</div></div>`;
     return href
       ? `<a href="${href}" ${isInsta?'target="_blank"':''} class="contact-item clickable">${inner}</a>`
       : `<div class="contact-item">${inner}</div>`;
   }).join('');
-
   document.getElementById('contactItems').innerHTML = kakaoBtn + items;
 
   // footer
@@ -506,109 +539,96 @@ function render() {
   }, 100);
 }
 
-function renderWorks(works) {
-  const d = getData();
-  const container = document.getElementById('workSections');
+function renderWorks(works) { /* 탭 방식으로 교체됨 */ }
+
+let activeWorkTab = null;
+
+function renderWorkTabs(d) {
+  d = d || getData();
   const sections = d.workSections || [];
+  const tabsEl = document.getElementById('workTabs');
+  if (!tabsEl) return;
   if (!sections.length) {
-    container.innerHTML = '<p style="text-align:center;color:var(--light);padding:3rem;">작업물을 준비 중입니다</p>';
+    tabsEl.innerHTML = '';
+    document.getElementById('workSections').innerHTML = '<p style="text-align:center;color:var(--light);padding:3rem;">제작영상을 준비 중입니다</p>';
     return;
   }
-  container.innerHTML = sections.map((sec, si) => {
-    const catWorks = works.filter(w => w.cat === sec.cat);
-    let orderedWorks;
-    if (sec.workIds && sec.workIds.length > 0) {
-      orderedWorks = sec.workIds.map(id => catWorks.find(w => w.id === id)).filter(Boolean);
-      const unassigned = catWorks.filter(w => !sec.workIds.includes(w.id));
-      orderedWorks = [...orderedWorks, ...unassigned];
-    } else {
-      orderedWorks = catWorks;
-    }
-    if (!orderedWorks.length) return '';
-    // catMeta 설명 불러오기
-    const catDesc = (d.catMeta && d.catMeta[sec.cat] && d.catMeta[sec.cat].desc) ? d.catMeta[sec.cat].desc : '';
-    const cards = orderedWorks.map((w, wi) => {
-      const ytId = getYtId(w.url);
-      const thumb = w.customThumb
-        ? `<img class="work-thumb" src="${w.customThumb}" alt="${w.name}">`
-        : ytId
-          ? `<img class="work-thumb" src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="${w.name}">`
-          : `<div class="work-thumb-placeholder">🎬</div>`;
-      const hasYt = !!ytId;
-      return `<div class="work-card" id="wcard-${si}-${wi}" onclick="openYtPlayer(${si},'${ytId||''}','wcard-${si}-${wi}')">
-        <div class="work-card-thumb">
-          ${thumb}
-          <div class="work-overlay" style="${hasYt?'':'cursor:default'}"></div>
-        </div>
-        <div class="work-info">
-          <div class="work-name">${w.name}</div>
-        </div>
-      </div>`;
-    }).join('');
-    const hasMore = orderedWorks.length > 4;
-    return `<div class="work-section fade" id="wsec-${si}">
-      <div class="work-section-header">
-        <div class="work-section-left">
-          <div class="work-section-cat">${sec.cat}</div>
-          ${catDesc ? `<div class="work-section-desc">${catDesc}</div>` : ''}
-        </div>
-        <div class="work-section-right">
-          <span class="work-section-count">${orderedWorks.length}개</span>
-          ${hasMore ? `<button class="work-view-all" onclick="toggleViewAll(this, 'slider-${si}')">전체보기 →</button>` : ''}
-        </div>
-      </div>
-      <div class="work-slider-wrap">
-        ${hasMore ? `<button class="slider-btn prev" onclick="slideWork('slider-${si}',-1)">‹</button>` : ''}
-        <div class="work-slider" id="slider-${si}" onscroll="updateSliderBtns('slider-${si}')">
-          ${cards}
-        </div>
-        ${hasMore ? `<button class="slider-btn next" onclick="slideWork('slider-${si}',1)">›</button>` : ''}
-      </div>
-      <div class="yt-player-wrap" id="ytplayer-${si}">
-        <div class="yt-player-inner">
-          <button class="yt-player-close" onclick="closeYtPlayer(${si})">✕</button>
-          <div id="ytplayer-frame-${si}"></div>
-        </div>
-      </div>
-    </div>`;
-  }).filter(Boolean).join('');
-
-  setTimeout(() => {
-    document.querySelectorAll('.work-slider').forEach(s => updateSliderBtns(s.id));
-  }, 100);
+  if (!activeWorkTab || !sections.find(s => s.cat === activeWorkTab)) activeWorkTab = sections[0].cat;
+  tabsEl.innerHTML = sections.map(s =>
+    `<button class="tab-btn${s.cat === activeWorkTab ? ' active' : ''}" onclick="selectWorkTab('${s.cat}')">${s.cat}</button>`
+  ).join('');
+  renderWorkGrid(d);
 }
 
-let currentYtSi = null, currentYtCardId = null;
+function selectWorkTab(cat) {
+  activeWorkTab = cat;
+  const d = getData();
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.textContent === cat));
+  closeYtPlayer();
+  renderWorkGrid(d);
+}
 
-function openYtPlayer(si, ytId, cardId) {
+function renderWorkGrid(d) {
+  const container = document.getElementById('workSections');
+  const sections = d.workSections || [];
+  const sec = sections.find(s => s.cat === activeWorkTab);
+  if (!sec) { container.innerHTML = ''; return; }
+  const catWorks = d.works.filter(w => w.cat === sec.cat);
+  let ordered;
+  if (sec.workIds && sec.workIds.length) {
+    ordered = sec.workIds.map(id => catWorks.find(w => w.id === id)).filter(Boolean);
+    ordered = [...ordered, ...catWorks.filter(w => !sec.workIds.includes(w.id))];
+  } else { ordered = catWorks; }
+  if (!ordered.length) {
+    container.innerHTML = '<p style="text-align:center;color:var(--light);padding:3rem;">이 카테고리에 영상이 없습니다</p>';
+    return;
+  }
+  const cards = ordered.map((w, i) => {
+    const ytId = getYtId(w.url);
+    const thumb = w.customThumb
+      ? `<img class="work-thumb" src="${w.customThumb}" alt="${w.name}">`
+      : ytId
+        ? `<img class="work-thumb" src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" alt="${w.name}">`
+        : `<div class="work-thumb-placeholder">🎬</div>`;
+    return `<div class="work-card fade" id="wcard-${i}" onclick="openYtPlayer('${ytId||''}','wcard-${i}')">
+      <div class="work-card-thumb">
+        ${thumb}
+        <div class="work-overlay"><div class="work-play-icon">▶</div></div>
+      </div>
+      <div class="work-info"><div class="work-name">${w.name}</div></div>
+    </div>`;
+  }).join('');
+  container.innerHTML = `<div class="work-grid">${cards}</div>`;
+}
+
+let currentYtCardId = null;
+
+function openYtPlayer(ytId, cardId) {
   if (!ytId) return;
-  const wrap = document.getElementById('ytplayer-' + si);
-  const frame = document.getElementById('ytplayer-frame-' + si);
+  const wrap = document.getElementById('ytplayer-global');
+  const frame = document.getElementById('ytplayer-frame-global');
   if (!wrap || !frame) return;
   // 같은 영상 다시 클릭하면 닫기
-  if (currentYtSi === si && currentYtCardId === cardId && wrap.classList.contains('open')) {
-    closeYtPlayer(si); return;
+  if (currentYtCardId === cardId && wrap.classList.contains('open')) {
+    closeYtPlayer(); return;
   }
-  // 다른 섹션 플레이어 닫기
-  if (currentYtSi !== null && currentYtSi !== si) closeYtPlayer(currentYtSi);
-  // 재생 중 카드 표시 초기화
   if (currentYtCardId) { const prev = document.getElementById(currentYtCardId); if (prev) prev.classList.remove('playing'); }
-  currentYtSi = si; currentYtCardId = cardId;
+  currentYtCardId = cardId;
   const card = document.getElementById(cardId);
   if (card) card.classList.add('playing');
-  frame.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  // vq=hd1080으로 기본 화질 1080 설정
+  frame.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&vq=hd1080" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
   wrap.classList.add('open');
-  // 플레이어 위치로 스크롤
   setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
 }
 
-function closeYtPlayer(si) {
-  const wrap = document.getElementById('ytplayer-' + si);
-  const frame = document.getElementById('ytplayer-frame-' + si);
+function closeYtPlayer() {
+  const wrap = document.getElementById('ytplayer-global');
+  const frame = document.getElementById('ytplayer-frame-global');
   if (wrap) wrap.classList.remove('open');
   if (frame) setTimeout(() => frame.innerHTML = '', 400);
   if (currentYtCardId) { const c = document.getElementById(currentYtCardId); if (c) c.classList.remove('playing'); }
-  if (currentYtSi === si) { currentYtSi = null; currentYtCardId = null; }
+  currentYtCardId = null;
 }
 
 function slideWork(sliderId, dir) {

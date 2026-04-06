@@ -331,8 +331,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <!-- 서비스 관리 -->
     <div class="panel" id="panel-services">
       <div class="panel-hdr">
-        <div class="panel-title">📋 서비스 관리</div>
-        <button class="btn-apply" onclick="applyPanel('services')">적용</button>
+        <div class="panel-title">📋 SERVICE</div>
+        <div style="display:flex;gap:.6rem;align-items:center">
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--mid);cursor:pointer">
+            <input type="checkbox" id="vis-services" onchange="toggleSectionVis('services',this.checked)" style="width:16px;height:16px;accent-color:var(--point)">
+            메인에 표시
+          </label>
+          <button class="btn-apply" onclick="applyPanel('services')">적용</button>
+        </div>
       </div>
       <div id="servicesList"></div>
       <button class="btn b-or" onclick="addService()" style="margin-top:.5rem">+ 서비스 추가</button>
@@ -341,8 +347,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <!-- 진행 과정 -->
     <div class="panel" id="panel-process">
       <div class="panel-hdr">
-        <div class="panel-title">🔄 진행 과정</div>
-        <button class="btn-apply" onclick="applyPanel('process')">적용</button>
+        <div class="panel-title">🔄 PROCESS</div>
+        <div style="display:flex;gap:.6rem;align-items:center">
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--mid);cursor:pointer">
+            <input type="checkbox" id="vis-process" onchange="toggleSectionVis('process',this.checked)" style="width:16px;height:16px;accent-color:var(--point)">
+            메인에 표시
+          </label>
+          <button class="btn-apply" onclick="applyPanel('process')">적용</button>
+        </div>
       </div>
       <div id="processList"></div>
       <button class="btn b-or" onclick="addProcess()" style="margin-top:.5rem">+ 단계 추가</button>
@@ -351,24 +363,22 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <!-- 상단바 -->
     <div class="panel" id="panel-nav">
       <div class="panel-hdr">
-        <div class="panel-title">🧭 상단바 수정</div>
+        <div class="panel-title">🧭 상단바</div>
         <button class="btn-apply" onclick="applyPanel('nav')">적용</button>
       </div>
       <div class="card">
         <div class="card-title">로고 이미지</div>
         <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
-          <div id="logoImgPreview"
-            style="width:160px;height:52px;background:var(--navy);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:700;color:#f4a96e;flex-shrink:0;border:2px dashed var(--border);cursor:pointer"
+          <div id="logoImgPreview" style="width:160px;height:52px;background:var(--navy);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:700;color:#f4a96e;flex-shrink:0;border:2px dashed var(--border);cursor:pointer"
             ondragover="event.preventDefault();this.style.borderColor='var(--point)'"
             ondragleave="this.style.borderColor='var(--border)'"
             ondrop="onLogoImgDrop(event)"
-            onclick="document.getElementById('logo-img-file').click()"
-            title="클릭하거나 이미지 드래그">덕선<span style="color:#fff">필름</span></div>
+            onclick="document.getElementById('logo-img-file').click()">덕선<span style="color:#fff">필름</span></div>
           <input type="file" id="logo-img-file" accept="image/*" style="display:none" onchange="onLogoImgUpload()">
           <div style="display:flex;flex-direction:column;gap:.4rem">
             <button class="btn b-gy b-sm" onclick="document.getElementById('logo-img-file').click()">📁 로고 이미지 선택</button>
             <button class="btn b-rd b-sm" onclick="clearLogoImg()">✕ 제거 (텍스트로 표시)</button>
-            <div class="fh">없으면 텍스트 '덕선필름' 표시<br>추천: PNG 투명 배경, 가로 200px 이하</div>
+            <div class="fh">없으면 텍스트 '덕선필름' 표시. 추천: PNG 투명 배경</div>
           </div>
         </div>
       </div>
@@ -396,7 +406,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <!-- 메인 문구 -->
     <div class="panel" id="panel-hero">
       <div class="panel-hdr">
-        <div class="panel-title">🏠 메인 문구 수정</div>
+        <div class="panel-title">🏠 TITLE</div>
         <button class="btn-apply" onclick="applyPanel('hero')">적용</button>
       </div>
       <div class="card">
@@ -453,8 +463,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <!-- 소개 -->
     <div class="panel" id="panel-about">
       <div class="panel-hdr">
-        <div class="panel-title">👤 소개 수정</div>
-        <button class="btn-apply" onclick="applyPanel('about')">적용</button>
+        <div class="panel-title">👤 ABOUT</div>
+        <div style="display:flex;gap:.6rem;align-items:center">
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--mid);cursor:pointer">
+            <input type="checkbox" id="vis-about" onchange="toggleSectionVis('about',this.checked)" style="width:16px;height:16px;accent-color:var(--point)">
+            메인에 표시
+          </label>
+          <button class="btn-apply" onclick="applyPanel('about')">적용</button>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">왼쪽 이미지</div>
@@ -496,8 +512,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <!-- 연락처 -->
     <div class="panel" id="panel-contact">
       <div class="panel-hdr">
-        <div class="panel-title">📞 연락처 수정</div>
-        <button class="btn-apply" onclick="applyPanel('contact')">적용</button>
+        <div class="panel-title">📞 CONTACT</div>
+        <div style="display:flex;gap:.6rem;align-items:center">
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--mid);cursor:pointer">
+            <input type="checkbox" id="vis-contact" onchange="toggleSectionVis('contact',this.checked)" style="width:16px;height:16px;accent-color:var(--point)">
+            메인에 표시
+          </label>
+          <button class="btn-apply" onclick="applyPanel('contact')">적용</button>
+        </div>
       </div>
       <div class="card">
         <div class="fr full"><div class="fg"><label class="fl">섹션 제목</label><input class="fi" id="ct-title" oninput="markDirty('contact')"></div></div>
@@ -615,6 +637,7 @@ const KEY = 'dsfilm_data';
 const ADMIN_PW = '1111';
 const DEFAULT = {
   nav:{menu1:'서비스',menu2:'작업물',menu3:'소개',menu4:'문의하기',logo:null,extraMenus:[]},
+  sectionVisibility:{services:true,work:true,process:true,about:true,contact:true},
   hero:{badge:'전북 기반 영상 제작',title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다',desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.',stat:'150건 이상'},
   trust:['전북 전주 기반','전국 출장 가능','빠른 납품','AI 활용 제작','카카오톡 상담'],
   services:[
@@ -676,8 +699,8 @@ function switchPanel(id, el) {
 function loadPanel(id) {
   if (id === 'works') { renderCats(); renderWorks(); }
   if (id === 'sections') { renderSecCats(); renderSections(); }
-  if (id === 'services') renderServices();
-  if (id === 'process') renderProcess();
+  if (id === 'services') { renderServices(); loadVisCheckbox('services'); }
+  if (id === 'process') { renderProcess(); loadVisCheckbox('process'); }
   if (id === 'nav') {
     if (!data.nav.extraMenus) data.nav.extraMenus = [];
     document.getElementById('nav-m1').value = data.nav.menu1 || '';
@@ -711,6 +734,7 @@ function loadPanel(id) {
     }
   }
   if (id === 'about') {
+    loadVisCheckbox('about');
     document.getElementById('about-title').value = data.about.title;
     document.getElementById('about-desc').value = data.about.desc;
     renderChips(); renderStats();
@@ -721,6 +745,7 @@ function loadPanel(id) {
     }
   }
   if (id === 'contact') {
+    loadVisCheckbox('contact');
     document.getElementById('ct-title').value = data.contact.title;
     document.getElementById('ct-sub').value = data.contact.sub;
     document.getElementById('footer-copy').value = data.footer.copy;
@@ -735,6 +760,7 @@ function applyPanel(id) {
     data.nav.menu2 = document.getElementById('nav-m2').value;
     data.nav.menu3 = document.getElementById('nav-m3').value;
     data.nav.menu4 = document.getElementById('nav-m4').value;
+    // logo, extraMenus는 즉시 저장됨
   }
   if (id === 'hero') {
     data.hero.badge = document.getElementById('hero-badge').value;
@@ -1006,17 +1032,12 @@ function addWork() {
   const newWork = { id: Date.now(), name, cat, url: document.getElementById('w-url').value.trim(), desc };
   if (customThumbData) newWork.customThumb = customThumbData;
   data.works.unshift(newWork);
-
-  // ★ 섹션 자동 생성 및 workId 등록 (메인 페이지 노출의 핵심)
+  // ★ 섹션 자동 생성 및 workId 등록 (메인 페이지 노출 핵심)
   if (!data.workSections) data.workSections = [];
   let sec = data.workSections.find(s => s.cat === cat);
-  if (!sec) {
-    sec = { cat, workIds: [] };
-    data.workSections.push(sec);
-  }
+  if (!sec) { sec = { cat, workIds: [] }; data.workSections.push(sec); }
   if (!sec.workIds) sec.workIds = [];
-  sec.workIds.unshift(newWork.id); // 최신 영상이 맨 앞에
-
+  sec.workIds.unshift(newWork.id);
   // reset
   document.getElementById('w-name').value = '';
   document.getElementById('w-name').dataset.edited = '';
@@ -1027,7 +1048,6 @@ function addWork() {
   document.getElementById('thumbSrcLabel').textContent = '';
   customThumbData = null;
   save(); renderWorks();
-  // 방금 추가한 카테고리로 선택 맞추기
   document.getElementById('cat-select').value = cat;
   currentCat = cat;
   document.getElementById('catDetail').style.display = 'block';
@@ -1039,7 +1059,6 @@ function renderWorks() {
   if (currentCat) renderCatWorkGrid(currentCat);
 }
 
-// 새 작업물 추가 폼의 카테고리 변경 시 하단 영상 리스트 동기화
 function onWorkCatChange() {
   const cat = document.getElementById('w-cat').value;
   if (!cat) return;
@@ -1499,6 +1518,19 @@ function clearAboutImg() {
   data.about.img = null; markDirty('about');
   const prev = document.getElementById('aboutImgPreview');
   if (prev) prev.innerHTML = '🎥';
+}
+
+// ===== 섹션 표시/숨기기 =====
+function loadVisCheckbox(id) {
+  const sv = data.sectionVisibility || {};
+  const cb = document.getElementById('vis-' + id);
+  if (cb) cb.checked = (sv[id] !== false);
+}
+function toggleSectionVis(id, visible) {
+  if (!data.sectionVisibility) data.sectionVisibility = {};
+  data.sectionVisibility[id] = visible;
+  save();
+  toast(visible ? `✅ ${id} 섹션이 메인에 표시됩니다` : `👁️ ${id} 섹션이 메인에서 숨겨졌어요`);
 }
 
 // ===== 로고 이미지 =====
