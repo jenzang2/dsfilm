@@ -1673,15 +1673,78 @@ function applyImgToPreview(file, previewId, cb) {
   reader.readAsDataURL(file);
 }
 
+// ===== GitHub 이미지 업로드 헬퍼 =====
+// GitHub 설정이 있으면 저장소 /images/ 폴더에 업로드 후 URL 반환
+// 설정 없으면 base64 반환 (fallback)
+async function uploadImgToGitHub(file, prefix) {
+  const s = getGhSettings();
+  const hasGh = s.user && s.repo && s.token;
+
+  // 파일 → base64 읽기 (미리보기 및 업로드 공용)
+  const b64full = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  if (!hasGh) return b64full; // fallback: base64 그대로
+
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const filename = `${prefix}_${Date.now()}.${ext}`;
+  const path = `images/${filename}`;
+  const b64 = b64full.split(',')[1];
+
+  const headers = {
+    'Authorization': `token ${s.token}`,
+    'Content-Type': 'application/json'
+  };
+
+  const res = await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/${path}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({ message: `이미지 업로드: ${filename}`, content: b64 })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || '업로드 실패');
+  }
+
+  // GitHub raw URL (CDN 캐시 적용됨)
+  return `https://raw.githubusercontent.com/${s.user}/${s.repo}/main/${path}`;
+}
+
+// 여러 파일 GitHub 업로드 (진행 상태 표시)
+async function uploadMultipleToGitHub(files, prefix, onProgress) {
+  const urls = [];
+  for (let i = 0; i < files.length; i++) {
+    if (onProgress) onProgress(i + 1, files.length);
+    const url = await uploadImgToGitHub(files[i], prefix);
+    urls.push(url);
+  }
+  return urls;
+}
+
 // Hero 이미지
 function onHeroImgDrop(e) {
   e.preventDefault(); e.currentTarget.classList.remove('drag-over');
   const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) applyImgToPreview(file, 'heroImgPreview', v => { data.hero.img = v; markDirty('hero'); });
+  if (file && file.type.startsWith('image/')) _uploadHeroImg(file);
 }
 function onHeroImgUpload() {
   const file = document.getElementById('hero-img-file').files[0];
-  if (file) applyImgToPreview(file, 'heroImgPreview', v => { data.hero.img = v; markDirty('hero'); });
+  if (file) _uploadHeroImg(file);
+}
+async function _uploadHeroImg(file) {
+  applyImgToPreview(file, 'heroImgPreview', () => {});
+  const s = getGhSettings();
+  if (s.user && s.repo && s.token) {
+    toast('📤 이미지 업로드 중...');
+    try { data.hero.img = await uploadImgToGitHub(file, 'hero'); toast('✅ 업로드 완료!'); }
+    catch(e) { toast('❌ 실패: ' + e.message); applyImgToPreview(file, 'heroImgPreview', v => { data.hero.img = v; }); return; }
+  } else { applyImgToPreview(file, 'heroImgPreview', v => { data.hero.img = v; }); return; }
+  markDirty('hero');
 }
 function clearHeroImg() {
   data.hero.img = null; markDirty('hero');
@@ -1693,11 +1756,21 @@ function clearHeroImg() {
 function onAboutImgDrop(e) {
   e.preventDefault(); e.currentTarget.classList.remove('drag-over');
   const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) applyImgToPreview(file, 'aboutImgPreview', v => { data.about.img = v; markDirty('about'); });
+  if (file && file.type.startsWith('image/')) _uploadAboutImg(file);
 }
 function onAboutImgUpload() {
   const file = document.getElementById('about-img-file').files[0];
-  if (file) applyImgToPreview(file, 'aboutImgPreview', v => { data.about.img = v; markDirty('about'); });
+  if (file) _uploadAboutImg(file);
+}
+async function _uploadAboutImg(file) {
+  applyImgToPreview(file, 'aboutImgPreview', () => {});
+  const s = getGhSettings();
+  if (s.user && s.repo && s.token) {
+    toast('📤 이미지 업로드 중...');
+    try { data.about.img = await uploadImgToGitHub(file, 'about'); toast('✅ 업로드 완료!'); }
+    catch(e) { toast('❌ 실패: ' + e.message); applyImgToPreview(file, 'aboutImgPreview', v => { data.about.img = v; }); return; }
+  } else { applyImgToPreview(file, 'aboutImgPreview', v => { data.about.img = v; }); return; }
+  markDirty('about');
 }
 function clearAboutImg() {
   data.about.img = null; markDirty('about');
@@ -1720,21 +1793,64 @@ function onScThumbUpload() {
   const file = document.getElementById('sc-thumb-file').files[0];
   if (file) _applyScThumb(file);
 }
-function _applyScThumb(file) {
-  applyImgToPreview(file, 'scThumbPreview', b64 => { scNewThumb = b64; });
+async function _applyScThumb(file) {
+  const prev = document.getElementById('scThumbPreview');
+  // 로컬 미리보기 즉시 표시
+  const reader = new FileReader();
+  reader.onload = e => { if (prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`; };
+  reader.readAsDataURL(file);
+
+  const s = getGhSettings();
+  if (s.user && s.repo && s.token) {
+    toast('📤 썸네일 GitHub 업로드 중...');
+    try {
+      scNewThumb = await uploadImgToGitHub(file, 'scene_thumb');
+      toast('✅ 썸네일 업로드 완료!');
+    } catch(e) {
+      toast('❌ 업로드 실패: ' + e.message);
+      // fallback: base64
+      const fr = new FileReader();
+      fr.onload = ev => { scNewThumb = ev.target.result; };
+      fr.readAsDataURL(file);
+    }
+  } else {
+    const fr = new FileReader();
+    fr.onload = e => { scNewThumb = e.target.result; };
+    fr.readAsDataURL(file);
+  }
 }
 
-function onScPhotosUpload() {
+async function onScPhotosUpload() {
   const files = Array.from(document.getElementById('sc-photos-file').files);
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      scNewPhotos.push(e.target.result);
-      renderScPhotosPreview();
-    };
-    reader.readAsDataURL(file);
-  });
   document.getElementById('sc-photos-file').value = '';
+  if (!files.length) return;
+
+  const s = getGhSettings();
+  if (s.user && s.repo && s.token) {
+    toast(`📤 사진 0 / ${files.length} 업로드 중...`);
+    try {
+      const urls = await uploadMultipleToGitHub(files, 'scene', (cur, total) => {
+        toast(`📤 사진 ${cur} / ${total} 업로드 중...`);
+      });
+      scNewPhotos.push(...urls);
+      renderScPhotosPreview();
+      toast(`✅ 사진 ${files.length}장 업로드 완료!`);
+    } catch(e) {
+      toast('❌ 업로드 실패: ' + e.message);
+    }
+  } else {
+    // base64 fallback
+    let loaded = 0;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        scNewPhotos.push(e.target.result);
+        loaded++;
+        if (loaded === files.length) renderScPhotosPreview();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 }
 
 function renderScPhotosPreview() {
@@ -1860,18 +1976,62 @@ function saveSceneEdit() {
   s.thumb = scNewThumb || scNewPhotos[0] || s.thumb;
   save(); renderAdminScenes(); closeSceneEdit(); toast('✅ 수정됐어요!');
 }
-function onScEditThumbUpload() {
+async function onScEditThumbUpload() {
   const file = document.getElementById('sc-edit-thumb-file').files[0];
-  if (file) applyImgToPreview(file, 'scEditThumbPreview', b64 => { scNewThumb = b64; });
+  if (!file) return;
+  // 로컬 미리보기 즉시
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById('scEditThumbPreview');
+    if (prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+  };
+  reader.readAsDataURL(file);
+
+  const s = getGhSettings();
+  if (s.user && s.repo && s.token) {
+    toast('📤 썸네일 업로드 중...');
+    try {
+      scNewThumb = await uploadImgToGitHub(file, 'scene_thumb');
+      toast('✅ 썸네일 업로드 완료!');
+    } catch(e) {
+      toast('❌ 업로드 실패: ' + e.message);
+      const fr = new FileReader(); fr.onload = ev => { scNewThumb = ev.target.result; }; fr.readAsDataURL(file);
+    }
+  } else {
+    const fr = new FileReader(); fr.onload = e => { scNewThumb = e.target.result; }; fr.readAsDataURL(file);
+  }
 }
-function onScEditPhotosUpload() {
+
+async function onScEditPhotosUpload() {
   const files = Array.from(document.getElementById('sc-edit-photos-file').files);
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => { scNewPhotos.push(e.target.result); renderScPhotosPreviewEdit(); };
-    reader.readAsDataURL(file);
-  });
   document.getElementById('sc-edit-photos-file').value = '';
+  if (!files.length) return;
+
+  const s = getGhSettings();
+  if (s.user && s.repo && s.token) {
+    toast(`📤 사진 0 / ${files.length} 업로드 중...`);
+    try {
+      const urls = await uploadMultipleToGitHub(files, 'scene', (cur, total) => {
+        toast(`📤 사진 ${cur} / ${total} 업로드 중...`);
+      });
+      scNewPhotos.push(...urls);
+      renderScPhotosPreviewEdit();
+      toast(`✅ 사진 ${files.length}장 업로드 완료!`);
+    } catch(e) {
+      toast('❌ 업로드 실패: ' + e.message);
+    }
+  } else {
+    let loaded = 0;
+    files.forEach(file => {
+      const fr = new FileReader();
+      fr.onload = e => {
+        scNewPhotos.push(e.target.result);
+        loaded++;
+        if (loaded === files.length) renderScPhotosPreviewEdit();
+      };
+      fr.readAsDataURL(file);
+    });
+  }
 }
 function renderScPhotosPreviewEdit() {
   const el = document.getElementById('scPhotosPreviewEdit');
@@ -1908,16 +2068,33 @@ function onLogoImgUpload() {
   const file = document.getElementById('logo-img-file').files[0];
   if (file) _applyLogo(file);
 }
-function _applyLogo(file) {
+async function _applyLogo(file) {
+  // 로컬 미리보기 즉시
   const reader = new FileReader();
   reader.onload = e => {
-    const b64 = e.target.result;
-    data.nav.logo = b64; save(); markDirty('nav');
     const prev = document.getElementById('logoImgPreview');
-    if (prev) prev.innerHTML = `<img src="${b64}" style="max-width:100%;max-height:100%;object-fit:contain;display:block">`;
-    toast('✅ 로고 이미지가 적용됐어요!');
+    if (prev) prev.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:100%;object-fit:contain;display:block">`;
   };
   reader.readAsDataURL(file);
+
+  const s = getGhSettings();
+  if (s.user && s.repo && s.token) {
+    toast('📤 로고 업로드 중...');
+    try {
+      data.nav.logo = await uploadImgToGitHub(file, 'logo');
+      save(); markDirty('nav');
+      toast('✅ 로고 업로드 완료!');
+    } catch(e) {
+      toast('❌ 실패: ' + e.message);
+      const fr = new FileReader();
+      fr.onload = ev => { data.nav.logo = ev.target.result; save(); markDirty('nav'); };
+      fr.readAsDataURL(file);
+    }
+  } else {
+    const fr = new FileReader();
+    fr.onload = e => { data.nav.logo = e.target.result; save(); markDirty('nav'); toast('✅ 로고 이미지가 적용됐어요!'); };
+    fr.readAsDataURL(file);
+  }
 }
 function clearLogoImg() {
   data.nav.logo = null; save(); markDirty('nav');
