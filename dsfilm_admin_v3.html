@@ -203,8 +203,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <div class="mi" id="mi-sections" onclick="switchPanel('sections',this)"><span>🗂️</span> 포트폴리오 섹션<span class="mi-dot"></span></div>
     <div class="mi" id="mi-services" onclick="switchPanel('services',this)"><span>📋</span> 서비스 관리<span class="mi-dot"></span></div>
     <div class="mi" id="mi-process" onclick="switchPanel('process',this)"><span>🔄</span> 진행 과정<span class="mi-dot"></span></div>
-    <div class="ms">텍스트</div>
-    <div class="mi" id="mi-nav" onclick="switchPanel('nav',this)"><span>🧭</span> 메뉴명<span class="mi-dot"></span></div>
+    <div class="ms">메인 페이지</div>
+    <div class="mi" id="mi-nav" onclick="switchPanel('nav',this)"><span>🧭</span> 상단바<span class="mi-dot"></span></div>
     <div class="mi" id="mi-hero" onclick="switchPanel('hero',this)"><span>🏠</span> 메인 문구<span class="mi-dot"></span></div>
     <div class="mi" id="mi-about" onclick="switchPanel('about',this)"><span>👤</span> 소개<span class="mi-dot"></span></div>
     <div class="mi" id="mi-contact" onclick="switchPanel('contact',this)"><span>📞</span> 연락처<span class="mi-dot"></span></div>
@@ -348,18 +348,55 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
       <button class="btn b-or" onclick="addProcess()" style="margin-top:.5rem">+ 단계 추가</button>
     </div>
 
-    <!-- 메뉴명 -->
+    <!-- 상단바 -->
     <div class="panel" id="panel-nav">
       <div class="panel-hdr">
-        <div class="panel-title">🧭 메뉴명 수정</div>
+        <div class="panel-title">🧭 상단바 수정</div>
         <button class="btn-apply" onclick="applyPanel('nav')">적용</button>
       </div>
+
+      <!-- 로고 이미지 -->
       <div class="card">
+        <div class="card-title">로고 이미지</div>
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+          <div id="logoImgPreview" class="thumb-drop-zone"
+            style="width:140px;height:52px;background:var(--navy);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:700;color:#f4a96e;border:2px dashed transparent;cursor:pointer;flex-shrink:0"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="onLogoImgDrop(event)"
+            onclick="document.getElementById('logo-img-file').click()"
+            title="클릭하거나 이미지 드래그">덕선<span style="color:#fff">필름</span></div>
+          <input type="file" id="logo-img-file" accept="image/*" style="display:none" onchange="onLogoImgUpload()">
+          <div style="display:flex;flex-direction:column;gap:.4rem">
+            <button class="btn b-gy b-sm" onclick="document.getElementById('logo-img-file').click()">📁 로고 이미지 선택</button>
+            <button class="btn b-rd b-sm" onclick="clearLogoImg()">✕ 제거 (텍스트로 표시)</button>
+            <div class="fh">없으면 텍스트 '덕선필름'이 표시됩니다<br>추천 사이즈: 가로 200px 이하, PNG 투명 배경</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 기본 메뉴 1~4 -->
+      <div class="card">
+        <div class="card-title">기본 메뉴 (섹션 스크롤 이동)</div>
         <div class="fr">
           <div class="fg"><label class="fl">메뉴 1</label><input class="fi" id="nav-m1" oninput="markDirty('nav')"></div>
           <div class="fg"><label class="fl">메뉴 2</label><input class="fi" id="nav-m2" oninput="markDirty('nav')"></div>
           <div class="fg"><label class="fl">메뉴 3</label><input class="fi" id="nav-m3" oninput="markDirty('nav')"></div>
           <div class="fg"><label class="fl">메뉴 4 (버튼)</label><input class="fi" id="nav-m4" oninput="markDirty('nav')"></div>
+        </div>
+      </div>
+
+      <!-- 추가 메뉴 (링크 연결) -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
+          <div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.06em">추가 메뉴 (링크 연결)</div>
+            <div class="fh" style="margin-top:.2rem">메뉴 이름과 연결할 URL을 입력하세요</div>
+          </div>
+          <button class="btn b-or b-sm" onclick="addNavExtra()">+ 메뉴 추가</button>
+        </div>
+        <div id="navExtraList">
+          <div style="font-size:.78rem;color:var(--light);text-align:center;padding:.8rem 0" id="navExtraEmpty">아직 추가된 메뉴가 없어요</div>
         </div>
       </div>
     </div>
@@ -585,7 +622,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
 const KEY = 'dsfilm_data';
 const ADMIN_PW = '1111';
 const DEFAULT = {
-  nav:{menu1:'서비스',menu2:'작업물',menu3:'소개',menu4:'문의하기'},
+  nav:{menu1:'서비스',menu2:'작업물',menu3:'소개',menu4:'문의하기',logo:null,extraMenus:[]},
   hero:{badge:'전북 기반 영상 제작',title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다',desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.',stat:'150건 이상'},
   trust:['전북 전주 기반','전국 출장 가능','빠른 납품','AI 활용 제작','카카오톡 상담'],
   services:[
@@ -629,7 +666,7 @@ function clearDirty(panel) {
 // ===== PANEL SWITCHING =====
 function switchPanel(id, el) {
   if (currentPanel !== id && dirtyPanels.has(currentPanel)) {
-    const panelNames = {nav:'메뉴명',hero:'메인 문구',about:'소개',contact:'연락처',services:'서비스 관리',process:'진행 과정',sections:'포트폴리오 섹션'};
+    const panelNames = {nav:'상단바',hero:'메인 문구',about:'소개',contact:'연락처',services:'서비스 관리',process:'진행 과정',sections:'포트폴리오 섹션'};
     if (confirm(`"${panelNames[currentPanel]||currentPanel}" 변경사항을 적용하지 않았어요.\n지금 적용할까요?`)) {
       applyPanel(currentPanel);
     } else {
@@ -650,10 +687,18 @@ function loadPanel(id) {
   if (id === 'services') renderServices();
   if (id === 'process') renderProcess();
   if (id === 'nav') {
+    if (!data.nav.extraMenus) data.nav.extraMenus = [];
     document.getElementById('nav-m1').value = data.nav.menu1;
     document.getElementById('nav-m2').value = data.nav.menu2;
     document.getElementById('nav-m3').value = data.nav.menu3;
     document.getElementById('nav-m4').value = data.nav.menu4;
+    // 로고 미리보기
+    const logoPrev = document.getElementById('logoImgPreview');
+    if (logoPrev) {
+      if (data.nav.logo) logoPrev.innerHTML = `<img src="${data.nav.logo}" style="max-width:100%;max-height:100%;object-fit:contain">`;
+      else logoPrev.innerHTML = '덕선<span style="color:#fff">필름</span>';
+    }
+    renderNavExtras();
   }
   if (id === 'hero') {
     document.getElementById('hero-badge').value = data.hero.badge;
@@ -699,6 +744,8 @@ function applyPanel(id) {
     data.nav.menu2 = document.getElementById('nav-m2').value;
     data.nav.menu3 = document.getElementById('nav-m3').value;
     data.nav.menu4 = document.getElementById('nav-m4').value;
+    // logo는 onLogoImgUpload/clearLogoImg에서 직접 저장됨
+    // extraMenus도 addNavExtra/removeNavExtra에서 직접 저장됨
   }
   if (id === 'hero') {
     data.hero.badge = document.getElementById('hero-badge').value;
@@ -1441,6 +1488,51 @@ function clearAboutImg() {
   data.about.img = null; markDirty('about');
   const prev = document.getElementById('aboutImgPreview');
   if (prev) prev.innerHTML = '🎥';
+}
+
+// 로고 이미지
+function onLogoImgDrop(e) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) applyImgToPreview(file, 'logoImgPreview', v => { data.nav.logo = v; save(); markDirty('nav'); });
+}
+function onLogoImgUpload() {
+  const file = document.getElementById('logo-img-file').files[0];
+  if (file) applyImgToPreview(file, 'logoImgPreview', v => { data.nav.logo = v; save(); markDirty('nav'); toast('✅ 로고 이미지 적용됐어요!'); });
+}
+function clearLogoImg() {
+  data.nav.logo = null; save(); markDirty('nav');
+  const prev = document.getElementById('logoImgPreview');
+  if (prev) prev.innerHTML = '덕선<span style="color:#fff">필름</span>';
+  toast('로고가 텍스트로 변경됐어요');
+}
+
+// 추가 메뉴 (링크 연결)
+function renderNavExtras() {
+  if (!data.nav.extraMenus) data.nav.extraMenus = [];
+  const list = document.getElementById('navExtraList');
+  const empty = document.getElementById('navExtraEmpty');
+  if (!list) return;
+  if (data.nav.extraMenus.length === 0) {
+    list.innerHTML = '<div style="font-size:.78rem;color:var(--light);text-align:center;padding:.8rem 0" id="navExtraEmpty">아직 추가된 메뉴가 없어요</div>';
+    return;
+  }
+  list.innerHTML = data.nav.extraMenus.map((m, i) => `
+    <div style="display:grid;grid-template-columns:auto 1fr 1fr auto;gap:.5rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:.78rem;font-weight:700;color:var(--light);min-width:46px">메뉴${5+i}</span>
+      <input class="fi" placeholder="메뉴 이름" value="${m.name||''}" oninput="data.nav.extraMenus[${i}].name=this.value;save();markDirty('nav')">
+      <input class="fi" placeholder="연결 URL (예: https://...)" value="${m.url||''}" oninput="data.nav.extraMenus[${i}].url=this.value;save();markDirty('nav')">
+      <button class="btn b-rd b-sm" onclick="removeNavExtra(${i})">×</button>
+    </div>`).join('');
+}
+function addNavExtra() {
+  if (!data.nav.extraMenus) data.nav.extraMenus = [];
+  data.nav.extraMenus.push({name:'', url:''});
+  save(); markDirty('nav'); renderNavExtras();
+}
+function removeNavExtra(i) {
+  data.nav.extraMenus.splice(i, 1);
+  save(); markDirty('nav'); renderNavExtras();
 }
 
 function openSite() { save(); window.open('index.html', '_blank'); }

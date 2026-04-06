@@ -29,8 +29,9 @@ nav {
   padding: 0 5%; height: 62px;
   display: flex; align-items: center; justify-content: space-between;
 }
-.nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--text); text-decoration: none; }
+.nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--text); text-decoration: none; display: flex; align-items: center; }
 .nav-logo span { color: var(--point); }
+.nav-logo img { height: 32px; max-width: 160px; object-fit: contain; }
 .nav-links { display: flex; gap: 2rem; list-style: none; }
 .nav-links a { font-size: 0.85rem; color: var(--mid); text-decoration: none; transition: color 0.2s; }
 .nav-links a:hover { color: var(--point); }
@@ -327,7 +328,7 @@ footer { background: #141e30; padding: 1.5rem 5%; display: flex; align-items: ce
 const STORAGE_KEY = 'dsfilm_data';
 
 const DEFAULT = {
-  nav: { menu1:'서비스', menu2:'작업물', menu3:'소개', menu4:'문의하기' },
+  nav: { menu1:'서비스', menu2:'작업물', menu3:'소개', menu4:'문의하기', logo:null, extraMenus:[] },
   hero: { badge:'전북 기반 영상 제작', title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다', desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.', stat:'150건 이상' },
   trust: ['전북 전주 기반','전국 출장 가능','빠른 납품','AI 활용 제작','카카오톡 상담'],
   services: [
@@ -381,6 +382,36 @@ function render() {
   document.getElementById('navMenu2').textContent = d.nav.menu2;
   document.getElementById('navMenu3').textContent = d.nav.menu3;
   document.getElementById('navMenu4').textContent = d.nav.menu4;
+
+  // 로고 이미지
+  const navLogo = document.getElementById('navLogo');
+  if (navLogo) {
+    if (d.nav.logo) {
+      navLogo.innerHTML = `<img src="${d.nav.logo}" alt="덕선필름 로고">`;
+    } else {
+      navLogo.innerHTML = '덕선<span>필름</span>';
+    }
+  }
+
+  // 추가 메뉴 (링크 연결)
+  const navLinks = document.getElementById('navLinks');
+  if (navLinks && d.nav.extraMenus && d.nav.extraMenus.length > 0) {
+    // 기존 추가 메뉴 li 제거 후 재렌더
+    navLinks.querySelectorAll('.nav-extra').forEach(el => el.remove());
+    // nav-cta(메뉴4)는 항상 맨 끝에 유지
+    const ctaLi = navLinks.querySelector('li:last-child');
+    d.nav.extraMenus.forEach(m => {
+      if (!m.name) return;
+      const li = document.createElement('li');
+      li.className = 'nav-extra';
+      const a = document.createElement('a');
+      a.href = m.url || '#';
+      a.textContent = m.name;
+      if (m.url && !m.url.startsWith('#')) { a.target = '_blank'; a.rel = 'noopener'; }
+      li.appendChild(a);
+      navLinks.insertBefore(li, ctaLi);
+    });
+  }
 
   // hero
   document.getElementById('heroBadge').textContent = d.hero.badge;
