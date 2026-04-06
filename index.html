@@ -162,6 +162,26 @@ section { padding: 5rem 5%; }
 .yt-player-close { position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; transition: background .2s; }
 .yt-player-close:hover { background: var(--point); }
 
+@keyframes ytSlideIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes ytSlideOut { to { opacity:0; transform:translateY(-6px); } }
+
+/* 슬라이더 뷰 (기존 방식) */
+.work-section { margin-bottom: 4rem; max-width: 1000px; margin-left: auto; margin-right: auto; }
+.work-section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1.5px solid var(--border); }
+.work-section-cat { font-size: 1.15rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.work-section-desc { font-size: 0.82rem; color: var(--mid); margin-top: 0.3rem; }
+.work-section-count { font-size: 0.75rem; color: var(--light); }
+.work-view-all { font-size: 0.78rem; color: var(--point); font-weight: 600; background: none; border: none; border-bottom: 1px solid var(--point-light); padding-bottom: 1px; cursor: pointer; font-family: 'Pretendard', sans-serif; }
+.work-slider-wrap { position: relative; }
+.work-slider { display: flex; gap: 0.8rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 4px; scroll-behavior: smooth; }
+.work-slider::-webkit-scrollbar { display: none; }
+.work-slider .work-card { flex: 0 0 calc(25% - 0.6rem); min-width: 180px; scroll-snap-align: start; border-radius: 0; border: 1px solid var(--border); background: var(--white); overflow: hidden; }
+.slider-btn { position: absolute; top: 40%; transform: translateY(-50%); width: 36px; height: 36px; background: white; border: 1.5px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; color: var(--text); transition: all 0.2s; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.slider-btn:hover { background: var(--point); color: white; border-color: var(--point); }
+.slider-btn.prev { left: -18px; }
+.slider-btn.next { right: -18px; }
+.slider-btn.hide { display: none; }
+
 /* PROCESS */
 #process { background: var(--white); }
 .process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; max-width: 960px; margin: 0 auto; position: relative; }
@@ -297,12 +317,6 @@ footer { background: #141e30; padding: 1.5rem 5%; display: flex; align-items: ce
   </div>
   <div class="work-tabs" id="workTabs"></div>
   <div id="workSections"></div>
-  <div class="yt-player-wrap" id="ytplayer-global">
-    <div class="yt-player-inner">
-      <button class="yt-player-close" onclick="closeYtPlayer()">✕</button>
-      <div id="ytplayer-frame-global"></div>
-    </div>
-  </div>
 </section>
 
 <section id="process">
@@ -369,6 +383,7 @@ const STORAGE_KEY = 'dsfilm_data';
 const DEFAULT = {
   nav: { menu1:'서비스', menu2:'작업물', menu3:'소개', menu4:'문의하기', logo:null, extraMenus:[] },
   sectionVisibility: { services:true, work:true, process:true, about:true, contact:true },
+  workViewMode: 'tabs',
   hero: { badge:'전북 기반 영상 제작', title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다', desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.', stat:'150건 이상' },
   trust: ['전북 전주 기반','전국 출장 가능','빠른 납품','AI 활용 제작','카카오톡 상담'],
   services: [
@@ -539,6 +554,76 @@ function render() {
   }, 100);
 }
 
+function renderSliderView(d, sections) {
+  const container = document.getElementById('workSections');
+  container.innerHTML = sections.map((sec, si) => {
+    const catWorks = d.works.filter(w => w.cat === sec.cat);
+    let ordered;
+    if (sec.workIds && sec.workIds.length) {
+      ordered = sec.workIds.map(id => catWorks.find(w => w.id === id)).filter(Boolean);
+      ordered = [...ordered, ...catWorks.filter(w => !sec.workIds.includes(w.id))];
+    } else { ordered = catWorks; }
+    if (!ordered.length) return '';
+    const catDesc = (d.catMeta && d.catMeta[sec.cat] && d.catMeta[sec.cat].desc) ? d.catMeta[sec.cat].desc : '';
+    const cards = ordered.map((w, wi) => {
+      const ytId = getYtId(w.url);
+      const thumb = w.customThumb
+        ? `<img class="work-thumb" src="${w.customThumb}" alt="${w.name}">`
+        : ytId ? `<img class="work-thumb" src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" alt="${w.name}">` : `<div class="work-thumb-placeholder">🎬</div>`;
+      return `<div class="work-card on" id="swcard-${si}-${wi}" data-ytid="${ytId||''}" onclick="openSliderYt('${ytId||''}','swcard-${si}-${wi}',${si})">
+        <div class="work-card-thumb">${thumb}<div class="work-overlay"><div class="work-play-icon">▶</div></div></div>
+        <div class="work-info"><div class="work-name">${w.name}</div></div>
+      </div>`;
+    }).join('');
+    const hasMore = ordered.length > 4;
+    return `<div class="work-section" id="wsec-${si}">
+      <div class="work-section-header">
+        <div><div class="work-section-cat">${sec.cat}</div>${catDesc?`<div class="work-section-desc">${catDesc}</div>`:''}</div>
+        <div style="display:flex;align-items:center;gap:.8rem">
+          <span class="work-section-count">${ordered.length}개</span>
+          ${hasMore?`<button class="work-view-all" onclick="toggleViewAll(this,'sslider-${si}')">전체보기 →</button>`:''}
+        </div>
+      </div>
+      <div class="work-slider-wrap">
+        ${hasMore?`<button class="slider-btn prev" onclick="slideWork('sslider-${si}',-1)">‹</button>`:''}
+        <div class="work-slider" id="sslider-${si}">${cards}</div>
+        ${hasMore?`<button class="slider-btn next" onclick="slideWork('sslider-${si}',1)">›</button>`:''}
+      </div>
+      <div class="yt-player-wrap" id="ytplayer-s-${si}">
+        <div class="yt-player-inner">
+          <button class="yt-player-close" onclick="closeSliderYt(${si})">✕</button>
+          <div id="ytplayer-sf-${si}"></div>
+        </div>
+      </div>
+    </div>`;
+  }).filter(Boolean).join('');
+  setTimeout(() => { document.querySelectorAll('.work-slider').forEach(s => updateSliderBtns(s.id)); }, 100);
+}
+
+let sliderYtSi = null, sliderYtCardId = null;
+function openSliderYt(ytId, cardId, si) {
+  if (!ytId) return;
+  const wrap = document.getElementById('ytplayer-s-' + si);
+  const frame = document.getElementById('ytplayer-sf-' + si);
+  if (!wrap || !frame) return;
+  if (sliderYtSi === si && sliderYtCardId === cardId && wrap.classList.contains('open')) { closeSliderYt(si); return; }
+  if (sliderYtSi !== null && sliderYtSi !== si) closeSliderYt(sliderYtSi);
+  if (sliderYtCardId) { const p = document.getElementById(sliderYtCardId); if(p) p.classList.remove('playing'); }
+  sliderYtSi = si; sliderYtCardId = cardId;
+  const card = document.getElementById(cardId); if(card) card.classList.add('playing');
+  frame.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&vq=hd1080" style="width:100%;aspect-ratio:16/9;display:block;border:none" allow="autoplay;encrypted-media" allowfullscreen></iframe>`;
+  wrap.classList.add('open');
+  setTimeout(() => wrap.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+}
+function closeSliderYt(si) {
+  const wrap = document.getElementById('ytplayer-s-' + si);
+  const frame = document.getElementById('ytplayer-sf-' + si);
+  if (wrap) wrap.classList.remove('open');
+  if (frame) setTimeout(() => frame.innerHTML = '', 400);
+  if (sliderYtCardId) { const c = document.getElementById(sliderYtCardId); if(c) c.classList.remove('playing'); }
+  sliderYtSi = null; sliderYtCardId = null;
+}
+
 function renderWorks(works) { /* 탭 방식으로 교체됨 */ }
 
 let activeWorkTab = null;
@@ -547,12 +632,23 @@ function renderWorkTabs(d) {
   d = d || getData();
   const sections = d.workSections || [];
   const tabsEl = document.getElementById('workTabs');
+  const viewMode = d.workViewMode || 'tabs';
+
   if (!tabsEl) return;
   if (!sections.length) {
     tabsEl.innerHTML = '';
     document.getElementById('workSections').innerHTML = '<p style="text-align:center;color:var(--light);padding:3rem;">제작영상을 준비 중입니다</p>';
     return;
   }
+
+  if (viewMode === 'slider') {
+    // 슬라이더 뷰: 탭 없이 카테고리별 섹션+슬라이더
+    tabsEl.innerHTML = '';
+    renderSliderView(d, sections);
+    return;
+  }
+
+  // 탭+그리드 뷰 (기본)
   if (!activeWorkTab || !sections.find(s => s.cat === activeWorkTab)) activeWorkTab = sections[0].cat;
   tabsEl.innerHTML = sections.map(s =>
     `<button class="tab-btn${s.cat === activeWorkTab ? ' active' : ''}" onclick="selectWorkTab('${s.cat}')">${s.cat}</button>`
@@ -590,7 +686,8 @@ function renderWorkGrid(d) {
       : ytId
         ? `<img class="work-thumb" src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" alt="${w.name}">`
         : `<div class="work-thumb-placeholder">🎬</div>`;
-    return `<div class="work-card fade" id="wcard-${i}" onclick="openYtPlayer('${ytId||''}','wcard-${i}')">
+    // fade on 즉시 적용 (탭 전환 시 안 보이는 버그 방지)
+    return `<div class="work-card on" id="wcard-${i}" data-ytid="${ytId||''}" data-idx="${i}" onclick="openYtPlayer('${ytId||''}',${i})">
       <div class="work-card-thumb">
         ${thumb}
         <div class="work-overlay"><div class="work-play-icon">▶</div></div>
@@ -598,36 +695,70 @@ function renderWorkGrid(d) {
       <div class="work-info"><div class="work-name">${w.name}</div></div>
     </div>`;
   }).join('');
-  container.innerHTML = `<div class="work-grid">${cards}</div>`;
+  container.innerHTML = `<div class="work-grid" id="work-grid-main">${cards}</div>`;
 }
 
 let currentYtCardId = null;
 
-function openYtPlayer(ytId, cardId) {
+function openYtPlayer(ytId, idx) {
   if (!ytId) return;
-  const wrap = document.getElementById('ytplayer-global');
-  const frame = document.getElementById('ytplayer-frame-global');
-  if (!wrap || !frame) return;
-  // 같은 영상 다시 클릭하면 닫기
-  if (currentYtCardId === cardId && wrap.classList.contains('open')) {
+  const grid = document.getElementById('work-grid-main');
+  if (!grid) return;
+
+  const cardId = 'wcard-' + idx;
+
+  // 같은 카드 재클릭 → 닫기
+  if (currentYtCardId === cardId) {
     closeYtPlayer(); return;
   }
-  if (currentYtCardId) { const prev = document.getElementById(currentYtCardId); if (prev) prev.classList.remove('playing'); }
+
+  // 이전 playing 카드 초기화
+  if (currentYtCardId) {
+    const prev = document.getElementById(currentYtCardId);
+    if (prev) prev.classList.remove('playing');
+  }
+
+  // 기존 인라인 플레이어 제거
+  const existing = document.getElementById('yt-inline-player');
+  if (existing) existing.remove();
+
   currentYtCardId = cardId;
   const card = document.getElementById(cardId);
   if (card) card.classList.add('playing');
-  // vq=hd1080으로 기본 화질 1080 설정
-  frame.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&vq=hd1080" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-  wrap.classList.add('open');
-  setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+
+  // 클릭 카드가 몇 번째 행인지 계산 (3열 기준)
+  const rowIdx = Math.floor(idx / 3);
+  const cards = grid.querySelectorAll('.work-card');
+  // 해당 행의 마지막 카드 (행 끝 인덱스 or 마지막 카드)
+  const lastInRow = Math.min((rowIdx + 1) * 3 - 1, cards.length - 1);
+  const afterCard = cards[lastInRow];
+
+  // 인라인 플레이어 생성 (grid-column: 1/-1 로 전체 폭)
+  const player = document.createElement('div');
+  player.id = 'yt-inline-player';
+  player.style.cssText = 'grid-column:1/-1;position:relative;background:#000;border-radius:4px;overflow:hidden;animation:ytSlideIn .35s ease';
+  player.innerHTML = `
+    <button onclick="closeYtPlayer()" style="position:absolute;top:10px;right:12px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center">✕</button>
+    <iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&vq=hd1080" style="width:100%;aspect-ratio:16/9;display:block;border:none" allow="autoplay;encrypted-media" allowfullscreen></iframe>
+  `;
+
+  // 행 마지막 카드 뒤에 삽입
+  afterCard.insertAdjacentElement('afterend', player);
+
+  // 플레이어로 스크롤
+  setTimeout(() => player.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
 }
 
 function closeYtPlayer() {
-  const wrap = document.getElementById('ytplayer-global');
-  const frame = document.getElementById('ytplayer-frame-global');
-  if (wrap) wrap.classList.remove('open');
-  if (frame) setTimeout(() => frame.innerHTML = '', 400);
-  if (currentYtCardId) { const c = document.getElementById(currentYtCardId); if (c) c.classList.remove('playing'); }
+  const player = document.getElementById('yt-inline-player');
+  if (player) {
+    player.style.animation = 'ytSlideOut .25s ease forwards';
+    setTimeout(() => player.remove(), 250);
+  }
+  if (currentYtCardId) {
+    const c = document.getElementById(currentYtCardId);
+    if (c) c.classList.remove('playing');
+  }
   currentYtCardId = null;
 }
 

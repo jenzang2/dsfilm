@@ -200,11 +200,11 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
   <div class="sidebar">
     <div class="ms">포트폴리오</div>
     <div class="mi active" id="mi-works" onclick="switchPanel('works',this)"><span>🎬</span> 포트폴리오 관리<span class="mi-dot"></span></div>
-    <div class="mi" id="mi-sections" onclick="switchPanel('sections',this)"><span>🗂️</span> 포트폴리오 섹션<span class="mi-dot"></span></div>
     <div class="ms">메인 관리</div>
     <div class="mi" id="mi-nav" onclick="switchPanel('nav',this)"><span>🧭</span> 상단바<span class="mi-dot"></span></div>
     <div class="mi" id="mi-hero" onclick="switchPanel('hero',this)"><span>🏠</span> TITLE<span class="mi-dot"></span></div>
     <div class="mi" id="mi-services" onclick="switchPanel('services',this)"><span>📋</span> SERVICE<span class="mi-dot"></span></div>
+    <div class="mi" id="mi-sections" onclick="switchPanel('sections',this)"><span>🎞️</span> WORK(제작영상)<span class="mi-dot"></span></div>
     <div class="mi" id="mi-process" onclick="switchPanel('process',this)"><span>🔄</span> PROCESS<span class="mi-dot"></span></div>
     <div class="mi" id="mi-about" onclick="switchPanel('about',this)"><span>👤</span> ABOUT<span class="mi-dot"></span></div>
     <div class="mi" id="mi-contact" onclick="switchPanel('contact',this)"><span>📞</span> CONTACT<span class="mi-dot"></span></div>
@@ -299,22 +299,51 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
         <button class="btn b-or" style="margin-top:.8rem" onclick="addWork()">+ 작업물 추가</button>
       </div>
 
-      <!-- 카테고리별 작업물 목록 (새 작업물 추가 아래) -->
+      <!-- 카테고리별 작업물 목록 -->
       <div class="card" id="catWorksCard" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
           <div style="font-size:.82rem;font-weight:700;color:var(--mid)"><span id="catWorkLabel" style="color:var(--text)"></span> 영상 <span id="catWorkCount" style="color:var(--point)"></span></div>
-          <div style="font-size:.72rem;color:var(--light)">클릭하여 수정 · 순서 변경은 <b style="color:var(--point)">포트폴리오 섹션</b>에서</div>
+          <div style="font-size:.72rem;color:var(--light)">클릭하여 수정 · <b style="color:var(--point)">⠿ 드래그로 순서 변경</b></div>
         </div>
         <div class="cat-grid" id="catWorkGrid"></div>
       </div>
     </div>
 
-    <!-- 포트폴리오 섹션 -->
+    <!-- WORK(제작영상) -->
     <div class="panel" id="panel-sections">
       <div class="panel-hdr">
-        <div class="panel-title">🗂️ 포트폴리오 섹션</div>
-        <button class="btn-apply" onclick="applyPanel('sections')">적용</button>
+        <div class="panel-title">🎞️ WORK (제작영상)</div>
+        <div style="display:flex;gap:.6rem;align-items:center">
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--mid);cursor:pointer">
+            <input type="checkbox" id="vis-work" onchange="toggleSectionVis('work',this.checked)" style="width:16px;height:16px;accent-color:var(--point)">
+            메인에 표시
+          </label>
+          <button class="btn-apply" onclick="applyPanel('sections')">적용</button>
+        </div>
       </div>
+
+      <!-- 뷰 모드 선택 -->
+      <div class="card">
+        <div class="card-title">메인 페이지 표시 방식</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;flex:1;min-width:160px" id="vm-label-tabs">
+            <input type="radio" name="workViewMode" value="tabs" onchange="setWorkViewMode('tabs')" style="accent-color:var(--point)">
+            <div>
+              <div style="font-size:.85rem;font-weight:600">탭 + 그리드 방식</div>
+              <div style="font-size:.72rem;color:var(--light);margin-top:.2rem">카테고리 탭 클릭 → 3열 그리드</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;flex:1;min-width:160px" id="vm-label-slider">
+            <input type="radio" name="workViewMode" value="slider" onchange="setWorkViewMode('slider')" style="accent-color:var(--point)">
+            <div>
+              <div style="font-size:.85rem;font-weight:600">섹션 슬라이더 방식</div>
+              <div style="font-size:.72rem;color:var(--light);margin-top:.2rem">카테고리별 가로 슬라이드</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- 섹션 추가 -->
       <div class="card">
         <div class="card-title">섹션 추가</div>
         <div class="fr full">
@@ -323,7 +352,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
         <button class="btn b-or" onclick="addSection()">+ 섹션 추가</button>
       </div>
       <div class="card">
-        <div style="font-size:.82rem;font-weight:700;color:var(--mid);margin-bottom:.8rem">섹션 목록 <span style="font-weight:400;color:var(--light)">— ⠿ 드래그로 섹션 순서 변경</span></div>
+        <div style="font-size:.82rem;font-weight:700;color:var(--mid);margin-bottom:.8rem">섹션 목록 <span style="font-weight:400;color:var(--light)">— ⠿ 드래그로 섹션 순서 변경 (영상 순서 변경은 포트폴리오 관리에서)</span></div>
         <div id="sectionsList"></div>
       </div>
     </div>
@@ -638,6 +667,7 @@ const ADMIN_PW = '1111';
 const DEFAULT = {
   nav:{menu1:'서비스',menu2:'작업물',menu3:'소개',menu4:'문의하기',logo:null,extraMenus:[]},
   sectionVisibility:{services:true,work:true,process:true,about:true,contact:true},
+  workViewMode:'tabs',
   hero:{badge:'전북 기반 영상 제작',title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다',desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.',stat:'150건 이상'},
   trust:['전북 전주 기반','전국 출장 가능','빠른 납품','AI 활용 제작','카카오톡 상담'],
   services:[
@@ -681,7 +711,7 @@ function clearDirty(panel) {
 // ===== PANEL SWITCHING =====
 function switchPanel(id, el) {
   if (currentPanel !== id && dirtyPanels.has(currentPanel)) {
-    const panelNames = {nav:'상단바',hero:'TITLE',about:'ABOUT',contact:'CONTACT',services:'SERVICE',process:'PROCESS',sections:'포트폴리오 섹션'};
+    const panelNames = {nav:'상단바',hero:'TITLE',about:'ABOUT',contact:'CONTACT',services:'SERVICE',process:'PROCESS',sections:'WORK(제작영상)'};
     if (confirm(`"${panelNames[currentPanel]||currentPanel}" 변경사항을 적용하지 않았어요.\n지금 적용할까요?`)) {
       applyPanel(currentPanel);
     } else {
@@ -698,7 +728,13 @@ function switchPanel(id, el) {
 
 function loadPanel(id) {
   if (id === 'works') { renderCats(); renderWorks(); }
-  if (id === 'sections') { renderSecCats(); renderSections(); }
+  if (id === 'sections') {
+    renderSecCats(); renderSections();
+    loadVisCheckbox('work');
+    const vm = data.workViewMode || 'tabs';
+    const r = document.querySelector(`input[name="workViewMode"][value="${vm}"]`);
+    if (r) r.checked = true;
+  }
   if (id === 'services') { renderServices(); loadVisCheckbox('services'); }
   if (id === 'process') { renderProcess(); loadVisCheckbox('process'); }
   if (id === 'nav') {
@@ -854,7 +890,9 @@ function renderCatDetail(cat) {
   renderCatWorkGrid(cat);
 }
 
-// 포트폴리오 관리는 순서변경 없이 수정만 — 순서 변경은 포트폴리오 섹션에서
+// 포트폴리오 관리 - 클릭 수정 + 드래그 순서변경
+
+let cwDragIdx = null;
 
 function renderCatWorkGrid(cat) {
   const card = document.getElementById('catWorksCard');
@@ -864,7 +902,6 @@ function renderCatWorkGrid(cat) {
   card.style.display = 'block';
   if (labelEl) labelEl.textContent = cat === '__ALL__' ? '전체' : cat;
 
-  // 포트폴리오 섹션의 workIds 순서를 따름
   let cw;
   if (cat === '__ALL__') {
     cw = data.works;
@@ -885,7 +922,7 @@ function renderCatWorkGrid(cat) {
     grid.innerHTML = '<p style="grid-column:1/-1;font-size:.78rem;color:var(--light);text-align:center;padding:1rem">이 카테고리에 작업물이 없어요</p>';
     return;
   }
-  // 순서변경 없음 — 클릭하면 수정 모달만 열림
+
   grid.innerHTML = cw.map((w, i) => {
     const ytId = getYtId(w.url);
     const th = w.customThumb
@@ -893,12 +930,67 @@ function renderCatWorkGrid(cat) {
       : ytId
         ? `<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;height:100%;object-fit:cover;">`
         : `<div style="width:100%;height:100%;background:#2d3a4a;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🎬</div>`;
-    return `<div class="cat-thumb" onclick="openEditModal(${w.id})">
+    return `<div class="cat-thumb" draggable="true" data-cwi="${i}"
+        ondragstart="cwDragIdx=${i};this.style.opacity='.4'"
+        ondragend="this.style.opacity='1';cwClearLine()"
+        ondragover="event.preventDefault();cwShowLine(event,${i})"
+        ondragleave="cwClearLine()"
+        ondrop="cwDrop(event,${i})"
+        onclick="openEditModal(${w.id})">
       ${th}
       <div class="cat-thumb-label"><div class="cat-thumb-name">${w.name}</div></div>
       <div class="cat-edit-badge">수정</div>
+      <div style="position:absolute;top:3px;left:3px;background:rgba(0,0,0,.5);border-radius:4px;padding:1px 5px;font-size:.55rem;color:rgba(255,255,255,.8)">${i+1}</div>
     </div>`;
   }).join('');
+}
+
+function cwShowLine(e, wi) {
+  e.preventDefault();
+  const grid = document.getElementById('catWorkGrid');
+  if (!grid) return;
+  let line = grid.querySelector('.drag-insert-line');
+  if (!line) { line = document.createElement('div'); line.className = 'drag-insert-line'; grid.appendChild(line); }
+  const cards = Array.from(grid.querySelectorAll('[data-cwi]'));
+  if (!cards[wi]) return;
+  const gr = grid.getBoundingClientRect(), cr = cards[wi].getBoundingClientRect();
+  const before = wi <= (cwDragIdx || 0);
+  line.style.left = (before ? cr.left - gr.left - 3 : cr.right - gr.left + 1) + 'px';
+  line.style.top = (cr.top - gr.top) + 'px';
+  line.style.height = cr.height + 'px';
+}
+
+function cwClearLine() {
+  const grid = document.getElementById('catWorkGrid');
+  if (!grid) return;
+  const line = grid.querySelector('.drag-insert-line');
+  if (line) line.remove();
+}
+
+function cwDrop(e, toWi) {
+  e.stopPropagation(); e.preventDefault();
+  cwClearLine();
+  if (cwDragIdx === null || cwDragIdx === toWi) return;
+  // workSections의 workIds 순서를 변경
+  const cat = currentCat;
+  if (!cat || cat === '__ALL__') return;
+  if (!data.workSections) data.workSections = [];
+  let sec = data.workSections.find(s => s.cat === cat);
+  if (!sec) { sec = { cat, workIds: data.works.filter(w => w.cat === cat).map(w => w.id) }; data.workSections.push(sec); }
+  if (!sec.workIds || sec.workIds.length === 0) sec.workIds = data.works.filter(w => w.cat === cat).map(w => w.id);
+
+  // 현재 표시 순서 기준으로 workIds 재구성
+  const raw = data.works.filter(w => w.cat === cat);
+  let ordered = sec.workIds.map(id => raw.find(w => w.id === id)).filter(Boolean);
+  const unassigned = raw.filter(w => !sec.workIds.includes(w.id));
+  ordered = [...ordered, ...unassigned];
+
+  const [moved] = ordered.splice(cwDragIdx, 1);
+  ordered.splice(toWi, 0, moved);
+  sec.workIds = ordered.map(w => w.id);
+  cwDragIdx = null;
+  save(); renderCatWorkGrid(cat);
+  toast('✅ 순서가 변경됐어요');
 }
 
 
@@ -1186,7 +1278,10 @@ function renderSections() {
   if (!data.workSections) data.workSections = [];
   const list = document.getElementById('sectionsList');
   if (!list) return;
-  if (!data.workSections.length) { list.innerHTML = '<p style="color:var(--light);font-size:.85rem;text-align:center;padding:2rem">위에서 섹션을 추가해보세요</p>'; return; }
+  if (!data.workSections.length) {
+    list.innerHTML = '<p style="color:var(--light);font-size:.85rem;text-align:center;padding:2rem">위에서 섹션을 추가해보세요</p>';
+    return;
+  }
 
   list.innerHTML = data.workSections.map((sec, si) => {
     const catWorks = data.works.filter(w => w.cat === sec.cat);
@@ -1195,7 +1290,7 @@ function renderSections() {
     const ordered = sec.workIds.map(id => catWorks.find(w => w.id === id)).filter(Boolean);
     const unassigned = catWorks.filter(w => !sec.workIds.includes(w.id));
     const all = [...ordered, ...unassigned];
-    // 기본 접힘
+
     if (secCollapsed[si] === undefined) secCollapsed[si] = true;
     const isCollapsed = secCollapsed[si];
 
@@ -1206,13 +1301,7 @@ function renderSections() {
         : ytId
           ? `<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;height:100%;object-fit:cover">`
           : `<div style="width:100%;height:100%;background:#2d3a4a;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🎬</div>`;
-      return `<div draggable="true" data-wsi="${si}" data-wwi="${wi}"
-        ondragstart="wDragSi=${si};wDragWi=${wi};this.style.opacity='.4'"
-        ondragend="this.style.opacity='1';secClearInsertLine(${si})"
-        ondragover="event.preventDefault();secShowInsertLine(event,${si},${wi})"
-        ondragleave="secClearInsertLine(${si})"
-        ondrop="dropWorkInSec(event,${si},${wi})"
-        style="border-radius:8px;overflow:hidden;aspect-ratio:16/10;position:relative;cursor:grab;background:#1e2d4a">
+      return `<div style="border-radius:8px;overflow:hidden;aspect-ratio:16/10;position:relative;background:#1e2d4a">
         ${th}
         <div style="position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,.7));display:flex;flex-direction:column;justify-content:flex-end;padding:.4rem .5rem">
           <div style="font-size:.58rem;color:#fff;font-weight:600;line-height:1.3">${w.name}</div>
@@ -1222,13 +1311,13 @@ function renderSections() {
     }).join('');
 
     return `<div class="sec-item" draggable="true" data-sidx="${si}"
-      ondragstart="if(!event.target.dataset.wsi){secDragIdx=${si};event.currentTarget.style.opacity='.5'}"
+      ondragstart="secDragIdx=${si};event.currentTarget.style.opacity='.5'"
       ondragend="event.currentTarget.style.opacity='1'"
-      ondragover="if(!event.target.dataset.wsi){event.preventDefault();event.currentTarget.classList.add('drag-over')}"
+      ondragover="event.preventDefault();event.currentTarget.classList.add('drag-over')"
       ondragleave="event.currentTarget.classList.remove('drag-over')"
-      ondrop="if(!event.target.dataset.wsi){dropSection(event,${si})}">
+      ondrop="dropSection(event,${si})">
       <div style="display:flex;align-items:center;gap:.6rem">
-        <span style="color:var(--light);font-size:1rem;flex-shrink:0">⠿</span>
+        <span style="color:var(--light);font-size:1rem;flex-shrink:0;cursor:grab">⠿</span>
         <div style="flex:1">
           <div style="font-size:.88rem;font-weight:700">${sec.cat}</div>
           ${meta.desc ? `<div style="font-size:.72rem;color:var(--mid);margin-top:.1rem">${meta.desc}</div>` : ''}
@@ -1239,37 +1328,28 @@ function renderSections() {
       </div>
       <div id="sec-body-${si}" style="margin-top:.8rem;${isCollapsed ? 'display:none' : ''}">
         ${all.length
-          ? `<div style="font-size:.7rem;color:var(--mid);margin-bottom:.5rem">⠿ 영상 드래그해서 순서 변경 — 사이에 주황선이 생기는 위치로 배치됩니다</div>
-             <div id="sec-grid-${si}" style="position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem">${grid}</div>`
+          ? `<div style="font-size:.7rem;color:var(--mid);margin-bottom:.5rem">영상 순서 변경은 <b style="color:var(--point)">포트폴리오 관리</b>에서 해주세요</div>
+             <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem">${grid}</div>`
           : `<p style="font-size:.78rem;color:var(--light);text-align:center;padding:1rem;background:#fff;border-radius:8px">이 카테고리에 작업물이 없어요</p>`}
       </div>
     </div>`;
   }).join('');
 }
 
-function secShowInsertLine(e, si, wi) {
-  e.preventDefault();
-  const grid = document.getElementById('sec-grid-' + si);
-  if (!grid) return;
-  let line = grid.querySelector('.drag-insert-line');
-  if (!line) { line = document.createElement('div'); line.className = 'drag-insert-line'; grid.style.position = 'relative'; grid.appendChild(line); }
-  const cards = Array.from(grid.querySelectorAll('[data-wwi]'));
-  if (!cards[wi]) return;
-  const gridRect = grid.getBoundingClientRect();
-  const cardRect = cards[wi].getBoundingClientRect();
-  const insertBefore = wi <= (wDragWi || 0);
-  const lineX = insertBefore ? cardRect.left - gridRect.left - 3 : cardRect.right - gridRect.left + 1;
-  line.style.left = lineX + 'px';
-  line.style.top = (cardRect.top - gridRect.top) + 'px';
-  line.style.height = cardRect.height + 'px';
+function setWorkViewMode(mode) {
+  data.workViewMode = mode;
+  save();
+  // 선택된 라디오 레이블 하이라이트
+  ['tabs','slider'].forEach(m => {
+    const lbl = document.getElementById('vm-label-' + m);
+    if (lbl) lbl.style.borderColor = m === mode ? 'var(--point)' : 'var(--border)';
+  });
+  toast(mode === 'tabs' ? '✅ 탭+그리드 방식으로 변경됐어요' : '✅ 슬라이더 방식으로 변경됐어요');
 }
 
-function secClearInsertLine(si) {
-  const grid = document.getElementById('sec-grid-' + si);
-  if (!grid) return;
-  const line = grid.querySelector('.drag-insert-line');
-  if (line) line.remove();
-}
+function secShowInsertLine(e, si, wi) { /* 포트폴리오 관리로 이동됨 */ }
+function secClearInsertLine(si) { /* 포트폴리오 관리로 이동됨 */ }
+function dropWorkInSec(event, toSi, toWi) { /* 포트폴리오 관리로 이동됨 */ }
 
 function updateSecDesc(secId, desc) {
   const s = (data.workSections||[]).find(s => s.id === secId);
@@ -1284,29 +1364,6 @@ function dropSection(event, toIdx) {
   data.workSections.splice(toIdx, 0, m);
   secDragIdx = null;
   save(); renderSections(); toast('✅ 섹션 순서 변경됐어요');
-}
-
-function dropWorkInSec(event, toSi, toWi) {
-  event.stopPropagation(); event.preventDefault();
-  secClearInsertLine(toSi);
-  if (wDragSi === null || wDragSi !== toSi || wDragWi === toWi) { wDragSi=null; wDragWi=null; return; }
-  const sec = data.workSections[toSi];
-  const cw = data.works.filter(w => w.cat === sec.cat);
-  if (!sec.workIds || sec.workIds.length === 0) sec.workIds = cw.map(w => w.id);
-  const ord = sec.workIds.map(id => cw.find(w => w.id === id)).filter(Boolean);
-  const una = cw.filter(w => !sec.workIds.includes(w.id));
-  const all = [...ord, ...una];
-  const [m] = all.splice(wDragWi, 1);
-  all.splice(toWi, 0, m);
-  sec.workIds = all.map(w => w.id);
-  wDragSi = null; wDragWi = null;
-  save(); renderSections(); toast('✅ 순서 변경됐어요');
-  // 이동된 카드에 flash 애니메이션
-  setTimeout(() => {
-    const grids = document.querySelectorAll('[data-wsi]');
-    const target = Array.from(grids).find(el => el.dataset.wsi == toSi && el.dataset.wwi == toWi);
-    if (target) { target.classList.add('swap-flash'); target.addEventListener('animationend', () => target.classList.remove('swap-flash'), {once:true}); }
-  }, 30);
 }
 
 // ===== SERVICES =====
