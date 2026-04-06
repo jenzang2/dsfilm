@@ -48,6 +48,48 @@
   ],
   "works": [
     {
+      "id": 1775444990391,
+      "name": "더빛한복 소개 및 촬영 현장",
+      "cat": "기업·홍보",
+      "url": "https://www.youtube.com/watch?v=3Rwd1mkQuLo",
+      "desc": ""
+    },
+    {
+      "id": 1775444977253,
+      "name": "기업 브랜딩 & 채용홍보 영상 | (주)코팅코리아(Upload Ver.)",
+      "cat": "기업·홍보",
+      "url": "https://www.youtube.com/watch?v=qr7Nl9le9MU&t=",
+      "desc": ""
+    },
+    {
+      "id": 1775444957853,
+      "name": "기업 브랜딩 & 채용홍보 영상 | (주)코팅코리아(Full Ver.)",
+      "cat": "기업·홍보",
+      "url": "https://www.youtube.com/watch?v=oZ7-L-2G1ps&t=",
+      "desc": ""
+    },
+    {
+      "id": 1775444687337,
+      "name": "테디베어뮤지엄 군산",
+      "cat": "기업·홍보",
+      "url": "https://youtu.be/z_6pcSQsmHI?si=qKN4utzkdaMHLjZI",
+      "desc": ""
+    },
+    {
+      "id": 1775444146416,
+      "name": "용인을 대표할 새로운 프리미엄 라이프의 시작 | 힐스테이트 용인고진역 D1BL 점등식 드론영상",
+      "cat": "기업·홍보",
+      "url": "https://youtu.be/o4WDE6jl6NI?si=2OxWqbOSGvEdFEGw",
+      "desc": ""
+    },
+    {
+      "id": 1775444136340,
+      "name": "용인을 대표할 새로운 프리미엄 라이프의 시작 | 힐스테이트 용인고진역 D2BL 점등식 드론영상",
+      "cat": "기업·홍보",
+      "url": "https://youtu.be/B6qCeKrCfQQ?si=DCbCo2rkoFKefAtu",
+      "desc": ""
+    },
+    {
       "id": 1775444006908,
       "name": "학산숲속 시집도서관[우리는 다시 만나고 있어]",
       "cat": "기타",
@@ -485,6 +527,12 @@
     {
       "cat": "기업·홍보",
       "workIds": [
+        1775444990391,
+        1775444977253,
+        1775444957853,
+        1775444687337,
+        1775444146416,
+        1775444136340,
         1775443814766
       ]
     },
