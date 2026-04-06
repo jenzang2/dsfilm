@@ -691,5 +691,6 @@
   },
   "footer": {
     "copy": "© 2025 덕선필름. All rights reserved."
-  }
+  },
+  "workViewMode": "slider"
 }
