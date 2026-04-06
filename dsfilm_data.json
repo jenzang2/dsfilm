@@ -48,6 +48,76 @@
   ],
   "works": [
     {
+      "id": 1775442186574,
+      "name": "가을밤의 맛과 흥, 2025 전주 막걸리 축제 스케치 영상",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/1AYZzMsOss4?si=H4KoWl0V2xmMUS6I",
+      "desc": ""
+    },
+    {
+      "id": 1775442178818,
+      "name": "2025 김제국가유산야행 스케치 | 빛으로 물든 한밤의 여행",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/OFztAFSapTQ?si=Xqq1mA3qNeFEKmqb",
+      "desc": ""
+    },
+    {
+      "id": 1775442169581,
+      "name": "🍉고창수박축제 완전 정복! 3일간의 뜨거운 축제 현장 스케치 영상!!🍉",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/fwVfEqbFLcE?si=JnexIwpKgTL72YmH",
+      "desc": ""
+    },
+    {
+      "id": 1775442079740,
+      "name": "2024전주 문화재 야행 홍보영상",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/JAl_w4NB_JU?si=54da_gJAvfJqiD6a",
+      "desc": ""
+    },
+    {
+      "id": 1775442069632,
+      "name": "2024전주 문화재 야행 홍보영상",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/JAl_w4NB_JU?si=54da_gJAvfJqiD6a",
+      "desc": ""
+    },
+    {
+      "id": 1775442062875,
+      "name": "2024전주 문화재 야행 홍보영상",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/JAl_w4NB_JU?si=54da_gJAvfJqiD6a",
+      "desc": ""
+    },
+    {
+      "id": 1775442054598,
+      "name": "2024전주 문화재 야행 홍보영상",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/JAl_w4NB_JU?si=54da_gJAvfJqiD6a",
+      "desc": ""
+    },
+    {
+      "id": 1775442047585,
+      "name": "2024전주 문화재 야행 홍보영상",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/JAl_w4NB_JU?si=54da_gJAvfJqiD6a",
+      "desc": ""
+    },
+    {
+      "id": 1775442035199,
+      "name": "고령친화우수식품 전시·시식회 현장 스케치",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/rBT4zb4OITo?si=WS_W08eGXja7-Akb",
+      "desc": ""
+    },
+    {
+      "id": 1775442026794,
+      "name": "재주소년과 함께하는 가을공감 콘서트",
+      "cat": "행사·축제 스케치",
+      "url": "https://youtu.be/2ryXie7ecT4?si=5K6cVu8KIS-xFG12",
+      "desc": ""
+    },
+    {
       "id": 1775439968946,
       "name": "김차동의 FM모닝쇼 30주년 기념콘서트",
       "cat": "행사·축제 스케치",
@@ -180,6 +250,16 @@
       "id": 1775437995190,
       "cat": "행사·축제 스케치",
       "workIds": [
+        1775442186574,
+        1775442178818,
+        1775442169581,
+        1775442079740,
+        1775442069632,
+        1775442062875,
+        1775442054598,
+        1775442047585,
+        1775442035199,
+        1775442026794,
         1775439968946,
         1775439950274,
         1775439939863,
