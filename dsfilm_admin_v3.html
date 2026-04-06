@@ -1120,17 +1120,33 @@ function addWork() {
   const name = document.getElementById('w-name').value.trim();
   if (!name) { toast('⚠️ 이름을 입력해주세요'); return; }
   const cat = document.getElementById('w-cat').value;
+  const url = document.getElementById('w-url').value.trim();
   const desc = document.getElementById('w-desc').value.trim();
-  const newWork = { id: Date.now(), name, cat, url: document.getElementById('w-url').value.trim(), desc };
+
+  // 중복 URL 체크 (유튜브 ID 기준)
+  if (url) {
+    const newYtId = getYtId(url);
+    const dup = data.works.find(w => {
+      if (w.url === url) return true;
+      if (newYtId && getYtId(w.url) === newYtId) return true;
+      return false;
+    });
+    if (dup) {
+      const confirmAdd = confirm(`⚠️ 이미 등록된 영상이에요!\n\n제목: ${dup.name}\n카테고리: ${dup.cat}\n\n그래도 추가할까요?`);
+      if (!confirmAdd) return;
+    }
+  }
+
+  const newWork = { id: Date.now(), name, cat, url, desc };
   if (customThumbData) newWork.customThumb = customThumbData;
   data.works.unshift(newWork);
-  // ★ 섹션 자동 생성 및 workId 등록 (메인 페이지 노출 핵심)
+  // 섹션 자동 생성 및 workId 등록
   if (!data.workSections) data.workSections = [];
   let sec = data.workSections.find(s => s.cat === cat);
-  if (!sec) { sec = { cat, workIds: [] }; data.workSections.push(sec); }
+  if (!sec) { sec = { id: Date.now() + 1, cat, workIds: [] }; data.workSections.push(sec); }
   if (!sec.workIds) sec.workIds = [];
   sec.workIds.unshift(newWork.id);
-  // reset
+  // 폼 초기화
   document.getElementById('w-name').value = '';
   document.getElementById('w-name').dataset.edited = '';
   document.getElementById('w-url').value = '';
@@ -1255,9 +1271,16 @@ function addSection() {
 }
 
 function deleteSection(id) {
-  if (!confirm('섹션을 삭제할까요?')) return;
-  data.workSections = (data.workSections || []).filter(s => s.id !== id);
-  save(); renderSections(); toast('🗑️ 삭제됐어요');
+  if (!confirm('이 섹션을 메인 리스트에서 제외할까요?\n영상 데이터는 그대로 유지됩니다.')) return;
+  const sec = (data.workSections || []).find(s => s.id === id);
+  if (sec) { sec.hidden = true; }
+  save(); renderSections(); toast('👁️ 리스트에서 제외됐어요 (데이터는 유지)');
+}
+
+function restoreSection(id) {
+  const sec = (data.workSections || []).find(s => s.id === id);
+  if (sec) { sec.hidden = false; }
+  save(); renderSections(); toast('✅ 섹션이 메인 리스트에 다시 표시됩니다');
 }
 
 const secCollapsed = {}; // 섹션 접힘 상태 (UI only)
@@ -1319,12 +1342,18 @@ function renderSections() {
       <div style="display:flex;align-items:center;gap:.6rem">
         <span style="color:var(--light);font-size:1rem;flex-shrink:0;cursor:grab">⠿</span>
         <div style="flex:1">
-          <div style="font-size:.88rem;font-weight:700">${sec.cat}</div>
+          <div style="font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:.4rem">
+            ${sec.cat}
+            ${sec.hidden ? `<span style="font-size:.65rem;background:#fff3cd;color:#856404;border-radius:4px;padding:1px 6px;font-weight:600">메인 미노출</span>` : ''}
+          </div>
           ${meta.desc ? `<div style="font-size:.72rem;color:var(--mid);margin-top:.1rem">${meta.desc}</div>` : ''}
         </div>
         <span style="font-size:.72rem;color:var(--light)">${all.length}개</span>
         <button id="sec-toggle-${si}" class="btn b-gy b-sm" onclick="toggleSecCollapse(${si})">${isCollapsed ? '열기 ▼' : '접기 ▲'}</button>
-        <button class="btn b-rd b-sm" onclick="deleteSection(${sec.id})">삭제</button>
+        ${sec.hidden
+          ? `<button class="btn b-gr b-sm" onclick="restoreSection(${sec.id})">리스트 복구</button>`
+          : `<button class="btn b-rd b-sm" onclick="deleteSection(${sec.id})">리스트 제외</button>`
+        }
       </div>
       <div id="sec-body-${si}" style="margin-top:.8rem;${isCollapsed ? 'display:none' : ''}">
         ${all.length
