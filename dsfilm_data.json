@@ -818,5 +818,14 @@
     "about": true,
     "contact": true
   },
-  "scenes": []
+  "scenes": [],
+  "theme": {
+    "point": "#2979ff",
+    "pointLight": "#e3edff",
+    "cream": "#f4f7ff",
+    "text": "#1a2340",
+    "navy": "#1a2f5e",
+    "navBg": "#f4f7ff",
+    "navText": "#1a2340"
+  }
 }
