@@ -141,6 +141,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
 .thumb-upload-btn:hover{border-color:var(--point);color:var(--point)}
 .thumb-drop-zone{transition:border-color .2s, background .2s}
 .thumb-drop-zone.drag-over{border-color:var(--point) !important;background:var(--pl) !important;}
+
+#debugPanel{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.88);color:#0f0;font-size:11px;font-family:monospace;padding:8px;max-height:200px;overflow-y:auto;z-index:9999;display:none}
+#debugPanel.show{display:block}
+#debugClose{position:absolute;top:4px;right:8px;color:#fff;background:none;border:none;font-size:16px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1907,52 +1911,40 @@ function addScene() {
 
 function renderAdminScenes() {
   if (!data.scenes) data.scenes = [];
-  var list = document.getElementById('scenesList');
+  const list = document.getElementById('scenesList');
   if (!list) return;
   if (!data.scenes.length) {
     list.innerHTML = '<p style="color:var(--light);font-size:.85rem;text-align:center;padding:1.5rem">아직 추가된 촬영현장이 없어요</p>';
     return;
   }
-  list.innerHTML = '';
-  data.scenes.forEach(function(sc, i) {
-    var div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;gap:.8rem;padding:.7rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:.5rem;' + (sc.hidden ? 'opacity:.5' : '');
-    div.setAttribute('draggable', 'true');
-    div.addEventListener('dragstart', function() { scDragIdx = i; div.style.opacity = '.4'; });
-    div.addEventListener('dragend', function() { div.style.opacity = ''; scDragIdx = null; });
-    div.addEventListener('dragover', function(e) { e.preventDefault(); div.style.borderColor = 'var(--point)'; });
-    div.addEventListener('dragleave', function() { div.style.borderColor = 'var(--border)'; });
-    div.addEventListener('drop', function(e) { scDrop(e, i); });
-
-    var thumbHtml = sc.thumb
-      ? '<img src="' + sc.thumb + '" style="width:100%;height:100%;object-fit:cover">'
-      : '<div style="width:100%;height:100%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📷</div>';
-    var hiddenBadge = sc.hidden ? '<span style="font-size:.62rem;background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;margin-left:.3rem">메인 미노출</span>' : '';
-    var hiddenBtnText = sc.hidden ? '표시' : '숨기기';
-    var descText = sc.desc ? ' · ' + sc.desc : '';
-
-    div.innerHTML = ''
-      + '<span style="color:var(--light);cursor:grab;font-size:1rem">⠿</span>'
-      + '<div style="width:60px;height:44px;border-radius:6px;overflow:hidden;flex-shrink:0">' + thumbHtml + '</div>'
-      + '<div style="flex:1;min-width:0">'
-      +   '<div style="font-size:.85rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + sc.title + hiddenBadge + '</div>'
-      +   '<div style="font-size:.7rem;color:var(--light);margin-top:.1rem">사진 ' + (sc.photos||[]).length + '장' + descText + '</div>'
-      + '</div>'
-      + '<div style="display:flex;gap:.4rem;flex-shrink:0">'
-      +   '<button class="btn b-gy b-sm">수정</button>'
-      +   '<button class="btn b-rd b-sm">' + hiddenBtnText + '</button>'
-      +   '<button class="btn b-rd b-sm" style="background:var(--rl)">삭제</button>'
-      + '</div>';
-
-    var btns = div.querySelectorAll('button');
-    btns[0].addEventListener('click', function() { openSceneEdit(sc.id); });
-    btns[1].addEventListener('click', function() { toggleSceneHidden(sc.id); });
-    btns[2].addEventListener('click', function() { deleteScene(sc.id); });
-
-    list.appendChild(div);
-  });
+  list.innerHTML = data.scenes.map((s, i) => {
+    const thumb = s.thumb
+      ? `<img src="${s.thumb}" style="width:100%;height:100%;object-fit:cover">`
+      : `<div style="width:100%;height:100%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📷</div>`;
+    return `<div style="display:flex;align-items:center;gap:.8rem;padding:.7rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:.5rem;${s.hidden?'opacity:.5':''}"
+        draggable="true"
+        ondragstart="scDragIdx=${i};this.style.opacity='.4'"
+        ondragend="this.style.opacity='';scDragIdx=null"
+        ondragover="event.preventDefault();this.style.borderColor='var(--point)'"
+        ondragleave="this.style.borderColor='var(--border)'"
+        ondrop="scDrop(event,${i})">
+      <span style="color:var(--light);cursor:grab;font-size:1rem">⠿</span>
+      <div style="width:60px;height:44px;border-radius:6px;overflow:hidden;flex-shrink:0">${thumb}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.85rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          ${s.title}
+          ${s.hidden ? `<span style="font-size:.62rem;background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;margin-left:.3rem">메인 미노출</span>` : ''}
+        </div>
+        <div style="font-size:.7rem;color:var(--light);margin-top:.1rem">사진 ${(s.photos||[]).length}장${s.desc ? ' · ' + s.desc : ''}</div>
+      </div>
+      <div style="display:flex;gap:.4rem;flex-shrink:0">
+        <button class="btn b-gy b-sm" onclick="openSceneEdit(${s.id})">수정</button>
+        <button class="btn b-rd b-sm" onclick="toggleSceneHidden(${s.id})">${s.hidden ? '표시' : '숨기기'}</button>
+        <button class="btn b-rd b-sm" style="background:var(--rl)" onclick="deleteScene(${s.id})">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
 }
-
 
 function scDrop(e, toIdx) {
   e.preventDefault(); e.currentTarget.style.borderColor = 'var(--border)';
@@ -2259,6 +2251,20 @@ function checkPw() {
 
 // init
 renderCats(); loadPanel('works');
+</script>
+<div id="debugPanel"><button id="debugClose" onclick="document.getElementById('debugPanel').classList.remove('show')">x</button><div id="debugLog"></div></div>
+<script>
+function dbg(msg,color){var p=document.getElementById('debugPanel');var l=document.getElementById('debugLog');if(!p||!l)return;p.classList.add('show');var d=document.createElement('div');d.style.color=color||'#0f0';d.textContent=new Date().toLocaleTimeString()+' '+msg;l.appendChild(d);p.scrollTop=p.scrollHeight;}
+window.onerror=function(msg,src,line,col,err){dbg('ERR '+line+':'+col+' '+msg,'#f66');return false;};
+window.addEventListener('unhandledrejection',function(e){dbg('PROMISE: '+e.reason,'#f66');});
+window.addEventListener('load',function(){
+  var _orig=addScene;
+  addScene=function(){
+    dbg('addScene called');
+    dbg('photos='+scNewPhotos.length+' thumb='+(scNewThumb?'yes':'no')+' title='+document.getElementById('sc-title').value);
+    try{_orig();dbg('OK','#ff0');}catch(e){dbg('FAIL: '+e.message,'#f66');}
+  };
+});
 </script>
 </body>
 </html>
