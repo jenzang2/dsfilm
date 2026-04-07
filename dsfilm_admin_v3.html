@@ -1836,22 +1836,37 @@ async function _applyScThumb(file) {
 }
 
 async function onScPhotosUpload() {
-  var input = document.getElementById('sc-photos-file');
-  var files = Array.from(input.files);
+  const files = Array.from(document.getElementById('sc-photos-file').files);
+  document.getElementById('sc-photos-file').value = '';
   if (!files.length) return;
-  var loaded = 0;
-  files.forEach(function(file) {
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      scNewPhotos.push(ev.target.result);
-      loaded++;
-      renderScPhotosPreview();
-      if (loaded === files.length) { input.value = ''; }
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
+  const s = getGhSettings();
+  if (s.user && s.repo && s.token) {
+    toast(`📤 사진 0 / ${files.length} 업로드 중...`);
+    try {
+      const urls = await uploadMultipleToGitHub(files, 'scene', (cur, total) => {
+        toast(`📤 사진 ${cur} / ${total} 업로드 중...`);
+      });
+      scNewPhotos.push(...urls);
+      renderScPhotosPreview();
+      toast(`✅ 사진 ${files.length}장 업로드 완료!`);
+    } catch(e) {
+      toast('❌ 업로드 실패: ' + e.message);
+    }
+  } else {
+    // base64 fallback
+    let loaded = 0;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        scNewPhotos.push(e.target.result);
+        loaded++;
+        if (loaded === files.length) renderScPhotosPreview();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+}
 
 function renderScPhotosPreview() {
   const el = document.getElementById('scPhotosPreview');
@@ -1892,40 +1907,52 @@ function addScene() {
 
 function renderAdminScenes() {
   if (!data.scenes) data.scenes = [];
-  const list = document.getElementById('scenesList');
+  var list = document.getElementById('scenesList');
   if (!list) return;
   if (!data.scenes.length) {
     list.innerHTML = '<p style="color:var(--light);font-size:.85rem;text-align:center;padding:1.5rem">아직 추가된 촬영현장이 없어요</p>';
     return;
   }
-  list.innerHTML = data.scenes.map((s, i) => {
-    const thumb = s.thumb
-      ? `<img src="${s.thumb}" style="width:100%;height:100%;object-fit:cover">`
-      : `<div style="width:100%;height:100%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📷</div>`;
-    return `<div style="display:flex;align-items:center;gap:.8rem;padding:.7rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:.5rem;${s.hidden?'opacity:.5':''}"
-        draggable="true"
-        ondragstart="scDragIdx=${i};this.style.opacity='.4'"
-        ondragend="this.style.opacity='';scDragIdx=null"
-        ondragover="event.preventDefault();this.style.borderColor='var(--point)'"
-        ondragleave="this.style.borderColor='var(--border)'"
-        ondrop="scDrop(event,${i})">
-      <span style="color:var(--light);cursor:grab;font-size:1rem">⠿</span>
-      <div style="width:60px;height:44px;border-radius:6px;overflow:hidden;flex-shrink:0">${thumb}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:.85rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-          ${s.title}
-          ${s.hidden ? `<span style="font-size:.62rem;background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;margin-left:.3rem">메인 미노출</span>` : ''}
-        </div>
-        <div style="font-size:.7rem;color:var(--light);margin-top:.1rem">사진 ${(s.photos||[]).length}장${s.desc ? ' · ' + s.desc : ''}</div>
-      </div>
-      <div style="display:flex;gap:.4rem;flex-shrink:0">
-        <button class="btn b-gy b-sm" onclick="openSceneEdit(${s.id})">수정</button>
-        <button class="btn b-rd b-sm" onclick="toggleSceneHidden(${s.id})">${s.hidden ? '표시' : '숨기기'}</button>
-        <button class="btn b-rd b-sm" style="background:var(--rl)" onclick="deleteScene(${s.id})">삭제</button>
-      </div>
-    </div>`;
-  }).join('');
+  list.innerHTML = '';
+  data.scenes.forEach(function(sc, i) {
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:.8rem;padding:.7rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:.5rem;' + (sc.hidden ? 'opacity:.5' : '');
+    div.setAttribute('draggable', 'true');
+    div.addEventListener('dragstart', function() { scDragIdx = i; div.style.opacity = '.4'; });
+    div.addEventListener('dragend', function() { div.style.opacity = ''; scDragIdx = null; });
+    div.addEventListener('dragover', function(e) { e.preventDefault(); div.style.borderColor = 'var(--point)'; });
+    div.addEventListener('dragleave', function() { div.style.borderColor = 'var(--border)'; });
+    div.addEventListener('drop', function(e) { scDrop(e, i); });
+
+    var thumbHtml = sc.thumb
+      ? '<img src="' + sc.thumb + '" style="width:100%;height:100%;object-fit:cover">'
+      : '<div style="width:100%;height:100%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📷</div>';
+    var hiddenBadge = sc.hidden ? '<span style="font-size:.62rem;background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;margin-left:.3rem">메인 미노출</span>' : '';
+    var hiddenBtnText = sc.hidden ? '표시' : '숨기기';
+    var descText = sc.desc ? ' · ' + sc.desc : '';
+
+    div.innerHTML = ''
+      + '<span style="color:var(--light);cursor:grab;font-size:1rem">⠿</span>'
+      + '<div style="width:60px;height:44px;border-radius:6px;overflow:hidden;flex-shrink:0">' + thumbHtml + '</div>'
+      + '<div style="flex:1;min-width:0">'
+      +   '<div style="font-size:.85rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + sc.title + hiddenBadge + '</div>'
+      +   '<div style="font-size:.7rem;color:var(--light);margin-top:.1rem">사진 ' + (sc.photos||[]).length + '장' + descText + '</div>'
+      + '</div>'
+      + '<div style="display:flex;gap:.4rem;flex-shrink:0">'
+      +   '<button class="btn b-gy b-sm">수정</button>'
+      +   '<button class="btn b-rd b-sm">' + hiddenBtnText + '</button>'
+      +   '<button class="btn b-rd b-sm" style="background:var(--rl)">삭제</button>'
+      + '</div>';
+
+    var btns = div.querySelectorAll('button');
+    btns[0].addEventListener('click', function() { openSceneEdit(sc.id); });
+    btns[1].addEventListener('click', function() { toggleSceneHidden(sc.id); });
+    btns[2].addEventListener('click', function() { deleteScene(sc.id); });
+
+    list.appendChild(div);
+  });
 }
+
 
 function scDrop(e, toIdx) {
   e.preventDefault(); e.currentTarget.style.borderColor = 'var(--border)';
@@ -2003,22 +2030,36 @@ async function onScEditThumbUpload() {
 }
 
 async function onScEditPhotosUpload() {
-  var input = document.getElementById('sc-edit-photos-file');
-  var files = Array.from(input.files);
+  const files = Array.from(document.getElementById('sc-edit-photos-file').files);
+  document.getElementById('sc-edit-photos-file').value = '';
   if (!files.length) return;
-  var loaded = 0;
-  files.forEach(function(file) {
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      scNewPhotos.push(ev.target.result);
-      loaded++;
-      renderScPhotosPreviewEdit();
-      if (loaded === files.length) { input.value = ''; }
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
+  const s = getGhSettings();
+  if (s.user && s.repo && s.token) {
+    toast(`📤 사진 0 / ${files.length} 업로드 중...`);
+    try {
+      const urls = await uploadMultipleToGitHub(files, 'scene', (cur, total) => {
+        toast(`📤 사진 ${cur} / ${total} 업로드 중...`);
+      });
+      scNewPhotos.push(...urls);
+      renderScPhotosPreviewEdit();
+      toast(`✅ 사진 ${files.length}장 업로드 완료!`);
+    } catch(e) {
+      toast('❌ 업로드 실패: ' + e.message);
+    }
+  } else {
+    let loaded = 0;
+    files.forEach(file => {
+      const fr = new FileReader();
+      fr.onload = e => {
+        scNewPhotos.push(e.target.result);
+        loaded++;
+        if (loaded === files.length) renderScPhotosPreviewEdit();
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+}
 function renderScPhotosPreviewEdit() {
   const el = document.getElementById('scPhotosPreviewEdit');
   if (!el) return;
