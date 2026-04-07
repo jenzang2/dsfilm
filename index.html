@@ -31,6 +31,9 @@
   --navy: #1e2d4a;
 }
 html { scroll-behavior: smooth; }
+/* THEME - dynamically set by JS */
+#themeStyle{}
+
 body { font-family: 'Pretendard', sans-serif; background: var(--cream); color: var(--text); font-weight: 400; line-height: 1.7; overflow-x: hidden; }
 
 /* NAV */
@@ -89,6 +92,13 @@ section { padding: 5rem 5%; }
 #services { background: var(--white); }
 .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 960px; margin: 0 auto; }
 .service-card { background: var(--cream); border-radius: 16px; padding: 2rem 1.6rem; transition: transform 0.2s; }
+.service-card-full { background-size:cover; background-position:center; min-height:200px; display:flex; align-items:flex-end; padding:0; overflow:hidden; position:relative; }
+.service-card-full::before { content:""; position:absolute; inset:0; background:linear-gradient(transparent 30%, rgba(0,0,0,.6)); }
+.service-card-text { position:relative; z-index:1; padding:1.2rem 1.4rem; color:#fff; }
+.service-card-text .service-name { color:#fff; }
+.service-card-text .service-desc { color:rgba(255,255,255,.8); }
+.service-card-text .service-tag { color:rgba(255,255,255,.9); border-color:rgba(255,255,255,.4); }
+
 .service-card:hover { transform: translateY(-4px); }
 .service-emoji { font-size: 2rem; margin-bottom: 1rem; display: block; }
 .service-img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; margin-bottom: 1rem; display: block; }
@@ -491,6 +501,24 @@ function deepMerge(target, source) {
   return out;
 }
 
+function applyTheme(theme) {
+  if (!theme) return;
+  var el = document.getElementById('themeStyle');
+  if (!el) { el = document.createElement('style'); el.id='themeStyle'; document.head.appendChild(el); }
+  var css = ':root {';
+  if (theme.point)  css += '--point:' + theme.point + ';';
+  if (theme.pointLight) css += '--point-light:' + theme.pointLight + ';';
+  if (theme.navy)   css += '--navy:' + theme.navy + ';';
+  if (theme.cream)  css += '--cream:' + theme.cream + ';';
+  if (theme.text)   css += '--text:' + theme.text + ';';
+  if (theme.navBg)  css += '--nav-bg:' + theme.navBg + ';';
+  if (theme.navText) css += '--nav-text:' + theme.navText + ';';
+  css += '}';
+  if (theme.navBg)  css += 'nav { background: ' + theme.navBg + ' !important; }';
+  if (theme.navText) css += '.nav-logo, .nav-links a, .nav-cta { color: ' + theme.navText + ' !important; }';
+  el.textContent = css;
+}
+
 function getData() {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -580,7 +608,15 @@ function render() {
   d.trust.forEach((t,i) => { const el = document.getElementById('trust'+(i+1)); if(el) el.textContent = t; });
 
   // services
-  document.getElementById('servicesGrid').innerHTML = d.services.map(s => {
+  const svcGrid = document.getElementById('servicesGrid');
+  svcGrid.innerHTML = (d.services || []).map(s => {
+    if (s.imgFull && s.img) {
+      // 촔체 이미지 모드
+      const textHtml = s.showText !== false
+        ? `<div class="service-card-text"><div class="service-name">${s.name}</div><p class="service-desc">${s.desc}</p><span class="service-tag">${s.tag}</span></div>`
+        : '';
+      return `<div class="service-card service-card-full fade" style="background-image:url('${s.img}')">${textHtml}</div>`;
+    }
     const icon = s.img
       ? `<img class="service-img" src="${s.img}" alt="${s.name}">`
       : `<span class="service-emoji">${s.emoji}</span>`;
@@ -591,6 +627,7 @@ function render() {
       <span class="service-tag">${s.tag}</span>
     </div>`;
   }).join('');
+  svcGrid.style.gridTemplateColumns = (d.services||[]).length > 3 ? 'repeat(3,1fr)' : 'repeat(3,1fr)';
 
   // works - 탭 렌더
   renderWorkTabs(d);
@@ -734,19 +771,23 @@ function renderScenes(d) {
   const section = document.getElementById('scenes');
   if (!grid) return;
 
-  if (!scenes.length) { if (section) section.style.display = 'none'; return; }
+  if (!scenes.length) {
+    if (section) section.style.display = 'none';
+    return;
+  }
   if (section && (d.sectionVisibility || {}).scenes !== false) section.style.display = '';
 
-  const SHOW = 3; // 첫 3개만 보이고 더보기
   grid.innerHTML = scenes.map((s, i) => {
     const thumb = s.thumb
       ? `<img src="${s.thumb}" alt="${s.title}">`
       : `<div class="scene-thumb-placeholder">📷</div>`;
     const count = (s.photos || []).length;
-    return `<div class="scene-card fade" onclick="openLb(${i})" style="${i >= SHOW ? 'display:none' : ''}" data-scene-idx="${i}">
+    return `<div class="scene-card fade" onclick="openLb(${i})">
       <div class="scene-card-thumb">
         ${thumb}
-        <div class="scene-card-overlay"><div class="scene-expand-icon">⊞</div></div>
+        <div class="scene-card-overlay">
+          <div class="scene-expand-icon">⊞</div>
+        </div>
       </div>
       <div class="scene-card-info">
         <div class="scene-card-title">${s.title}</div>
@@ -755,29 +796,6 @@ function renderScenes(d) {
       </div>
     </div>`;
   }).join('');
-
-  // 더보기 버튼
-  let moreBtn = document.getElementById('scenesMoreBtn');
-  if (scenes.length > SHOW) {
-    if (!moreBtn) {
-      moreBtn = document.createElement('div');
-      moreBtn.id = 'scenesMoreBtn';
-      moreBtn.style.cssText = 'text-align:center;margin-top:2rem';
-      moreBtn.innerHTML = `<button onclick="showAllScenes()" style="background:none;border:1.5px solid var(--point);color:var(--point);padding:.6rem 2rem;border-radius:100px;font-family:Pretendard,sans-serif;font-size:.9rem;font-weight:600;cursor:pointer">더보기 +${scenes.length - SHOW}</button>`;
-      grid.parentNode.insertBefore(moreBtn, grid.nextSibling);
-    } else {
-      moreBtn.style.display = '';
-      moreBtn.querySelector('button').textContent = '더보기 +' + (scenes.length - SHOW);
-    }
-  } else if (moreBtn) {
-    moreBtn.style.display = 'none';
-  }
-}
-
-function showAllScenes() {
-  document.querySelectorAll('[data-scene-idx]').forEach(function(el) { el.style.display = ''; });
-  var btn = document.getElementById('scenesMoreBtn');
-  if (btn) btn.style.display = 'none';
 }
 
 // ===== 라이트박스 =====
@@ -1105,6 +1123,8 @@ function adminClick() {
   } catch(e) {
     // GitHub 로드 실패해도 localStorage로 계속 진행
   }
+  const d = getData();
+  if (d && d.theme) applyTheme(d.theme);
   render();
 })();
 </script>

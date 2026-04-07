@@ -209,6 +209,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <div class="mi" id="mi-process" onclick="switchPanel('process',this)"><span>🔄</span> PROCESS<span class="mi-dot"></span></div>
     <div class="mi" id="mi-about" onclick="switchPanel('about',this)"><span>👤</span> ABOUT<span class="mi-dot"></span></div>
     <div class="mi" id="mi-contact" onclick="switchPanel('contact',this)"><span>📞</span> CONTACT<span class="mi-dot"></span></div>
+    <div class="ms">디자인</div>
+    <div class="mi" id="mi-theme" onclick="switchPanel('theme',this)"><span>🎨</span> 색상 테마<span class="mi-dot"></span></div>
   </div>
 
   <div class="main">
@@ -399,16 +401,11 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
           </div>
           <div class="fg">
             <label class="fl">슬라이드 사진 (여러 장 선택 가능)</label>
-            <div id="scDropZone" class="thumb-drop-zone"
-              style="display:flex;align-items:center;justify-content:center;gap:.5rem;background:var(--bg);border:1.5px dashed var(--border);border-radius:8px;padding:.7rem 1rem;cursor:pointer;font-size:.82rem;color:var(--mid);transition:border-color .2s,background .2s;min-height:48px"
-              ondragover="event.preventDefault();this.classList.add('drag-over')"
-              ondragleave="this.classList.remove('drag-over')"
-              ondrop="onScPhotosDrop(event)"
-              onclick="document.getElementById('sc-photos-file').click()">
-              📸 사진 추가하기
-              <span style="font-size:.7rem;opacity:.6">(최대 여러 장 � 드래그 가능)</span>
+            <label style="display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1.5px dashed var(--border);border-radius:8px;padding:.6rem .8rem;cursor:pointer;font-size:.82rem;color:var(--mid);transition:border-color .2s"
+              onmouseover="this.style.borderColor='var(--point)'" onmouseout="this.style.borderColor='var(--border)'">
+              📸 사진 추가하기 (여러 장 가능)
               <input type="file" id="sc-photos-file" accept="image/*" multiple style="display:none" onchange="onScPhotosUpload()">
-            </div>
+            </label>
             <div id="scPhotosPreview" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem"></div>
           </div>
         </div>
@@ -631,6 +628,86 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
       </div>
     </div>
 
+    <!-- 색상 테마 -->
+    <div class="panel" id="panel-theme">
+      <div class="panel-hdr">
+        <div class="panel-title">🎨 색상 테마</div>
+        <button class="btn-apply" onclick="applyThemePanel()">적용</button>
+      </div>
+      <div class="card">
+        <div class="card-title">주요 색상</div>
+        <div class="fr">
+          <div class="fg">
+            <label class="fl">포인트 색상 <span style="font-weight:400;color:var(--light)">(버튼, 강조)</span></label>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="color" id="th-point" value="#e8833a" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-point','th-point-hex')">
+              <input class="fi" id="th-point-hex" placeholder="#e8833a" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-point-hex','th-point')">
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">포인트 연한색 <span style="font-weight:400;color:var(--light)">(배경 강조)</span></label>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="color" id="th-point-light" value="#fdf0e6" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-point-light','th-point-light-hex')">
+              <input class="fi" id="th-point-light-hex" placeholder="#fdf0e6" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-point-light-hex','th-point-light')">
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">배경색 <span style="font-weight:400;color:var(--light)">(Cream)</span></label>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="color" id="th-cream" value="#faf8f4" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-cream','th-cream-hex')">
+              <input class="fi" id="th-cream-hex" placeholder="#faf8f4" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-cream-hex','th-cream')">
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">텍스트 색상</label>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="color" id="th-text" value="#2d2b27" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-text','th-text-hex')">
+              <input class="fi" id="th-text-hex" placeholder="#2d2b27" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-text-hex','th-text')">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">상단바 (네비게이션)</div>
+        <div class="fr">
+          <div class="fg">
+            <label class="fl">상단바 배경색</label>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="color" id="th-nav-bg" value="#faf8f4" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-nav-bg','th-nav-bg-hex')">
+              <input class="fi" id="th-nav-bg-hex" placeholder="#faf8f4" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-nav-bg-hex','th-nav-bg')">
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">상단바 텍스트·로고 색</label>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="color" id="th-nav-text" value="#2d2b27" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-nav-text','th-nav-text-hex')">
+              <input class="fi" id="th-nav-text-hex" placeholder="#2d2b27" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-nav-text-hex','th-nav-text')">
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">내비 색상 <span style="font-weight:400;color:var(--light)">(히어로 배경 등)</span></label>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="color" id="th-navy" value="#1e2d4a" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-navy','th-navy-hex')">
+              <input class="fi" id="th-navy-hex" placeholder="#1e2d4a" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-navy-hex','th-navy')">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">프리셋 테마</div>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="btn b-gy b-sm" onclick="applyPreset('warm')">🧡 웜 오렌지 (기본)</button>
+          <button class="btn b-gy b-sm" onclick="applyPreset('dark')">🌙 다크</button>
+          <button class="btn b-gy b-sm" onclick="applyPreset('blue')">💙 오션 블루</button>
+          <button class="btn b-gy b-sm" onclick="applyPreset('green')">🌿 모던 그린</button>
+          <button class="btn b-gy b-sm" onclick="applyPreset('mono')">⬜ 모노</button>
+        </div>
+      </div>
+      <div class="card" style="background:#f0f8ff;border-color:#b3d9ff">
+        <div style="font-size:.78rem;color:#1e5fa8">적용 버튼을 누르면 로컬에 저장됩니다. 🚀 저장&배포 후 사이트에 반영됩니다.</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -693,6 +770,16 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
       </div>
       <div class="fg"><label class="fl">설명</label><textarea class="ft" id="sv-desc" rows="2"></textarea></div>
       <div class="fg"><label class="fl">태그</label><input class="fi" id="sv-tag"></div>
+      <div style="display:flex;gap:1rem;align-items:center;padding:.6rem;background:var(--bg);border-radius:8px">
+        <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer">
+          <input type="checkbox" id="sv-img-full" style="width:15px;height:15px;accent-color:var(--point)">
+          이미지로 카드 체우기 <span style="color:var(--light);font-size:.72rem">(풀 카버)</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer">
+          <input type="checkbox" id="sv-show-text" checked style="width:15px;height:15px;accent-color:var(--point)">
+          텍스트 표시
+        </label>
+      </div>
     </div>
     <div style="display:flex;gap:.6rem;margin-top:1.2rem">
       <button class="btn b-or" style="flex:1" onclick="saveService()">저장</button>
@@ -829,7 +916,7 @@ function clearDirty(panel) {
 // ===== PANEL SWITCHING =====
 function switchPanel(id, el) {
   if (currentPanel !== id && dirtyPanels.has(currentPanel)) {
-    const panelNames = {nav:'상단바',hero:'TITLE',about:'ABOUT',contact:'CONTACT',services:'SERVICE',process:'PROCESS',sections:'WORK(제작영상)',scenes:'SCENE(촬영현장)'};
+    const panelNames = {nav:'상단바',hero:'TITLE',about:'ABOUT',contact:'CONTACT',services:'SERVICE',process:'PROCESS',sections:'WORK(제작영상)',scenes:'SCENE(촬영현장)',theme:'색상 테마'};
     if (confirm(`"${panelNames[currentPanel]||currentPanel}" 변경사항을 적용하지 않았어요.\n지금 적용할까요?`)) {
       applyPanel(currentPanel);
     } else {
@@ -899,6 +986,7 @@ function loadPanel(id) {
       else prev.innerHTML = '🎥';
     }
   }
+  if (id === 'theme') { loadThemePanel(); }
   if (id === 'contact') {
     loadVisCheckbox('contact');
     document.getElementById('ct-title').value = data.contact.title;
@@ -1535,7 +1623,8 @@ function renderServices() {
 }
 
 function addService() {
-  data.services.push({emoji:'🎬',name:'새 서비스',desc:'설명을 입력해주세요.',tag:'태그'});
+  if (data.services.length >= 6) { toast('⚠️ 서비스는 최대 6개까지 추가할 수 있어요'); return; }
+  data.services.push({emoji:'🎬',name:'새 서비스',desc:'설명을 입력해주세요.',tag:'태그',imgFull:false,showText:true});
   renderServices(); markDirty('services');
 }
 
@@ -1546,6 +1635,8 @@ function openServiceModal(i) {
   document.getElementById('sv-name').value = s.name;
   document.getElementById('sv-desc').value = s.desc;
   document.getElementById('sv-tag').value = s.tag;
+  document.getElementById('sv-img-full').checked = s.imgFull || false;
+  document.getElementById('sv-show-text').checked = s.showText !== false;
   const prev = document.getElementById('svImgPreview');
   if (prev) prev.innerHTML = s.img ? `<img src="${s.img}" style="width:100%;height:100%;object-fit:cover">` : (s.emoji || '🎬');
   document.getElementById('editServiceModal').classList.add('open');
@@ -1578,7 +1669,9 @@ function saveService() {
     name: document.getElementById('sv-name').value.trim(),
     desc: document.getElementById('sv-desc').value.trim(),
     tag: document.getElementById('sv-tag').value.trim(),
-    img: svImgData || (prev && prev.img) || null
+    img: svImgData || (prev && prev.img) || null,
+    imgFull: document.getElementById('sv-img-full').checked,
+    showText: document.getElementById('sv-show-text').checked
   };
   svImgData = null;
   save(); renderServices(); closeServiceModal(); markDirty('services'); toast('✅ 수정됐어요!');
@@ -1873,41 +1966,6 @@ async function onScPhotosUpload() {
   }
 }
 
-function onScPhotosDrop(e) {
-  e.preventDefault();
-  document.getElementById('scDropZone').classList.remove('drag-over');
-  var files = Array.from(e.dataTransfer.files).filter(function(f) { return f.type.startsWith('image/'); });
-  if (!files.length) return;
-  var loaded = 0;
-  files.forEach(function(file) {
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      scNewPhotos.push(ev.target.result);
-      loaded++;
-      renderScPhotosPreview();
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function onScPhotosDrop(e) {
-  e.preventDefault();
-  var zone = document.getElementById('scDropZone');
-  if (zone) zone.classList.remove('drag-over');
-  var files = Array.from(e.dataTransfer.files).filter(function(f) { return f.type.startsWith('image/'); });
-  if (!files.length) return;
-  var loaded = 0;
-  files.forEach(function(file) {
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      scNewPhotos.push(ev.target.result);
-      loaded++;
-      renderScPhotosPreview();
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 function renderScPhotosPreview() {
   const el = document.getElementById('scPhotosPreview');
   if (!el) return;
@@ -2099,6 +2157,75 @@ function renderScPhotosPreviewEdit() {
     </div>`
   ).join('');
 }
+
+// ===== 색상 테마 =====
+const PRESETS = {
+  warm:  { point:'#e8833a', pointLight:'#fdf0e6', cream:'#faf8f4', text:'#2d2b27', navy:'#1e2d4a', navBg:'#faf8f4', navText:'#2d2b27' },
+  dark:  { point:'#f4a96e', pointLight:'#2a1f18', cream:'#111111', text:'#f0ede8', navy:'#0a0a0a', navBg:'#111111', navText:'#f0ede8' },
+  blue:  { point:'#2979ff', pointLight:'#e3edff', cream:'#f4f7ff', text:'#1a2340', navy:'#1a2f5e', navBg:'#f4f7ff', navText:'#1a2340' },
+  green: { point:'#2d7a4a', pointLight:'#e8f5ee', cream:'#f4faf6', text:'#1a2e22', navy:'#1a3828', navBg:'#f4faf6', navText:'#1a2e22' },
+  mono:  { point:'#333333', pointLight:'#f0f0f0', cream:'#ffffff', text:'#111111', navy:'#222222', navBg:'#ffffff', navText:'#111111' }
+};
+
+function loadThemePanel() {
+  const t = data.theme || PRESETS.warm;
+  const fields = {
+    'th-point': t.point || '#e8833a',
+    'th-point-light': t.pointLight || '#fdf0e6',
+    'th-cream': t.cream || '#faf8f4',
+    'th-text': t.text || '#2d2b27',
+    'th-nav-bg': t.navBg || '#faf8f4',
+    'th-nav-text': t.navText || '#2d2b27',
+    'th-navy': t.navy || '#1e2d4a'
+  };
+  Object.keys(fields).forEach(function(id) {
+    var el = document.getElementById(id);
+    var hex = document.getElementById(id + '-hex');
+    if (el) el.value = fields[id];
+    if (hex) hex.value = fields[id];
+  });
+}
+
+function syncColorFromPicker(pickerId, hexId) {
+  var picker = document.getElementById(pickerId);
+  var hex = document.getElementById(hexId);
+  if (picker && hex) hex.value = picker.value;
+  markDirty('theme');
+}
+
+function syncColorFromHex(hexId, pickerId) {
+  var hex = document.getElementById(hexId);
+  var picker = document.getElementById(pickerId);
+  if (!hex || !picker) return;
+  var v = hex.value.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) picker.value = v;
+  markDirty('theme');
+}
+
+function applyPreset(name) {
+  var p = PRESETS[name];
+  if (!p) return;
+  data.theme = Object.assign({}, p);
+  save();
+  loadThemePanel();
+  toast('프리셋 적용됐어요!');
+}
+
+function applyThemePanel() {
+  data.theme = {
+    point:      document.getElementById('th-point').value,
+    pointLight: document.getElementById('th-point-light').value,
+    cream:      document.getElementById('th-cream').value,
+    text:       document.getElementById('th-text').value,
+    navy:       document.getElementById('th-navy').value,
+    navBg:      document.getElementById('th-nav-bg').value,
+    navText:    document.getElementById('th-nav-text').value
+  };
+  save();
+  clearDirty('theme');
+  toast('색상 테마가 적용됐어요! 배포하면 사이트에 반영됩니다.');
+}
+
 
 // ===== 섹션 표시/숨기기 =====
 function loadVisCheckbox(id) {
