@@ -141,10 +141,6 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
 .thumb-upload-btn:hover{border-color:var(--point);color:var(--point)}
 .thumb-drop-zone{transition:border-color .2s, background .2s}
 .thumb-drop-zone.drag-over{border-color:var(--point) !important;background:var(--pl) !important;}
-
-#debugPanel{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.88);color:#0f0;font-size:11px;font-family:monospace;padding:8px;max-height:200px;overflow-y:auto;z-index:9999;display:none}
-#debugPanel.show{display:block}
-#debugClose{position:absolute;top:4px;right:8px;color:#fff;background:none;border:none;font-size:16px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -420,6 +416,15 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
           현장 목록 <span style="font-weight:400;color:var(--light)">— ⠿ 드래그로 순서 변경</span>
         </div>
         <div id="scenesList"></div>
+      </div>
+      <div class="card" style="background:#fff3cd;border-color:#ffc107">
+        <div style="font-size:.82rem;font-weight:700;color:#856404;margin-bottom:.5rem">⚠️ 저장공간 관리</div>
+        <div style="font-size:.75rem;color:#856404;margin-bottom:.8rem">base64 이미지가 로컬 저장공간을 가득 채우면 모바일에서 추가가 안 됩니다.</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn b-rd b-sm" onclick="clearSceneBase64()">base64 사진 전체 초기화 (사진 참고)</button>
+          <button class="btn b-gy b-sm" onclick="showStorageSize()">저장공간 확인</button>
+        </div>
+        <div id="storageInfo" style="font-size:.75rem;color:#856404;margin-top:.5rem"></div>
       </div>
     </div>
 
@@ -1954,6 +1959,36 @@ function scDrop(e, toIdx) {
   scDragIdx = null; save(); renderAdminScenes(); toast('✅ 순서 변경됐어요');
 }
 
+function showStorageSize() {
+  var total = 0;
+  for (var k in localStorage) {
+    if (localStorage.hasOwnProperty(k)) total += localStorage[k].length * 2;
+  }
+  var mb = (total / 1024 / 1024).toFixed(2);
+  var el = document.getElementById('storageInfo');
+  if (el) el.textContent = '현재 사용렉: ' + mb + 'MB / 제\ud55c 5MB';
+  toast('저장공간: ' + mb + 'MB');
+}
+
+function clearSceneBase64() {
+  if (!confirm('촬영현장 사진(base64)을 모두 제거합니다. 사진이 사라지지만 돍돌릴 수 없어요. 계속할까요?')) return;
+  if (!data.scenes) { toast('삭제할 데이터가 없어요'); return; }
+  var count = 0;
+  data.scenes.forEach(function(sc) {
+    if (sc.thumb && sc.thumb.startsWith('data:')) { sc.thumb = ''; count++; }
+    if (sc.photos) {
+      sc.photos = sc.photos.filter(function(p) {
+        if (p && p.startsWith('data:')) { count++; return false; }
+        return true;
+      });
+    }
+  });
+  save();
+  renderAdminScenes();
+  showStorageSize();
+  toast('완료! ' + count + '개 base64 참채 제거됐어요');
+}
+
 function toggleSceneHidden(id) {
   const s = (data.scenes||[]).find(s => s.id === id);
   if (!s) return;
@@ -2251,20 +2286,6 @@ function checkPw() {
 
 // init
 renderCats(); loadPanel('works');
-</script>
-<div id="debugPanel"><button id="debugClose" onclick="document.getElementById('debugPanel').classList.remove('show')">x</button><div id="debugLog"></div></div>
-<script>
-function dbg(msg,color){var p=document.getElementById('debugPanel');var l=document.getElementById('debugLog');if(!p||!l)return;p.classList.add('show');var d=document.createElement('div');d.style.color=color||'#0f0';d.textContent=new Date().toLocaleTimeString()+' '+msg;l.appendChild(d);p.scrollTop=p.scrollHeight;}
-window.onerror=function(msg,src,line,col,err){dbg('ERR '+line+':'+col+' '+msg,'#f66');return false;};
-window.addEventListener('unhandledrejection',function(e){dbg('PROMISE: '+e.reason,'#f66');});
-window.addEventListener('load',function(){
-  var _orig=addScene;
-  addScene=function(){
-    dbg('addScene called');
-    dbg('photos='+scNewPhotos.length+' thumb='+(scNewThumb?'yes':'no')+' title='+document.getElementById('sc-title').value);
-    try{_orig();dbg('OK','#ff0');}catch(e){dbg('FAIL: '+e.message,'#f66');}
-  };
-});
 </script>
 </body>
 </html>
