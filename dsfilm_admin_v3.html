@@ -1835,23 +1835,19 @@ async function _applyScThumb(file) {
   }
 }
 
-function onScPhotosUpload() {
-  const input = document.getElementById('sc-photos-file');
-  const files = Array.from(input.files);
+async function onScPhotosUpload() {
+  var input = document.getElementById('sc-photos-file');
+  var files = Array.from(input.files);
   if (!files.length) return;
-  let loaded = 0;
+  var loaded = 0;
   files.forEach(function(file) {
     var reader = new FileReader();
     reader.onload = function(ev) {
       scNewPhotos.push(ev.target.result);
       loaded++;
       renderScPhotosPreview();
-      if (loaded === files.length) {
-        input.value = '';
-        toast('✅ 사진 ' + files.length + '장 추가됐니다!');
-      }
+      if (loaded === files.length) { input.value = ''; }
     };
-    reader.onerror = function() { loaded++; };
     reader.readAsDataURL(file);
   });
 }
@@ -2006,23 +2002,19 @@ async function onScEditThumbUpload() {
   }
 }
 
-function onScEditPhotosUpload() {
-  const input = document.getElementById('sc-edit-photos-file');
-  const files = Array.from(input.files);
+async function onScEditPhotosUpload() {
+  var input = document.getElementById('sc-edit-photos-file');
+  var files = Array.from(input.files);
   if (!files.length) return;
-  let loaded = 0;
+  var loaded = 0;
   files.forEach(function(file) {
     var reader = new FileReader();
     reader.onload = function(ev) {
       scNewPhotos.push(ev.target.result);
       loaded++;
       renderScPhotosPreviewEdit();
-      if (loaded === files.length) {
-        input.value = '';
-        toast('✅ 사진 ' + files.length + '장 추가됐니다!');
-      }
+      if (loaded === files.length) { input.value = ''; }
     };
-    reader.onerror = function() { loaded++; };
     reader.readAsDataURL(file);
   });
 }
