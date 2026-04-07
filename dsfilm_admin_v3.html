@@ -407,7 +407,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
             <div id="scPhotosPreview" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem"></div>
           </div>
         </div>
-        <button class="btn b-or" style="margin-top:1rem" onclick="addScene()">+ 촬영현장 추가</button>
+        <button class="btn b-or" id="sc-add-btn" style="margin-top:1rem" onclick="addScene()">+ 촬영현장 추가</button>
       </div>
 
       <!-- 현장 목록 -->
@@ -930,7 +930,7 @@ function applyPanel(id) {
     data.contact.sub = document.getElementById('ct-sub').value;
     data.footer.copy = document.getElementById('footer-copy').value;
   }
-  // services, process, sections, scenes are auto-saved on action
+  // services, process, sections are auto-saved on action
   localStorage.setItem(KEY, JSON.stringify(data));
   clearDirty(id);
   toast('✅ 적용됐어요!');
@@ -1798,7 +1798,17 @@ let scNewThumb = null;
 let scNewPhotos = [];
 let scDragIdx = null;
 let editSceneId = null;
-let scUploading = false; // 업로드 중 여부 (모바일 중복 방지)
+let scUploading = false; // 업로드 진행 중 여부
+
+// 파일 → base64 변환 (Promise)
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
 
 function onScThumbDrop(e) {
   e.preventDefault(); e.currentTarget.classList.remove('drag-over');
@@ -1810,81 +1820,69 @@ function onScThumbUpload() {
   if (file) _applyScThumb(file);
 }
 async function _applyScThumb(file) {
+  // 1) 로컬 미리보기 즉시 표시
+  const b64 = await fileToBase64(file);
   const prev = document.getElementById('scThumbPreview');
-  // 로컬 미리보기 즉시 표시
-  const reader = new FileReader();
-  reader.onload = e => { if (prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`; };
-  reader.readAsDataURL(file);
+  if (prev) prev.innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover">`;
 
+  // 2) GitHub 업로드 시도 → 실패하면 base64 그대로 사용
   const s = getGhSettings();
   if (s.user && s.repo && s.token) {
-    toast('📤 썸네일 GitHub 업로드 중...');
     try {
       scNewThumb = await uploadImgToGitHub(file, 'scene_thumb');
       toast('✅ 썸네일 업로드 완료!');
     } catch(e) {
-      toast('❌ 업로드 실패: ' + e.message);
-      // fallback: base64
-      const fr = new FileReader();
-      fr.onload = ev => { scNewThumb = ev.target.result; };
-      fr.readAsDataURL(file);
+      scNewThumb = b64; // fallback
+      toast('⚠️ 썸네일 로컬 저장 (GitHub 업로드 실패)');
     }
   } else {
-    const fr = new FileReader();
-    fr.onload = e => { scNewThumb = e.target.result; };
-    fr.readAsDataURL(file);
+    scNewThumb = b64;
   }
 }
 
 async function onScPhotosUpload() {
   const input = document.getElementById('sc-photos-file');
   const files = Array.from(input.files);
-  // input 리셋은 업로드 완료 후에 (모바일 대응)
   if (!files.length) return;
 
-  const s = getGhSettings();
-  if (s.user && s.repo && s.token) {
-    scUploading = true;
-    const addBtn = document.querySelector('#panel-scenes .btn.b-or');
-    if (addBtn) { addBtn.disabled = true; addBtn.textContent = '⏳ 업로드 중...'; }
-    toast(`📤 사진 0 / ${files.length} 업로드 중...`);
-    try {
-      const urls = await uploadMultipleToGitHub(files, 'scene', (cur, total) => {
-        toast(`📤 사진 ${cur} / ${total} 업로드 중...`);
-      });
-      scNewPhotos.push(...urls);
-      renderScPhotosPreview();
-      toast(`✅ 사진 ${files.length}장 업로드 완료!`);
-    } catch(e) {
-      toast('❌ 업로드 실패: ' + e.message);
-      // fallback: base64로 저장
-      let loaded = 0;
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          scNewPhotos.push(ev.target.result);
-          loaded++;
-          if (loaded === files.length) { renderScPhotosPreview(); toast(`✅ 사진 ${files.length}장 추가됐어요 (로컬)`); }
-        };
-        reader.readAsDataURL(file);
-      });
-    } finally {
-      scUploading = false;
-      if (addBtn) { addBtn.disabled = false; addBtn.textContent = '+ 촬영현장 추가'; }
-      input.value = '';
+  // 버튼 비활성화
+  scUploading = true;
+  const addBtn = document.getElementById('sc-add-btn');
+  if (addBtn) { addBtn.disabled = true; addBtn.textContent = '⏳ 업로드 중...'; }
+
+  try {
+    const s = getGhSettings();
+    if (s.user && s.repo && s.token) {
+      toast(`📤 사진 ${files.length}장 업로드 중...`);
+      const results = [];
+      for (let i = 0; i < files.length; i++) {
+        toast(`📤 사진 ${i+1} / ${files.length} 업로드 중...`);
+        try {
+          const url = await uploadImgToGitHub(files[i], 'scene');
+          results.push(url);
+        } catch(e) {
+          // 개별 실패 시 base64 fallback
+          const b64 = await fileToBase64(files[i]);
+          results.push(b64);
+        }
+      }
+      scNewPhotos.push(...results);
+      toast(`✅ 사진 ${files.length}장 추가 완료!`);
+    } else {
+      // GitHub 미설정: 전부 base64
+      for (const file of files) {
+        const b64 = await fileToBase64(file);
+        scNewPhotos.push(b64);
+      }
+      toast(`✅ 사진 ${files.length}장 추가됐어요`);
     }
-  } else {
-    // base64 fallback (GitHub 미설정 시)
-    let loaded = 0;
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        scNewPhotos.push(e.target.result);
-        loaded++;
-        if (loaded === files.length) { renderScPhotosPreview(); input.value = ''; }
-      };
-      reader.readAsDataURL(file);
-    });
+    renderScPhotosPreview();
+  } catch(e) {
+    toast('❌ 오류: ' + e.message);
+  } finally {
+    scUploading = false;
+    if (addBtn) { addBtn.disabled = false; addBtn.textContent = '+ 촬영현장 추가'; }
+    input.value = '';
   }
 }
 
@@ -1903,7 +1901,7 @@ function renderScPhotosPreview() {
 }
 
 function addScene() {
-  if (scUploading) { toast('⏳ 사진 업로드가 완료될 때까지 잠시 기다려주세요'); return; }
+  if (scUploading) { toast('⏳ 사진 업로드 완료 후 추가해주세요'); return; }
   const title = document.getElementById('sc-title').value.trim();
   if (!title) { toast('⚠️ 현장 제목을 입력해주세요'); return; }
   if (!scNewPhotos.length) { toast('⚠️ 사진을 최소 1장 추가해주세요'); return; }
@@ -1916,13 +1914,18 @@ function addScene() {
     photos: [...scNewPhotos],
     hidden: false
   });
-  // 폼 초기화
+  // 폼 완전 초기화
   document.getElementById('sc-title').value = '';
   document.getElementById('sc-desc').value = '';
-  document.getElementById('scThumbPreview').innerHTML = '📷';
-  scNewThumb = null; scNewPhotos = [];
+  document.getElementById('sc-thumb-file').value = '';
+  document.getElementById('sc-photos-file').value = '';
+  const prev = document.getElementById('scThumbPreview');
+  if (prev) prev.innerHTML = '📷';
+  scNewThumb = null;
+  scNewPhotos = [];
   renderScPhotosPreview();
-  save(); renderAdminScenes();
+  save();
+  renderAdminScenes();
   toast('✅ 촬영현장이 추가됐어요!');
 }
 
@@ -2004,7 +2007,7 @@ function closeSceneEdit() {
   editSceneId = null; scNewThumb = null; scNewPhotos = [];
 }
 function saveSceneEdit() {
-  if (scUploading) { toast('⏳ 사진 업로드가 완료될 때까지 잠시 기다려주세요'); return; }
+  if (scUploading) { toast('⏳ 사진 업로드 완료 후 저장해주세요'); return; }
   const s = (data.scenes||[]).find(s => s.id === editSceneId);
   if (!s) return;
   s.title = document.getElementById('sc-edit-title').value.trim() || s.title;
@@ -2016,26 +2019,24 @@ function saveSceneEdit() {
 async function onScEditThumbUpload() {
   const file = document.getElementById('sc-edit-thumb-file').files[0];
   if (!file) return;
-  // 로컬 미리보기 즉시
-  const reader = new FileReader();
-  reader.onload = e => {
-    const prev = document.getElementById('scEditThumbPreview');
-    if (prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
-  };
-  reader.readAsDataURL(file);
 
+  // 1) 로컬 미리보기 즉시
+  const b64 = await fileToBase64(file);
+  const prev = document.getElementById('scEditThumbPreview');
+  if (prev) prev.innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover">`;
+
+  // 2) GitHub 업로드 → 실패 시 base64 fallback
   const s = getGhSettings();
   if (s.user && s.repo && s.token) {
-    toast('📤 썸네일 업로드 중...');
     try {
       scNewThumb = await uploadImgToGitHub(file, 'scene_thumb');
       toast('✅ 썸네일 업로드 완료!');
     } catch(e) {
-      toast('❌ 업로드 실패: ' + e.message);
-      const fr = new FileReader(); fr.onload = ev => { scNewThumb = ev.target.result; }; fr.readAsDataURL(file);
+      scNewThumb = b64;
+      toast('⚠️ 썸네일 로컬 저장 (GitHub 업로드 실패)');
     }
   } else {
-    const fr = new FileReader(); fr.onload = e => { scNewThumb = e.target.result; }; fr.readAsDataURL(file);
+    scNewThumb = b64;
   }
 }
 
@@ -2044,48 +2045,41 @@ async function onScEditPhotosUpload() {
   const files = Array.from(input.files);
   if (!files.length) return;
 
-  const s = getGhSettings();
-  if (s.user && s.repo && s.token) {
-    scUploading = true;
-    const saveBtn = document.querySelector('#sceneEditModal .btn.b-or');
-    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ 업로드 중...'; }
-    toast(`📤 사진 0 / ${files.length} 업로드 중...`);
-    try {
-      const urls = await uploadMultipleToGitHub(files, 'scene', (cur, total) => {
-        toast(`📤 사진 ${cur} / ${total} 업로드 중...`);
-      });
-      scNewPhotos.push(...urls);
-      renderScPhotosPreviewEdit();
-      toast(`✅ 사진 ${files.length}장 업로드 완료!`);
-    } catch(e) {
-      toast('❌ 업로드 실패: ' + e.message);
-      // fallback: base64
-      let loaded = 0;
-      files.forEach(file => {
-        const fr = new FileReader();
-        fr.onload = ev => {
-          scNewPhotos.push(ev.target.result);
-          loaded++;
-          if (loaded === files.length) { renderScPhotosPreviewEdit(); toast(`✅ 사진 ${files.length}장 추가됐어요 (로컬)`); }
-        };
-        fr.readAsDataURL(file);
-      });
-    } finally {
-      scUploading = false;
-      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '저장'; }
-      input.value = '';
+  scUploading = true;
+  const saveBtn = document.querySelector('#sceneEditModal .btn.b-or');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ 업로드 중...'; }
+
+  try {
+    const s = getGhSettings();
+    if (s.user && s.repo && s.token) {
+      toast(`📤 사진 ${files.length}장 업로드 중...`);
+      const results = [];
+      for (let i = 0; i < files.length; i++) {
+        toast(`📤 사진 ${i+1} / ${files.length} 업로드 중...`);
+        try {
+          const url = await uploadImgToGitHub(files[i], 'scene');
+          results.push(url);
+        } catch(e) {
+          const b64 = await fileToBase64(files[i]);
+          results.push(b64);
+        }
+      }
+      scNewPhotos.push(...results);
+      toast(`✅ 사진 ${files.length}장 추가 완료!`);
+    } else {
+      for (const file of files) {
+        const b64 = await fileToBase64(file);
+        scNewPhotos.push(b64);
+      }
+      toast(`✅ 사진 ${files.length}장 추가됐어요`);
     }
-  } else {
-    let loaded = 0;
-    files.forEach(file => {
-      const fr = new FileReader();
-      fr.onload = e => {
-        scNewPhotos.push(e.target.result);
-        loaded++;
-        if (loaded === files.length) { renderScPhotosPreviewEdit(); input.value = ''; }
-      };
-      fr.readAsDataURL(file);
-    });
+    renderScPhotosPreviewEdit();
+  } catch(e) {
+    toast('❌ 오류: ' + e.message);
+  } finally {
+    scUploading = false;
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '저장'; }
+    input.value = '';
   }
 }
 function renderScPhotosPreviewEdit() {
@@ -2217,8 +2211,8 @@ function saveGhSettings() {
 }
 
 async function deployToGithub() {
-  // 1. 모든 변경사항 먼저 저장 (scenes, services, process 등은 즉시저장이라 data에 이미 반영됨)
-  ['nav','hero','about','contact','sections'].forEach(id => { if (dirtyPanels.has(id)) applyPanel(id); });
+  // 1. 모든 변경사항 먼저 저장
+  ['nav','hero','about','contact'].forEach(id => { if (dirtyPanels.has(id)) applyPanel(id); });
   localStorage.setItem(KEY, JSON.stringify(data));
   dirtyPanels.clear();
   document.querySelectorAll('.mi').forEach(m => m.classList.remove('dirty'));
