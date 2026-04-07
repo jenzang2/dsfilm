@@ -632,44 +632,65 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <div class="panel" id="panel-theme">
       <div class="panel-hdr">
         <div class="panel-title">🎨 색상 테마</div>
-        <div style="display:flex;gap:.6rem">
-          <button class="btn b-nv" onclick="previewTheme()">👁️ 미리보기</button>
-          <button class="btn-apply" onclick="applyThemePanel()">적용</button>
+        <button class="btn-apply" onclick="applyThemePanel()">적용</button>
+      </div>
+
+      <!-- 미니 프리뷰 -->
+      <div class="card">
+        <div class="card-title">미리보기</div>
+        <div id="themePreviewBox" style="border-radius:12px;overflow:hidden;border:1.5px solid var(--border)">
+          <!-- nav -->
+          <div id="pv-nav" style="background:#faf8f4;padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ede9e2">
+            <div id="pv-logo" style="font-weight:700;font-size:.9rem;color:#2d2b27">덕선<span id="pv-logo-span" style="color:#e8833a">필름</span></div>
+            <div id="pv-btn" style="background:#e8833a;color:#fff;font-size:.72rem;padding:.3rem .8rem;border-radius:100px;font-weight:600">문의하기</div>
+          </div>
+          <!-- body -->
+          <div id="pv-body" style="background:#faf8f4;padding:1.2rem">
+            <div style="display:flex;gap:.8rem;flex-wrap:wrap;align-items:center">
+              <div id="pv-hero" style="background:#1e2d4a;border-radius:10px;padding:.8rem 1.2rem;flex:1;min-width:140px">
+                <div style="font-size:.65rem;color:rgba(255,255,255,.6);margin-bottom:.3rem">HERO 배경</div>
+                <div id="pv-hero-text" style="color:#fff;font-size:.82rem;font-weight:600">덕선필름</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:.5rem;flex:1;min-width:140px">
+                <div id="pv-point-btn" style="background:#e8833a;color:#fff;border-radius:8px;padding:.4rem .8rem;font-size:.75rem;font-weight:600;text-align:center">포인트 버튼</div>
+                <div id="pv-point-light" style="background:#fdf0e6;color:#e8833a;border-radius:8px;padding:.4rem .8rem;font-size:.75rem;font-weight:600;text-align:center;border:1px solid #e8833a">강조 배경</div>
+                <div id="pv-text-sample" style="color:#2d2b27;font-size:.78rem">텍스트 색상 샘플</div>
+              </div>
+            </div>
+          </div>
         </div>
+        <div class="fh" style="margin-top:.5rem">색상 변경 시 미리보기가 실시간으로 업데이트됩니다. 적용 버튼을 눌러야 사이트에 반영됩니다.</div>
       </div>
-      <div id="themePreviewBanner" style="display:none;background:#1e2d4a;color:#f4a96e;font-size:.78rem;padding:.5rem 1rem;border-radius:8px;margin-bottom:.8rem;display:none;align-items:center;justify-content:space-between">
-        <span>👁️ 미리보기 중 — 관리자 페이지에 색상이 임시 적용됐어요</span>
-        <button onclick="resetThemePreview()" style="background:none;border:none;color:#f4a96e;cursor:pointer;font-size:.85rem">원래대로 ✕</button>
-      </div>
+
       <div class="card">
         <div class="card-title">주요 색상</div>
         <div class="fr">
           <div class="fg">
             <label class="fl">포인트 색상 <span style="font-weight:400;color:var(--light)">(버튼, 강조)</span></label>
             <div style="display:flex;gap:.5rem;align-items:center">
-              <input type="color" id="th-point" value="#e8833a" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-point','th-point-hex')">
-              <input class="fi" id="th-point-hex" placeholder="#e8833a" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-point-hex','th-point')">
+              <input type="color" id="th-point" value="#e8833a" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-point','th-point-hex');updateThemePreview()">
+              <input class="fi" id="th-point-hex" placeholder="#e8833a" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-point-hex','th-point');updateThemePreview()">
             </div>
           </div>
           <div class="fg">
             <label class="fl">포인트 연한색</label>
             <div style="display:flex;gap:.5rem;align-items:center">
-              <input type="color" id="th-point-light" value="#fdf0e6" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-point-light','th-point-light-hex')">
-              <input class="fi" id="th-point-light-hex" placeholder="#fdf0e6" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-point-light-hex','th-point-light')">
+              <input type="color" id="th-point-light" value="#fdf0e6" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-point-light','th-point-light-hex');updateThemePreview()">
+              <input class="fi" id="th-point-light-hex" placeholder="#fdf0e6" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-point-light-hex','th-point-light');updateThemePreview()">
             </div>
           </div>
           <div class="fg">
             <label class="fl">배경색 <span style="font-weight:400;color:var(--light)">(크림)</span></label>
             <div style="display:flex;gap:.5rem;align-items:center">
-              <input type="color" id="th-cream" value="#faf8f4" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-cream','th-cream-hex')">
-              <input class="fi" id="th-cream-hex" placeholder="#faf8f4" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-cream-hex','th-cream')">
+              <input type="color" id="th-cream" value="#faf8f4" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-cream','th-cream-hex');updateThemePreview()">
+              <input class="fi" id="th-cream-hex" placeholder="#faf8f4" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-cream-hex','th-cream');updateThemePreview()">
             </div>
           </div>
           <div class="fg">
             <label class="fl">텍스트 색상</label>
             <div style="display:flex;gap:.5rem;align-items:center">
-              <input type="color" id="th-text" value="#2d2b27" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-text','th-text-hex')">
-              <input class="fi" id="th-text-hex" placeholder="#2d2b27" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-text-hex','th-text')">
+              <input type="color" id="th-text" value="#2d2b27" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-text','th-text-hex');updateThemePreview()">
+              <input class="fi" id="th-text-hex" placeholder="#2d2b27" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-text-hex','th-text');updateThemePreview()">
             </div>
           </div>
         </div>
@@ -680,22 +701,22 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
           <div class="fg">
             <label class="fl">상단바 배경색</label>
             <div style="display:flex;gap:.5rem;align-items:center">
-              <input type="color" id="th-nav-bg" value="#faf8f4" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-nav-bg','th-nav-bg-hex')">
-              <input class="fi" id="th-nav-bg-hex" placeholder="#faf8f4" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-nav-bg-hex','th-nav-bg')">
+              <input type="color" id="th-nav-bg" value="#faf8f4" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-nav-bg','th-nav-bg-hex');updateThemePreview()">
+              <input class="fi" id="th-nav-bg-hex" placeholder="#faf8f4" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-nav-bg-hex','th-nav-bg');updateThemePreview()">
             </div>
           </div>
           <div class="fg">
             <label class="fl">상단바 텍스트·로고 색</label>
             <div style="display:flex;gap:.5rem;align-items:center">
-              <input type="color" id="th-nav-text" value="#2d2b27" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-nav-text','th-nav-text-hex')">
+              <input type="color" id="th-nav-text" value="#2d2b27" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-nav-text','th-nav-text-hex');updateThemePreview()">
               <input class="fi" id="th-nav-text-hex" placeholder="#2d2b27" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-nav-text-hex','th-nav-text')">
             </div>
           </div>
           <div class="fg">
             <label class="fl">내비 색상 <span style="font-weight:400;color:var(--light)">(히어로 배경 등)</span></label>
             <div style="display:flex;gap:.5rem;align-items:center">
-              <input type="color" id="th-navy" value="#1e2d4a" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-navy','th-navy-hex')">
-              <input class="fi" id="th-navy-hex" placeholder="#1e2d4a" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-navy-hex','th-navy')">
+              <input type="color" id="th-navy" value="#1e2d4a" style="width:48px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorFromPicker('th-navy','th-navy-hex');updateThemePreview()">
+              <input class="fi" id="th-navy-hex" placeholder="#1e2d4a" style="flex:1;font-size:.82rem" oninput="syncColorFromHex('th-navy-hex','th-navy');updateThemePreview()">
             </div>
           </div>
         </div>
@@ -711,7 +732,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
         </div>
       </div>
       <div class="card" style="background:#f0f8ff;border-color:#b3d9ff">
-        <div style="font-size:.78rem;color:#1e5fa8">👁️ <b>미리보기</b>: 관리자 페이지에 색상 임시 적용. 사이트에는 반영 안 됨<br>✅ <b>적용</b>: 로컬 저장 후 🚀 저장&배포 하면 사이트에 반영됨</div>
+        <div style="font-size:.78rem;color:#1e5fa8">미리보기는 위 박스에서만 확인됩니다. <b>적용</b> 버튼을 눌러야 저장되고, 🚀 <b>저장&배포</b> 후 사이트에 반영됩니다.</div>
       </div>
     </div>
 
@@ -777,15 +798,9 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
       </div>
       <div class="fg"><label class="fl">설명</label><textarea class="ft" id="sv-desc" rows="2"></textarea></div>
       <div class="fg"><label class="fl">태그</label><input class="fi" id="sv-tag"></div>
-      <div style="display:flex;gap:1.2rem;align-items:center;padding:.6rem;background:var(--bg);border-radius:8px">
-        <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer">
-          <input type="checkbox" id="sv-img-full" style="width:15px;height:15px;accent-color:var(--point)">
-          이미지 풀 카버
-        </label>
-        <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer">
-          <input type="checkbox" id="sv-show-text" checked style="width:15px;height:15px;accent-color:var(--point)">
-          텍스트 표시
-        </label>
+      <div style="display:flex;gap:1.2rem;padding:.6rem;background:var(--bg);border-radius:8px">
+        <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer"><input type="checkbox" id="sv-img-full" style="width:15px;height:15px;accent-color:var(--point)"> 이미지 풀 카버</label>
+        <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer"><input type="checkbox" id="sv-show-text" checked style="width:15px;height:15px;accent-color:var(--point)"> 텍스트 표시</label>
       </div>
     </div>
     <div style="display:flex;gap:.6rem;margin-top:1.2rem">
@@ -1630,7 +1645,7 @@ function renderServices() {
 }
 
 function addService() {
-  if (data.services.length >= 6) { toast('⚠️ 서비스는 최대 6개까지 추가할 수 있어요'); return; }
+  if (data.services.length >= 6) { toast('⚠️ 서비스는 최대 6개까지 추가 가능해요'); return; }
   data.services.push({emoji:'🎬',name:'새 서비스',desc:'설명을 입력해주세요.',tag:'태그',imgFull:false,showText:true});
   renderServices(); markDirty('services');
 }
@@ -1642,8 +1657,8 @@ function openServiceModal(i) {
   document.getElementById('sv-name').value = s.name;
   document.getElementById('sv-desc').value = s.desc;
   document.getElementById('sv-tag').value = s.tag;
-  document.getElementById('sv-img-full').checked = s.imgFull || false;
-  document.getElementById('sv-show-text').checked = s.showText !== false;
+  var ifEl = document.getElementById('sv-img-full'); if(ifEl) ifEl.checked = s.imgFull||false;
+  var stEl = document.getElementById('sv-show-text'); if(stEl) stEl.checked = s.showText!==false;
   const prev = document.getElementById('svImgPreview');
   if (prev) prev.innerHTML = s.img ? `<img src="${s.img}" style="width:100%;height:100%;object-fit:cover">` : (s.emoji || '🎬');
   document.getElementById('editServiceModal').classList.add('open');
@@ -1677,8 +1692,8 @@ function saveService() {
     desc: document.getElementById('sv-desc').value.trim(),
     tag: document.getElementById('sv-tag').value.trim(),
     img: svImgData || (prev && prev.img) || null,
-    imgFull: document.getElementById('sv-img-full').checked,
-    showText: document.getElementById('sv-show-text').checked
+    imgFull: (document.getElementById('sv-img-full')||{}).checked||false,
+    showText: (document.getElementById('sv-show-text')||{checked:true}).checked
   };
   svImgData = null;
   save(); renderServices(); closeServiceModal(); markDirty('services'); toast('✅ 수정됐어요!');
@@ -2166,115 +2181,110 @@ function renderScPhotosPreviewEdit() {
 }
 
 // ===== 색상 테마 =====
-const PRESETS = {
-  warm:  { point:'#e8833a', pointLight:'#fdf0e6', cream:'#faf8f4', text:'#2d2b27', navy:'#1e2d4a', navBg:'#faf8f4', navText:'#2d2b27' },
-  dark:  { point:'#f4a96e', pointLight:'#2a1f18', cream:'#111111', text:'#f0ede8', navy:'#0a0a0a', navBg:'#111111', navText:'#f0ede8' },
-  blue:  { point:'#2979ff', pointLight:'#e3edff', cream:'#f4f7ff', text:'#1a2340', navy:'#1a2f5e', navBg:'#f4f7ff', navText:'#1a2340' },
-  green: { point:'#2d7a4a', pointLight:'#e8f5ee', cream:'#f4faf6', text:'#1a2e22', navy:'#1a3828', navBg:'#f4faf6', navText:'#1a2e22' },
-  mono:  { point:'#333333', pointLight:'#f0f0f0', cream:'#ffffff', text:'#111111', navy:'#222222', navBg:'#ffffff', navText:'#111111' }
+var PRESETS = {
+  warm:  {point:'#e8833a',pointLight:'#fdf0e6',cream:'#faf8f4',text:'#2d2b27',navy:'#1e2d4a',navBg:'#faf8f4',navText:'#2d2b27'},
+  dark:  {point:'#f4a96e',pointLight:'#2a1f18',cream:'#111111',text:'#f0ede8',navy:'#0a0a0a',navBg:'#111111',navText:'#f0ede8'},
+  blue:  {point:'#2979ff',pointLight:'#e3edff',cream:'#f4f7ff',text:'#1a2340',navy:'#1a2f5e',navBg:'#f4f7ff',navText:'#1a2340'},
+  green: {point:'#2d7a4a',pointLight:'#e8f5ee',cream:'#f4faf6',text:'#1a2e22',navy:'#1a3828',navBg:'#f4faf6',navText:'#1a2e22'},
+  mono:  {point:'#333333',pointLight:'#f0f0f0',cream:'#ffffff',text:'#111111',navy:'#222222',navBg:'#ffffff',navText:'#111111'}
 };
 
-let _themePreviewActive = false;
-
-function _buildThemeCSS(t) {
-  return ':root{'
-    + '--point:' + t.point + ';'
-    + '--pl:' + t.pointLight + ';'
-    + '--bg:' + t.cream + ';'
-    + '--text:' + t.text + ';'
-    + '--navy:' + t.navy + ';'
-    + '}'
-    + '.hdr{background:' + t.navy + ' !important}'
-    + '.btn-apply,.b-or{background:' + t.point + ' !important}'
-    + '.mi.active{color:' + t.point + ' !important;border-left-color:' + t.point + ' !important;background:' + t.pointLight + ' !important}'
-    + '.mi-dot{background:' + t.point + ' !important}'
-    + '.lb-btn{background:' + t.point + ' !important}'
-    + '.lb-inp:focus{border-color:' + t.point + ' !important}';
-}
-
-function _getThemeFromInputs() {
-  return {
-    point:      document.getElementById('th-point').value,
-    pointLight: document.getElementById('th-point-light').value,
-    cream:      document.getElementById('th-cream').value,
-    text:       document.getElementById('th-text').value,
-    navy:       document.getElementById('th-navy').value,
-    navBg:      document.getElementById('th-nav-bg').value,
-    navText:    document.getElementById('th-nav-text').value
+function updateThemePreview() {
+  var t = {
+    point:      (document.getElementById('th-point')||{value:'#e8833a'}).value,
+    pointLight: (document.getElementById('th-point-light')||{value:'#fdf0e6'}).value,
+    cream:      (document.getElementById('th-cream')||{value:'#faf8f4'}).value,
+    text:       (document.getElementById('th-text')||{value:'#2d2b27'}).value,
+    navy:       (document.getElementById('th-navy')||{value:'#1e2d4a'}).value,
+    navBg:      (document.getElementById('th-nav-bg')||{value:'#faf8f4'}).value,
+    navText:    (document.getElementById('th-nav-text')||{value:'#2d2b27'}).value
   };
-}
-
-function previewTheme() {
-  var t = _getThemeFromInputs();
-  var el = document.getElementById('adminThemeStyle');
-  if (!el) { el = document.createElement('style'); el.id = 'adminThemeStyle'; document.head.appendChild(el); }
-  el.textContent = _buildThemeCSS(t);
-  _themePreviewActive = true;
-  var banner = document.getElementById('themePreviewBanner');
-  if (banner) banner.style.display = 'flex';
-  toast('👁️ 미리보기 적용됐어요! 관리자 페이지에서 확인해보세요');
-}
-
-function resetThemePreview() {
-  var el = document.getElementById('adminThemeStyle');
-  if (el) el.textContent = '';
-  _themePreviewActive = false;
-  var banner = document.getElementById('themePreviewBanner');
-  if (banner) banner.style.display = 'none';
-  toast('원래 색상으로 돌아왔어요');
+  var pvNav = document.getElementById('pv-nav');
+  var pvLogo = document.getElementById('pv-logo');
+  var pvLogoSpan = document.getElementById('pv-logo-span');
+  var pvBtn = document.getElementById('pv-btn');
+  var pvBody = document.getElementById('pv-body');
+  var pvHero = document.getElementById('pv-hero');
+  var pvPointBtn = document.getElementById('pv-point-btn');
+  var pvPointLight = document.getElementById('pv-point-light');
+  var pvTextSample = document.getElementById('pv-text-sample');
+  if (pvNav) pvNav.style.background = t.navBg;
+  if (pvLogo) pvLogo.style.color = t.navText;
+  if (pvLogoSpan) pvLogoSpan.style.color = t.point;
+  if (pvBtn) { pvBtn.style.background = t.point; pvBtn.style.color = '#fff'; }
+  if (pvBody) pvBody.style.background = t.cream;
+  if (pvHero) pvHero.style.background = t.navy;
+  if (pvPointBtn) { pvPointBtn.style.background = t.point; }
+  if (pvPointLight) { pvPointLight.style.background = t.pointLight; pvPointLight.style.color = t.point; pvPointLight.style.borderColor = t.point; }
+  if (pvTextSample) pvTextSample.style.color = t.text;
 }
 
 function loadThemePanel() {
   var t = data.theme || PRESETS.warm;
-  var fields = {
-    'th-point': t.point || '#e8833a',
-    'th-point-light': t.pointLight || '#fdf0e6',
-    'th-cream': t.cream || '#faf8f4',
-    'th-text': t.text || '#2d2b27',
-    'th-nav-bg': t.navBg || '#faf8f4',
-    'th-nav-text': t.navText || '#2d2b27',
-    'th-navy': t.navy || '#1e2d4a'
+  var map = {
+    'th-point': t.point||'#e8833a',
+    'th-point-light': t.pointLight||'#fdf0e6',
+    'th-cream': t.cream||'#faf8f4',
+    'th-text': t.text||'#2d2b27',
+    'th-nav-bg': t.navBg||'#faf8f4',
+    'th-nav-text': t.navText||'#2d2b27',
+    'th-navy': t.navy||'#1e2d4a'
   };
-  Object.keys(fields).forEach(function(id) {
+  Object.keys(map).forEach(function(id) {
     var el = document.getElementById(id);
-    var hex = document.getElementById(id + '-hex');
-    if (el) el.value = fields[id];
-    if (hex) hex.value = fields[id];
+    var hex = document.getElementById(id+'-hex');
+    if (el) el.value = map[id];
+    if (hex) hex.value = map[id];
   });
+  updateThemePreview();
 }
 
 function syncColorFromPicker(pickerId, hexId) {
-  var picker = document.getElementById(pickerId);
-  var hex = document.getElementById(hexId);
-  if (picker && hex) hex.value = picker.value;
+  var p = document.getElementById(pickerId);
+  var h = document.getElementById(hexId);
+  if (p && h) h.value = p.value;
   markDirty('theme');
 }
 
 function syncColorFromHex(hexId, pickerId) {
-  var hex = document.getElementById(hexId);
-  var picker = document.getElementById(pickerId);
-  if (!hex || !picker) return;
-  var v = hex.value.trim();
-  if (/^#[0-9a-fA-F]{6}$/.test(v)) picker.value = v;
+  var h = document.getElementById(hexId);
+  var p = document.getElementById(pickerId);
+  if (!h || !p) return;
+  var v = h.value.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) p.value = v;
   markDirty('theme');
 }
 
 function applyPreset(name) {
   var p = PRESETS[name];
   if (!p) return;
-  data.theme = Object.assign({}, p);
-  save();
-  loadThemePanel();
-  previewTheme();
-  toast('프리셋 적용 + 미리보기됐어요!');
+  var map = {
+    'th-point': p.point, 'th-point-light': p.pointLight,
+    'th-cream': p.cream, 'th-text': p.text,
+    'th-nav-bg': p.navBg, 'th-nav-text': p.navText, 'th-navy': p.navy
+  };
+  Object.keys(map).forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = map[id];
+    var hex = document.getElementById(id+'-hex'); if (hex) hex.value = map[id];
+  });
+  updateThemePreview();
+  markDirty('theme');
+  toast('\xed\x94\xbc\xeb\xa6\xac\xec\x85\x8b \xec\xa0\x81\xec\x9a\xa9\xeb\x90\x90\xec\x96\xb4\xec\x9a\x94. \xec\xb5\x9c\xec\xb2\x9c\xec\x85\x9c \xed\x99\x95\xec\x9d\xb8 \xed\x9b\x84 \xec\xa0\x81\xec\x9a\xa9 \xeb\xb2\x84\xed\x8a\xbc\xec\x9d\x84 \xeb\x88\x8c\xeb\xa0\x9c\xec\xa3\xbc\xec\x84\xb8\xec\x9a\x94!');
 }
 
 function applyThemePanel() {
-  data.theme = _getThemeFromInputs();
+  data.theme = {
+    point:      (document.getElementById('th-point')||{value:'#e8833a'}).value,
+    pointLight: (document.getElementById('th-point-light')||{value:'#fdf0e6'}).value,
+    cream:      (document.getElementById('th-cream')||{value:'#faf8f4'}).value,
+    text:       (document.getElementById('th-text')||{value:'#2d2b27'}).value,
+    navy:       (document.getElementById('th-navy')||{value:'#1e2d4a'}).value,
+    navBg:      (document.getElementById('th-nav-bg')||{value:'#faf8f4'}).value,
+    navText:    (document.getElementById('th-nav-text')||{value:'#2d2b27'}).value
+  };
   save();
   clearDirty('theme');
-  if (_themePreviewActive) resetThemePreview();
-  toast('색상 테마 적용됐어요! 🚀 저장&배포 하면 사이트에 반영됩니다.');
+  toast('\xec\x83\x89\xec\x83\x81 \xed\x85\x8c\xeb\xa7\x88 \xec\xa0\x80\xec\x9e\xa5\xeb\x90\x90\xec\x96\xb4\xec\x9a\x94! \xf0\x9f\x9a\x80 \xec\xa0\x80\xec\x9e\xa5&\xeb\xb0\xb0\xed\x8f\xac \xed\x9b\x84 \xec\x82\xac\xec\x9d\xb4\xed\x8a\xb8\xec\x97\x90 \xeb\xb0\x98\xec\x98\x81\xeb\x90\xa9\xeb\x8b\x88\xeb\x8b\xa4.');
 }
 
 
@@ -2363,7 +2373,13 @@ function removeNavExtra(i) {
   save(); markDirty('nav'); renderNavExtras();
 }
 
-function openSite() { save(); window.open('index.html', '_blank'); }
+function openSite() {
+  save();
+  var d = JSON.stringify(data);
+  var html = '<script>localStorage.setItem("dsfilm_data",' + JSON.stringify(d) + ');location.replace("index.html");<\/script>';
+  var blob = new Blob([html], {type:'text/html'});
+  window.open(URL.createObjectURL(blob), '_blank');
+}
 
 // ===== GITHUB DEPLOY =====
 const GH_KEY = 'dsfilm_gh_settings';
