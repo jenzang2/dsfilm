@@ -818,18 +818,5 @@
     "about": true,
     "contact": true
   },
-  "scenes": [
-    {
-      "id": 1775526937061,
-      "title": "싱스트리트",
-      "desc": "촬영현장",
-      "thumb": "https://raw.githubusercontent.com/jenzang2/dsfilm/main/images/scene_1775526909031.jpg",
-      "photos": [
-        "https://raw.githubusercontent.com/jenzang2/dsfilm/main/images/scene_1775526909031.jpg",
-        "https://raw.githubusercontent.com/jenzang2/dsfilm/main/images/scene_1775526911951.jpg",
-        "https://raw.githubusercontent.com/jenzang2/dsfilm/main/images/scene_1775526914607.jpg"
-      ],
-      "hidden": false
-    }
-  ]
+  "scenes": []
 }
