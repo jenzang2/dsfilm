@@ -820,17 +820,6 @@
   },
   "scenes": [
     {
-      "id": 1775526291803,
-      "title": "ㅁㅁㅁ",
-      "desc": "ㄴㄴㄴ",
-      "thumb": "https://raw.githubusercontent.com/jenzang2/dsfilm/main/images/scene_thumb_1775526277487.jpg",
-      "photos": [
-        "https://raw.githubusercontent.com/jenzang2/dsfilm/main/images/scene_1775526283471.jpg",
-        "https://raw.githubusercontent.com/jenzang2/dsfilm/main/images/scene_1775526285570.jpg"
-      ],
-      "hidden": false
-    },
-    {
       "id": 1775526937061,
       "title": "싱스트리트",
       "desc": "촬영현장",
