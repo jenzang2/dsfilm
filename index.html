@@ -734,23 +734,19 @@ function renderScenes(d) {
   const section = document.getElementById('scenes');
   if (!grid) return;
 
-  if (!scenes.length) {
-    if (section) section.style.display = 'none';
-    return;
-  }
+  if (!scenes.length) { if (section) section.style.display = 'none'; return; }
   if (section && (d.sectionVisibility || {}).scenes !== false) section.style.display = '';
 
+  const SHOW = 3; // 첫 3개만 보이고 더보기
   grid.innerHTML = scenes.map((s, i) => {
     const thumb = s.thumb
       ? `<img src="${s.thumb}" alt="${s.title}">`
       : `<div class="scene-thumb-placeholder">📷</div>`;
     const count = (s.photos || []).length;
-    return `<div class="scene-card fade" onclick="openLb(${i})">
+    return `<div class="scene-card fade" onclick="openLb(${i})" style="${i >= SHOW ? 'display:none' : ''}" data-scene-idx="${i}">
       <div class="scene-card-thumb">
         ${thumb}
-        <div class="scene-card-overlay">
-          <div class="scene-expand-icon">⊞</div>
-        </div>
+        <div class="scene-card-overlay"><div class="scene-expand-icon">⊞</div></div>
       </div>
       <div class="scene-card-info">
         <div class="scene-card-title">${s.title}</div>
@@ -759,6 +755,29 @@ function renderScenes(d) {
       </div>
     </div>`;
   }).join('');
+
+  // 더보기 버튼
+  let moreBtn = document.getElementById('scenesMoreBtn');
+  if (scenes.length > SHOW) {
+    if (!moreBtn) {
+      moreBtn = document.createElement('div');
+      moreBtn.id = 'scenesMoreBtn';
+      moreBtn.style.cssText = 'text-align:center;margin-top:2rem';
+      moreBtn.innerHTML = `<button onclick="showAllScenes()" style="background:none;border:1.5px solid var(--point);color:var(--point);padding:.6rem 2rem;border-radius:100px;font-family:Pretendard,sans-serif;font-size:.9rem;font-weight:600;cursor:pointer">더보기 +${scenes.length - SHOW}</button>`;
+      grid.parentNode.insertBefore(moreBtn, grid.nextSibling);
+    } else {
+      moreBtn.style.display = '';
+      moreBtn.querySelector('button').textContent = '더보기 +' + (scenes.length - SHOW);
+    }
+  } else if (moreBtn) {
+    moreBtn.style.display = 'none';
+  }
+}
+
+function showAllScenes() {
+  document.querySelectorAll('[data-scene-idx]').forEach(function(el) { el.style.display = ''; });
+  var btn = document.getElementById('scenesMoreBtn');
+  if (btn) btn.style.display = 'none';
 }
 
 // ===== 라이트박스 =====

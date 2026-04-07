@@ -384,15 +384,33 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
           </div>
         </div>
 
-        <!-- 사진 업로드 -->
-        <div class="fg" style="margin-bottom:.8rem">
-          <label class="fl">사진 <span style="font-weight:400;color:var(--light)">(첫 사진이 썸네일을로 치정됩니다)</span></label>
-          <label style="display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1.5px dashed var(--border);border-radius:8px;padding:.8rem 1rem;cursor:pointer;font-size:.85rem;color:var(--mid);transition:border-color .2s"
-            onmouseover="this.style.borderColor='var(--point)'" onmouseout="this.style.borderColor='var(--border)'">
-            📸 사진 추가하기 (여러 장 가능)
-            <input type="file" id="sc-photos-file" accept="image/*" multiple style="display:none" onchange="onScPhotosUpload()">
-          </label>
-          <div id="scPhotosPreview" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem"></div>
+        <!-- 대표 썸네일 + 사진 업로드 -->
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:1rem;align-items:start">
+          <div class="fg">
+            <label class="fl">대표 썸네일</label>
+            <div id="scThumbPreview" class="thumb-drop-zone"
+              style="width:140px;height:100px;background:var(--navy);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.8rem;border:2px dashed var(--border);cursor:pointer"
+              ondragover="event.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="onScThumbDrop(event)"
+              onclick="document.getElementById('sc-thumb-file').click()" title="클릭 또는 드래그">📷</div>
+            <input type="file" id="sc-thumb-file" accept="image/*" style="display:none" onchange="onScThumbUpload()">
+            <button class="btn b-gy b-sm" style="margin-top:.3rem;width:140px" onclick="document.getElementById('sc-thumb-file').click()">📁 썸네일</button>
+          </div>
+          <div class="fg">
+            <label class="fl">슬라이드 사진 (여러 장 선택 가능)</label>
+            <div id="scDropZone" class="thumb-drop-zone"
+              style="display:flex;align-items:center;justify-content:center;gap:.5rem;background:var(--bg);border:1.5px dashed var(--border);border-radius:8px;padding:.7rem 1rem;cursor:pointer;font-size:.82rem;color:var(--mid);transition:border-color .2s,background .2s;min-height:48px"
+              ondragover="event.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="onScPhotosDrop(event)"
+              onclick="document.getElementById('sc-photos-file').click()">
+              📸 사진 추가하기
+              <span style="font-size:.7rem;opacity:.6">(최대 여러 장 � 드래그 가능)</span>
+              <input type="file" id="sc-photos-file" accept="image/*" multiple style="display:none" onchange="onScPhotosUpload()">
+            </div>
+            <div id="scPhotosPreview" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem"></div>
+          </div>
         </div>
         <button class="btn b-or" style="margin-top:1rem" onclick="addScene()">+ 촬영현장 추가</button>
       </div>
@@ -718,13 +736,22 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <div style="display:flex;flex-direction:column;gap:.8rem">
       <div class="fg"><label class="fl">현장 제목</label><input class="fi" id="sc-edit-title" placeholder="현장 제목"></div>
       <div class="fg"><label class="fl">설명</label><input class="fi" id="sc-edit-desc" placeholder="간단한 설명"></div>
-      <div class="fg">
-          <label class="fl">사진 <span style="font-weight:400;color:var(--light)">(첫 사진이 썸네일을로 치정됩니다)</span></label>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:.8rem;align-items:start">
+        <div class="fg">
+          <label class="fl">대표 썸네일</label>
+          <div id="scEditThumbPreview" style="width:120px;height:88px;background:var(--navy);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer"
+            onclick="document.getElementById('sc-edit-thumb-file').click()">📷</div>
+          <input type="file" id="sc-edit-thumb-file" accept="image/*" style="display:none" onchange="onScEditThumbUpload()">
+          <button class="btn b-gy b-sm" style="margin-top:.3rem;width:120px" onclick="document.getElementById('sc-edit-thumb-file').click()">변경</button>
+        </div>
+        <div class="fg">
+          <label class="fl">슬라이드 사진</label>
           <label style="display:flex;align-items:center;gap:.4rem;background:var(--bg);border:1.5px dashed var(--border);border-radius:8px;padding:.5rem .7rem;cursor:pointer;font-size:.8rem;color:var(--mid)">
             📸 사진 추가
             <input type="file" id="sc-edit-photos-file" accept="image/*" multiple style="display:none" onchange="onScEditPhotosUpload()">
           </label>
           <div id="scPhotosPreviewEdit" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem"></div>
+        </div>
       </div>
     </div>
     <div style="display:flex;gap:.6rem;margin-top:1.2rem">
@@ -1844,6 +1871,41 @@ async function onScPhotosUpload() {
       reader.readAsDataURL(file);
     });
   }
+}
+
+function onScPhotosDrop(e) {
+  e.preventDefault();
+  document.getElementById('scDropZone').classList.remove('drag-over');
+  var files = Array.from(e.dataTransfer.files).filter(function(f) { return f.type.startsWith('image/'); });
+  if (!files.length) return;
+  var loaded = 0;
+  files.forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      scNewPhotos.push(ev.target.result);
+      loaded++;
+      renderScPhotosPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function onScPhotosDrop(e) {
+  e.preventDefault();
+  var zone = document.getElementById('scDropZone');
+  if (zone) zone.classList.remove('drag-over');
+  var files = Array.from(e.dataTransfer.files).filter(function(f) { return f.type.startsWith('image/'); });
+  if (!files.length) return;
+  var loaded = 0;
+  files.forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      scNewPhotos.push(ev.target.result);
+      loaded++;
+      renderScPhotosPreview();
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function renderScPhotosPreview() {
