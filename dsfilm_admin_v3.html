@@ -542,6 +542,16 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
         </div>
       </div>
       <div class="card">
+        <div class="card-title">🎞 메인 슬라이드쇼 <span style="font-weight:400;font-size:.78rem;color:var(--light)">(이미지 or 유튜브 URL — 등록 순서대로 표시)</span></div>
+        <div style="display:flex;gap:.6rem;margin-bottom:.8rem;flex-wrap:wrap">
+          <button class="btn b-pt b-sm" onclick="addHeroSlideImage()">📁 이미지 추가</button>
+          <button class="btn b-pt b-sm" onclick="addHeroSlideYoutube()">▶ 유튜브 URL 추가</button>
+          <input type="file" id="hero-slide-file" accept="image/*" style="display:none" onchange="onHeroSlideFileChange()">
+        </div>
+        <div id="heroSlideList" style="display:flex;flex-direction:column;gap:.6rem"></div>
+        <p id="heroSlideEmpty" style="font-size:.8rem;color:var(--light);margin:.5rem 0 0">슬라이드가 없으면 기존 오른쪽 카드 이미지가 표시됩니다.</p>
+      </div>
+      <div class="card">
         <div class="card-title">신뢰 바 문구</div>
         <div class="fr">
           <div class="fg"><label class="fl">항목 1</label><input class="fi" id="trust-0" oninput="markDirty('hero')"></div>
@@ -881,6 +891,7 @@ const DEFAULT = {
   workViewMode:'tabs',
   scenes:[],
   hero:{badge:'전북 기반 영상 제작',title:'소중한 순간을\n오래 기억되는\n영상으로 만듭니다',desc:'행사, 웨딩, 기업 홍보까지—\n현장의 감동을 그대로 담아 전달합니다.\n전북 전주 기반, 전국 출장 가능합니다.',stat:'150건 이상'},
+  heroSlides:[],
   trust:['전북 전주 기반','전국 출장 가능','빠른 납품','AI 활용 제작','카카오톡 상담'],
   services:[
     {emoji:'🎪',name:'행사 · 축제 영상',desc:'지역 행사, 축제, 공연 현장을 생동감 있게 담아드립니다.',tag:'당일 현장 대응'},
@@ -996,6 +1007,7 @@ function loadPanel(id) {
       if (data.hero.imgMode === 'bg') modeBg.checked = true;
       else modeRight.checked = true;
     }
+    renderHeroSlideList();
   }
   if (id === 'about') {
     loadVisCheckbox('about');
@@ -1859,6 +1871,108 @@ async function uploadMultipleToGitHub(files, prefix, onProgress) {
     urls.push(url);
   }
   return urls;
+}
+
+// ===== 히어로 슬라이드쇼 관리 =====
+function renderHeroSlideList() {
+  if (!data.heroSlides) data.heroSlides = [];
+  const list = document.getElementById('heroSlideList');
+  const empty = document.getElementById('heroSlideEmpty');
+  if (!list) return;
+  if (data.heroSlides.length === 0) {
+    list.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  list.innerHTML = data.heroSlides.map((s, i) => {
+    const thumb = s.type === 'youtube'
+      ? `<img src="https://img.youtube.com/vi/${s.youtubeId}/mqdefault.jpg" style="width:80px;height:52px;object-fit:cover;border-radius:6px;flex-shrink:0">`
+      : `<img src="${s.url}" style="width:80px;height:52px;object-fit:cover;border-radius:6px;flex-shrink:0">`;
+    const label = s.type === 'youtube'
+      ? `<span style="font-size:.8rem;color:var(--mid)">▶ 유튜브: ${s.youtubeId}</span>`
+      : `<span style="font-size:.8rem;color:var(--mid)">🖼 이미지 ${i+1}</span>`;
+    return `<div style="display:flex;align-items:center;gap:.8rem;background:var(--bg2);border-radius:8px;padding:.5rem .7rem">
+      ${thumb}
+      <div style="flex:1;min-width:0">${label}</div>
+      <div style="display:flex;gap:.3rem;flex-shrink:0">
+        <button class="btn b-gy b-sm" onclick="moveHeroSlide(${i},-1)" ${i===0?'disabled':''}>↑</button>
+        <button class="btn b-gy b-sm" onclick="moveHeroSlide(${i},1)" ${i===data.heroSlides.length-1?'disabled':''}>↓</button>
+        <button class="btn b-rd b-sm" onclick="removeHeroSlide(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addHeroSlideImage() {
+  document.getElementById('hero-slide-file').click();
+}
+
+function onHeroSlideFileChange() {
+  const file = document.getElementById('hero-slide-file').files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    if (!data.heroSlides) data.heroSlides = [];
+    // GitHub 업로드 시도
+    const ghCfg = getGHConfig();
+    if (ghCfg.token && ghCfg.repo) {
+      const fname = 'hero_' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const base64 = e.target.result.split(',')[1];
+      uploadImageToGitHub(fname, base64).then(url => {
+        data.heroSlides.push({type:'image', url});
+        save(); renderHeroSlideList(); toast('✅ 슬라이드 추가됐어요!');
+      }).catch(() => {
+        data.heroSlides.push({type:'image', url: e.target.result});
+        save(); renderHeroSlideList(); toast('✅ 슬라이드 추가됐어요! (로컬)');
+      });
+    } else {
+      data.heroSlides.push({type:'image', url: e.target.result});
+      save(); renderHeroSlideList(); toast('✅ 슬라이드 추가됐어요!');
+    }
+    document.getElementById('hero-slide-file').value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function addHeroSlideYoutube() {
+  const url = prompt('유튜브 URL 또는 영상 ID를 입력하세요\n예) https://www.youtube.com/watch?v=XXXXXXXXXXX');
+  if (!url) return;
+  const match = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
+  if (!match) { toast('❌ 유튜브 URL을 확인해주세요'); return; }
+  const youtubeId = match[1];
+  if (!data.heroSlides) data.heroSlides = [];
+  data.heroSlides.push({type:'youtube', youtubeId});
+  save(); renderHeroSlideList(); toast('✅ 유튜브 슬라이드 추가됐어요!');
+}
+
+function moveHeroSlide(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= data.heroSlides.length) return;
+  [data.heroSlides[i], data.heroSlides[j]] = [data.heroSlides[j], data.heroSlides[i]];
+  save(); renderHeroSlideList();
+}
+
+function removeHeroSlide(i) {
+  data.heroSlides.splice(i, 1);
+  save(); renderHeroSlideList();
+  if (data.heroSlides.length === 0) {
+    const empty = document.getElementById('heroSlideEmpty');
+    if (empty) empty.style.display = '';
+  }
+}
+
+async function uploadImageToGitHub(filename, base64) {
+  const cfg = getGHConfig();
+  const apiBase = `https://api.github.com/repos/${cfg.repo}/contents/images`;
+  const headers = { 'Authorization': `token ${cfg.token}`, 'Content-Type': 'application/json' };
+  const res = await fetch(`${apiBase}/${filename}`, {
+    method: 'PUT', headers,
+    body: JSON.stringify({ message: `hero slide: ${filename}`, content: base64 })
+  });
+  if (!res.ok) throw new Error('GitHub upload failed');
+  const json = await res.json();
+  return json.content.download_url;
 }
 
 // Hero 이미지

@@ -72,6 +72,20 @@ nav {
 .hero-right { position: relative; }
 .hero-card-main { background: var(--navy); border-radius: 20px; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-size: 3rem; overflow: hidden; }
 .hero-card-main img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 히어로 슬라이드쇼 */
+.hero-slideshow { position: relative; border-radius: 20px; overflow: hidden; aspect-ratio: 4/3; background: var(--navy); }
+.hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; }
+.hero-slide.active { opacity: 1; }
+.hero-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero-slide iframe { width: 100%; height: 100%; border: none; display: block; pointer-events: none; }
+.hero-slide-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 5; background: rgba(255,255,255,0.85); border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
+.hero-slide-btn:hover { background: white; }
+.hero-slide-btn.prev { left: 10px; }
+.hero-slide-btn.next { right: 10px; }
+.hero-slide-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 5; }
+.hero-slide-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.5); border: none; cursor: pointer; transition: background 0.2s; }
+.hero-slide-dot.active { background: white; }
 .hero-card-float { position: absolute; bottom: -20px; left: -24px; background: white; border-radius: 14px; padding: 1rem 1.2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.8rem; }
 .float-icon { width: 40px; height: 40px; background: var(--point-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
 .float-label { font-size: 0.72rem; color: var(--light); }
@@ -584,24 +598,44 @@ function render() {
   document.getElementById('heroTitle').innerHTML = nl2br(d.hero.title).replace('오래 기억되는','<span class="point">오래 기억되는</span>');
   document.getElementById('heroDesc').innerHTML = nl2br(d.hero.desc);
 
-  // hero 이미지
+  // hero 이미지 / 슬라이드쇼
   const heroEl = document.getElementById('hero');
   const heroCardMain = document.querySelector('.hero-card-main');
-  const heroRight = document.querySelector('#hero .hero-inner > div:last-child');
-  if (d.hero.img) {
+  const slides = d.heroSlides && d.heroSlides.length > 0 ? d.heroSlides : null;
+
+  if (slides) {
+    // 슬라이드쇼 모드
+    heroEl.classList.remove('hero-bg-mode');
+    heroEl.style.backgroundImage = '';
+    if (heroCardMain) {
+      heroCardMain.className = 'hero-slideshow';
+      heroCardMain.innerHTML = slides.map((s, i) => {
+        const media = s.type === 'youtube'
+          ? `<iframe src="https://www.youtube.com/embed/${s.youtubeId}?autoplay=1&mute=1&loop=1&playlist=${s.youtubeId}&controls=0&showinfo=0&rel=0" allow="autoplay" allowfullscreen></iframe>`
+          : `<img src="${s.url}" alt="슬라이드 ${i+1}">`;
+        return `<div class="hero-slide${i===0?' active':''}" data-index="${i}">${media}</div>`;
+      }).join('')
+      + (slides.length > 1 ? `
+        <button class="hero-slide-btn prev" onclick="heroSlidePrev()">&#8249;</button>
+        <button class="hero-slide-btn next" onclick="heroSlideNext()">&#8250;</button>
+        <div class="hero-slide-dots">${slides.map((_,i)=>`<button class="hero-slide-dot${i===0?' active':''}" onclick="heroSlideTo(${i})"></button>`).join('')}</div>
+      ` : '');
+      startHeroSlideshow(slides.length);
+    }
+  } else if (d.hero.img) {
     if (d.hero.imgMode === 'bg') {
       heroEl.classList.add('hero-bg-mode');
       heroEl.style.backgroundImage = `url(${d.hero.img})`;
-      if (heroCardMain) heroCardMain.innerHTML = '🎬';
+      if (heroCardMain) { heroCardMain.className = 'hero-card-main'; heroCardMain.innerHTML = '🎬'; }
     } else {
       heroEl.classList.remove('hero-bg-mode');
       heroEl.style.backgroundImage = '';
-      if (heroCardMain) heroCardMain.innerHTML = `<img src="${d.hero.img}" alt="메인 이미지">`;
+      if (heroCardMain) { heroCardMain.className = 'hero-card-main'; heroCardMain.innerHTML = `<img src="${d.hero.img}" alt="메인 이미지">`; }
     }
   } else {
     heroEl.classList.remove('hero-bg-mode');
     heroEl.style.backgroundImage = '';
-    if (heroCardMain) heroCardMain.innerHTML = '🎬';
+    if (heroCardMain) { heroCardMain.className = 'hero-card-main'; heroCardMain.innerHTML = '🎬'; }
   }
 
   // trust
@@ -1127,6 +1161,30 @@ function adminClick() {
   if (d && d.theme) applyTheme(d.theme);
   render();
 })();
+
+// ===== 히어로 슬라이드쇼 =====
+let _heroSlideIdx = 0;
+let _heroSlideTimer = null;
+let _heroSlideTotal = 0;
+
+function startHeroSlideshow(total) {
+  _heroSlideTotal = total;
+  _heroSlideIdx = 0;
+  if (_heroSlideTimer) clearInterval(_heroSlideTimer);
+  if (total > 1) _heroSlideTimer = setInterval(() => heroSlideNext(), 4000);
+}
+function heroSlideTo(i) {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-slide-dot');
+  if (!slides.length) return;
+  slides[_heroSlideIdx].classList.remove('active');
+  if (dots[_heroSlideIdx]) dots[_heroSlideIdx].classList.remove('active');
+  _heroSlideIdx = (i + _heroSlideTotal) % _heroSlideTotal;
+  slides[_heroSlideIdx].classList.add('active');
+  if (dots[_heroSlideIdx]) dots[_heroSlideIdx].classList.add('active');
+}
+function heroSlideNext() { heroSlideTo(_heroSlideIdx + 1); }
+function heroSlidePrev() { heroSlideTo(_heroSlideIdx - 1); }
 </script>
 </body>
 </html>
