@@ -145,8 +145,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="lw" id="loginWrap">
+<div class="lw" id="loginWrap" style="flex-direction:column;gap:1.2rem;">
   <div class="lb">
     <div class="lb-logo">덕선<span>필름</span></div>
     <div class="lb-sub">관리자 페이지</div>
@@ -154,6 +153,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
     <button class="lb-btn" onclick="checkPw()">로그인</button>
     <div class="lb-err" id="loginError">비밀번호가 틀렸어요</div>
   </div>
+  <a href="/estimate/" style="display:block;width:180px;padding:.65rem;border-radius:10px;background:#fff;font-size:.82rem;color:var(--navy);text-decoration:none;text-align:center;font-weight:600;opacity:.85;transition:opacity .2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.85'">📄 견적서 작성</a>
 </div>
 
 <!-- HEADER -->
