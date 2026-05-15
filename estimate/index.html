@@ -108,6 +108,95 @@ input, select, textarea { width:100%; padding:10px; border:1px solid var(--borde
   .preview-paper { box-shadow: none; border: none; margin: 0; padding: 15mm 15mm 20mm 15mm !important; }
 }
 </style>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCHe4_wr2Q1ph3bC6eRGieIOotw8e1vZ_o",
+  authDomain: "dsfilm-d211c.firebaseapp.com",
+  projectId: "dsfilm-d211c",
+  storageBucket: "dsfilm-d211c.firebasestorage.app",
+  messagingSenderId: "217041988519",
+  appId: "1:217041988519:web:f01951b6a819c6dd112482"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const COL = 'estimates';
+
+window.saveQuote = async function(){
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const data = {
+        saveTime: timeStr,
+        date: g('q_date').value, client: g('c_name').value, rep: g('c_rep').value, etc: g('c_etc').value,
+        title: g('q_title').value, no: g('q_no').value, valid: g('q_valid').value,
+        pay: g('q_pay').value, payCustom: g('q_pay_custom').value,
+        items: currentItems, note: g('q_note').value
+    };
+    try {
+        if(editingId) {
+            await updateDoc(doc(db, COL, editingId), data);
+        } else {
+            const ref = await addDoc(collection(db, COL), data);
+            editingId = ref.id;
+        }
+        alert('성공적으로 저장되었습니다.');
+        renderSavedList();
+    } catch(e) { alert('저장 실패: ' + e.message); }
+};
+
+window.renderSavedList = async function(){
+    const container = g('saved-list-container');
+    container.innerHTML = '<div style="padding:20px; color:#999; text-align:center;">불러오는 중...</div>';
+    try {
+        const q = query(collection(db, COL), orderBy('saveTime', 'desc'));
+        const snap = await getDocs(q);
+        if(snap.empty){ container.innerHTML = '<div style="padding:40px; color:#999; text-align:center;">저장된 견적서가 없습니다.</div>'; return; }
+        container.innerHTML = '';
+        snap.forEach(docSnap => {
+            const qu = docSnap.data();
+            const item = document.createElement('div');
+            item.className = 'list-item';
+            item.innerHTML = `
+                <div class="list-info">
+                    <b>${qu.client || '거래처명 없음'} — ${qu.title || '제목 없음'}</b>
+                    <small>저장: ${qu.saveTime || qu.date} | No.${qu.no || '-'}</small>
+                </div>
+                <div class="list-actions">
+                    <button class="btn btn-accent" style="padding:5px 12px;" onclick="loadQuote('${docSnap.id}')">수정</button>
+                    <button class="btn" style="color:#e74c3c; padding:5px 12px;" onclick="deleteQuote('${docSnap.id}')">삭제</button>
+                </div>`;
+            container.appendChild(item);
+        });
+    } catch(e) { container.innerHTML = `<div style="padding:20px; color:red; text-align:center;">오류: ${e.message}</div>`; }
+};
+
+window.loadQuote = async function(id){
+    try {
+        const snap = await getDocs(collection(db, COL));
+        const docSnap = snap.docs.find(d => d.id === id);
+        if(!docSnap) return;
+        const q = docSnap.data();
+        editingId = id;
+        g('c_name').value = q.client||''; g('c_rep').value = q.rep||''; g('c_etc').value = q.etc||'';
+        g('q_title').value = q.title||''; g('q_no').value = q.no||''; g('q_date').value = q.date||'';
+        g('q_valid').value = q.valid||''; g('q_pay').value = q.pay||''; g('q_pay_custom').value = q.payCustom||'';
+        g('q_note').value = q.note||'';
+        togglePayCustom(); currentItems = q.items||[]; renderItems(); showTab('editor');
+    } catch(e) { alert('불러오기 실패: ' + e.message); }
+};
+
+window.deleteQuote = async function(id){
+    if(confirm('정말 이 견적서를 삭제하시겠습니까?')){
+        try {
+            await deleteDoc(doc(db, COL, id));
+            renderSavedList();
+        } catch(e) { alert('삭제 실패: ' + e.message); }
+    }
+};
+</script>
 </head>
 <body>
 
@@ -253,7 +342,7 @@ window.onload = () => {
     loadSettings();
     if (currentItems.length === 0) addItem({name:'홍보영상 제작', spec:'기획/촬영/편집 포함', qty:'', price:''});
     updateScale();
-    renderSavedList();
+    setTimeout(() => { if(window.renderSavedList) renderSavedList(); }, 500);
 };
 
 function addItem(data){ currentItems.push(data || {name:'', spec:'', qty:'', price:''}); renderItems(); livePreview(); }
@@ -301,69 +390,6 @@ function livePreview(){
     g('pv-ft-email').innerText = s.email || '';
 }
 
-function saveQuote(){
-    const quotes = JSON.parse(localStorage.getItem('ds_quotes') || '[]');
-    const now = new Date();
-    const timeStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
-    
-    const data = {
-        id: editingId || Date.now(),
-        saveTime: timeStr,
-        date: g('q_date').value, client: g('c_name').value, rep: g('c_rep').value, etc: g('c_etc').value,
-        title: g('q_title').value, no: g('q_no').value, valid: g('q_valid').value,
-        pay: g('q_pay').value, payCustom: g('q_pay_custom').value,
-        items: currentItems, note: g('q_note').value
-    };
-    if(editingId) {
-        const idx = quotes.findIndex(q => q.id === editingId);
-        if(idx !== -1) quotes[idx] = data;
-    } else { quotes.push(data); }
-    localStorage.setItem('ds_quotes', JSON.stringify(quotes));
-    alert('성공적으로 저장되었습니다.');
-    renderSavedList();
-}
-
-function renderSavedList(){
-    const quotes = JSON.parse(localStorage.getItem('ds_quotes') || '[]');
-    const container = g('saved-list-container');
-    container.innerHTML = quotes.length ? '' : '<div style="padding:40px; color:#999; text-align:center;">저장된 견적서가 없습니다.</div>';
-    [...quotes].reverse().forEach(q => {
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `
-            <div class="list-info">
-                <b>${q.client || '거래처명 없음'}</b>
-                <small>저장일시: ${q.saveTime || q.date}</small>
-            </div>
-            <div class="list-actions">
-                <button class="btn btn-accent" style="padding:5px 12px;" onclick="loadQuote(${q.id})">수정</button>
-                <button class="btn" style="color:#e74c3c; padding:5px 12px;" onclick="deleteQuote(${q.id})">삭제</button>
-            </div>`;
-        container.appendChild(item);
-    });
-}
-
-function loadQuote(id){
-    const quotes = JSON.parse(localStorage.getItem('ds_quotes') || '[]');
-    const q = quotes.find(item => item.id === id);
-    if(q){
-        editingId = q.id;
-        g('c_name').value = q.client || ''; g('c_rep').value = q.rep || ''; g('c_etc').value = q.etc || '';
-        g('q_title').value = q.title || ''; g('q_no').value = q.no || ''; g('q_date').value = q.date || '';
-        g('q_valid').value = q.valid || ''; g('q_pay').value = q.pay || ''; g('q_pay_custom').value = q.payCustom || '';
-        g('q_note').value = q.note || '';
-        togglePayCustom(); currentItems = q.items || []; renderItems(); showTab('editor');
-    }
-}
-
-function deleteQuote(id){
-    if(confirm('정말 이 견적서를 삭제하시겠습니까?')){
-        let quotes = JSON.parse(localStorage.getItem('ds_quotes') || '[]');
-        localStorage.setItem('ds_quotes', JSON.stringify(quotes.filter(q => q.id !== id)));
-        renderSavedList();
-    }
-}
-
 function saveSettings(){
     const s = {
         name: g('s_name').value, rep: g('s_rep').value, tel: g('s_tel').value,
@@ -396,6 +422,7 @@ function showTab(n){
     g('tab-write').className = n==='editor'?'tab active':'tab';
     g('tab-list').className = n==='list'?'tab active':'tab';
     g('tab-settings').className = n==='settings'?'tab active':'tab';
+    if(n==='list' && window.renderSavedList) renderSavedList();
 }
 
 function updateTitleAndPrint() {
