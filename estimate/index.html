@@ -348,7 +348,7 @@ window.deleteQuote = async function(id){
           <div class="pv-co-details" id="pv-s-details"></div>
         </div>
         <div class="pv-meta-section">
-          <div class="pv-client-box"><div style="font-size:9px; font-weight:700; color:var(--pv); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em;">수신</div><div class="pv-client-name"><span id="pv-c-name">거래처명</span> 귀하</div><div id="pv-c-rep" style="font-weight:600; margin:4px 0;"></div><div id="pv-c-sub" style="font-size:11px; color:#666; white-space:pre-wrap;"></div></div>
+          <div class="pv-client-box"><div style="font-size:9px; font-weight:700; color:var(--pv); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em;">수신</div><div class="pv-client-name"><span id="pv-c-name">거래처명</span></div><div id="pv-c-rep" style="font-weight:600; margin:4px 0;"></div><div id="pv-c-sub" style="font-size:11px; color:#666; white-space:pre-wrap;"></div></div>
           <div class="pv-summary-box">
             <div class="pv-summary-line"><span>명칭</span><b id="pv-q-title"></b></div>
             <div class="pv-summary-line"><span>일자</span><b id="pv-q-date"></b></div>
@@ -462,9 +462,25 @@ function updateScale(){
 
 function togglePayCustom() { g('q_pay_custom').style.display = g('q_pay').value === 'custom' ? 'block' : 'none'; }
 function handleFile(input, type) {
+    const file = input.files[0];
     const reader = new FileReader();
-    reader.onload = (e) => { window['temp_'+type] = e.target.result; };
-    reader.readAsDataURL(input.files[0]);
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX = 400;
+            let w = img.width, h = img.height;
+            if(w > MAX || h > MAX) {
+                if(w > h) { h = Math.round(h * MAX / w); w = MAX; }
+                else { w = Math.round(w * MAX / h); h = MAX; }
+            }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            window['temp_'+type] = canvas.toDataURL('image/png', 0.8);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
 }
 function newQuote(){ if(confirm('입력된 모든 내용이 초기화됩니다. 계속할까요?')) { editingId = null; location.reload(); } }
 
