@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="dynamic-title">견적서_덕선필름</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ee;--surface:#fdfcf8;--surface2:#f0ede5;
+  --border:#ddd9cf;--border2:#c8c4b8;
+  --text:#1e1c18;--text2:#6b6860;--text3:#9e9b94;
+  --accent:#1e3a2f;--accent2:#2d5c46;
+  --radius:8px;--shadow:0 1px 3px rgba(0,0,0,.08);
+  --pv:#1a3a6b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;overflow:hidden;}
+
+/* UI 레이아웃 */
+.app-header{background:var(--accent);color:#fff;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:52px;}
+.app-header h1{font-size:15px;font-weight:500;letter-spacing:.04em}
+.header-actions{display:flex;gap:8px}
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;}
+.tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.split-container { display: flex; height: calc(100vh - 104px); width: 100vw; }
+#editor-side { width: 40%; min-width: 400px; height: 100%; overflow-y: auto; padding: 1.5rem; background: var(--bg); border-right: 1px solid var(--border); }
+#resizer { width: 8px; cursor: col-resize; background: var(--border); }
+#preview-side { flex: 1; height: 100%; overflow-y: auto; padding: 2rem; background: var(--surface2); display: flex; justify-content: center; }
+
+/* 카드 스타일 */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:1rem}
+.card-header{padding:0.8rem 1rem;border-bottom:1px solid var(--border);font-weight:700;font-size:13px;color:var(--text2)}
+.card-body{padding:1rem}
+label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:4px}
+input, select, textarea { width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius); font-size:13px; outline:none; font-family: inherit; }
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{padding:8px 14px; border-radius:var(--radius); font-size:12px; font-weight:700; cursor:pointer; border:1px solid var(--border2); background:#fff; transition: background 0.2s;}
+.btn:hover { background: #f0f0f0; }
+.btn-accent{background:var(--accent); color:#fff; border:none}
+.btn-accent:hover { background: var(--accent2); }
+.hbtn{padding:6px 12px; border-radius:var(--radius); font-size:12px; font-weight:500; cursor:pointer; border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.1); color:#fff;}
+
+/* 저장 목록 스타일 복원 */
+#saved-list-container { padding: 5px; }
+.list-item { 
+  background: #fff; border: 1px solid var(--border); border-radius: 6px; 
+  padding: 12px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.list-info b { font-size: 14px; color: var(--text); display: block; margin-bottom: 2px; }
+.list-info small { color: #888; font-size: 11px; }
+.list-actions { display: flex; gap: 6px; }
+
+/* 미리보기 용지 */
+.preview-paper{ 
+  background:#fff; width:210mm; min-height:296mm; padding: 15mm 15mm 20mm 15mm; 
+  position: relative; display: flex; flex-direction: column; color:#111;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1); margin-bottom: 20px;
+}
+.pv-q-no-top { text-align: right; font-size: 11px; color: #888; height: 15px; margin-bottom: 5px; }
+.pv-main-title { font-family: 'Noto Serif KR', serif; font-size: 38px; font-weight: 700; color: var(--pv); letter-spacing: 15px; text-align: left; }
+.pv-header-line { width: 100%; height: 2px; background: var(--pv); margin: 5px 0 10px 0; }
+
+.pv-info-right { text-align: right; margin-bottom: 1.5rem; }
+.pv-co-row { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 6px; position: relative; display: inline-block; padding-right: 35px; }
+.pv-stamp-area { position: absolute; right: -15px; top: -24px; width: 62px; height: 62px; pointer-events: none; }
+.pv-stamp-area img { width: 100%; height: 100%; opacity: 0.85; }
+.pv-co-details { font-size: 10.5px; color: #444; line-height: 1.6; text-align: right; }
+
+.pv-meta-section { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; gap: 20px; }
+.pv-client-box { flex: 1; background: #f8f9fa; padding: 1.2rem; border-left: 4px solid var(--pv); min-height: 100px; text-align: left; }
+.pv-client-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.pv-summary-box { width: 280px; }
+.pv-summary-line { display: flex; justify-content: space-between; font-size: 11px; padding: 6px 0; border-bottom: 1px solid #eee; }
+
+.pv-table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; margin-bottom: 1rem; }
+.pv-table th { background: var(--pv); color: #fff; padding: 8px 5px; border-top: 1px solid var(--pv); border-bottom: 1px solid var(--pv); }
+.pv-table td { padding: 7px 5px; border-bottom: 1px solid #eee; height: 32px; }
+
+.pv-total-wrap { display: flex; justify-content: flex-end; margin-top: 0.5rem; margin-bottom: 1rem; }
+.pv-total-box { min-width: 260px; }
+.pv-total-line { display: flex; justify-content: space-between; padding: 5px 0; font-size: 11px; border-bottom: 1px solid #eee; }
+.pv-total-final { border-top: 2.5px solid var(--pv); border-bottom: none; margin-top: 5px; padding-top: 10px; font-size: 17px; font-weight: 700; color: var(--pv); }
+
+.pv-note-box { 
+    background:#f4f6f9; padding:10px; font-size:11px; border-radius:4px; text-align:left; 
+    display: flex; gap: 10px; align-items: flex-start; line-height: 1.5;
+}
+.pv-note-label { font-weight: 700; color: #444; white-space: nowrap; flex-shrink: 0; }
+.pv-note-content { white-space: pre-wrap; }
+
+.pv-footer-wrap { margin-top: auto; padding-top: 10px; border-top: 1px solid #ccc; width: 100%; }
+.pv-footer-grid { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.pv-footer-item { font-size: 10px; color: #444; flex: 1; }
+.pv-footer-left { text-align: left; }
+.pv-footer-center { text-align: center; }
+.pv-footer-right { text-align: right; }
+.pv-footer-logo-img { max-height: 30px; vertical-align: middle; }
+
+@media print {
+  @page { margin: 0; size: A4; }
+  body { overflow: visible; background: #fff; }
+  .app-header, .tabs, #resizer, #editor-side { display: none !important; }
+  #preview-side { width: 100% !important; padding: 0 !important; background: #fff !important; overflow: visible !important; display: block !important; }
+  .preview-paper { box-shadow: none; border: none; margin: 0; padding: 15mm 15mm 20mm 15mm !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>덕선필름 견적 시스템</h1>
+  <div class="header-actions">
+    <button class="hbtn" onclick="newQuote()">새 견적</button>
+    <button class="hbtn" onclick="saveQuote()">💾 견적 저장</button>
+    <button class="hbtn" style="background:#fff; color:var(--accent)" onclick="updateTitleAndPrint()">🖨 PDF 저장 / 인쇄</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tab active" id="tab-write" onclick="showTab('editor')">견적서 작성</div>
+  <div class="tab" id="tab-list" onclick="showTab('list')">저장 목록</div>
+  <div class="tab" id="tab-settings" onclick="showTab('settings')">회사 정보 설정</div>
+</nav>
+
+<div class="split-container">
+  <div id="editor-side">
+    <div id="editor-content">
+      <div class="card">
+        <div class="card-header">수신처 정보</div>
+        <div class="card-body">
+          <div class="row2">
+            <div class="field"><label>거래처명</label><input type="text" id="c_name" oninput="livePreview()" placeholder="(주)영산글로넷"></div>
+            <div class="field"><label>담당자명</label><input type="text" id="c_rep" oninput="livePreview()"></div>
+          </div>
+          <div class="field"><label>기타 수신 정보</label><textarea id="c_etc" rows="2" oninput="livePreview()"></textarea></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">견적 요약 정보</div>
+        <div class="card-body">
+          <div class="field"><label>프로젝트 명칭</label><input type="text" id="q_title" oninput="livePreview()"></div>
+          <div class="row2">
+            <div class="field"><label>견적번호</label><input type="text" id="q_no" oninput="livePreview()"></div>
+            <div class="field"><label>견적일자</label><input type="date" id="q_date" oninput="livePreview()"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>유효기간</label><input type="text" id="q_valid" value="발행일로부터 30일" oninput="livePreview()"></div>
+            <div class="field">
+              <label>납부 방법</label>
+              <select id="q_pay" onchange="togglePayCustom(); livePreview()">
+                <option>세금계산서 발행 후 계좌이체</option>
+                <option>계약금 50% / 잔금 50%</option>
+                <option value="custom">직접 입력</option>
+              </select>
+              <input type="text" id="q_pay_custom" placeholder="내용 입력" style="display:none; margin-top:8px;" oninput="livePreview()">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" style="display:flex; justify-content:space-between;">
+          항목 리스트 <button class="btn btn-accent" style="padding:4px 8px" onclick="addItem()">+ 추가</button>
+        </div>
+        <div class="card-body"><table style="width:100%; border-collapse:collapse;"><tbody id="items-body"></tbody></table></div>
+      </div>
+      <div class="card"><div class="card-header">비고</div><div class="card-body"><textarea id="q_note" rows="3" oninput="livePreview()"></textarea></div></div>
+    </div>
+    <div id="list-content" style="display:none">
+        <div id="saved-list-container"></div>
+    </div>
+    <div id="settings-content" style="display:none">
+        <div class="card">
+            <div class="card-header">우리회사 정보 설정</div>
+            <div class="card-body">
+                <div class="field"><label>상호명</label><input type="text" id="s_name" value="덕선기획"></div>
+                <div class="row2">
+                  <div class="field"><label>대표자명</label><input type="text" id="s_rep" value="주선영"></div>
+                  <div class="field"><label>전화번호</label><input type="text" id="s_tel" value="010-7795-1566"></div>
+                </div>
+                <div class="row2">
+                  <div class="field"><label>이메일</label><input type="text" id="s_email" value="dsfilm7@naver.com"></div>
+                  <div class="field"><label>계좌번호</label><input type="text" id="s_bank" value="국민은행 | 789402-01-195804"></div>
+                </div>
+                <div class="row2">
+                  <div class="field"><label>업태</label><input type="text" id="s_t1" value="서비스업"></div>
+                  <div class="field"><label>종목</label><input type="text" id="s_t2" value="일반영화 제작"></div>
+                </div>
+                <div class="field"><label>사업자번호</label><input type="text" id="s_num" value="350-49-00883"></div>
+                <div class="field"><label>주소</label><input type="text" id="s_addr" value="전북특별자치도 완산구 아중2길 12"></div>
+                <div class="row2">
+                  <div class="field"><label>로고 이미지</label><input type="file" accept="image/*" onchange="handleFile(this, 'logo')"></div>
+                  <div class="field"><label>도장 이미지</label><input type="file" accept="image/*" onchange="handleFile(this, 'stamp')"></div>
+                </div>
+                <button class="btn btn-accent" style="width:100%" onclick="saveSettings()">⚙ 설정 저장</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div id="resizer"></div>
+
+  <div id="preview-side">
+    <div class="preview-paper-container" id="paper-scale">
+      <div class="preview-paper" id="main-paper">
+        <div class="pv-q-no-top" id="pv-q-no"></div>
+        <div class="pv-main-title">견 적 서</div>
+        <div class="pv-header-line"></div>
+        <div class="pv-info-right">
+          <div class="pv-co-row"><span id="pv-s-name">덕선기획</span> | 대표 <span id="pv-s-rep">주선영</span><div class="pv-stamp-area" id="pv-stamp-area"></div></div>
+          <div class="pv-co-details" id="pv-s-details"></div>
+        </div>
+        <div class="pv-meta-section">
+          <div class="pv-client-box"><div class="pv-client-name"><span id="pv-c-name">거래처명</span> 귀하</div><div id="pv-c-rep" style="font-weight:600; margin:4px 0;"></div><div id="pv-c-sub" style="font-size:11px; color:#666; white-space:pre-wrap;"></div></div>
+          <div class="pv-summary-box">
+            <div class="pv-summary-line"><span>명칭</span><b id="pv-q-title"></b></div>
+            <div class="pv-summary-line"><span>일자</span><b id="pv-q-date"></b></div>
+            <div class="pv-summary-line"><span>납부</span><b id="pv-q-pay"></b></div>
+            <div class="pv-summary-line"><span>유효</span><b id="pv-q-valid"></b></div>
+          </div>
+        </div>
+        <table class="pv-table">
+          <thead><tr><th width="45">No</th><th width="200">품목명</th><th width="170">상세내용</th><th width="50">수량</th><th width="100">단가</th><th width="100">금액</th></tr></thead>
+          <tbody id="pv-items-body"></tbody>
+        </table>
+        <div class="pv-total-wrap"><div class="pv-total-box"><div class="pv-total-line"><span>공급가액</span><span id="pv-subtotal">0 원</span></div><div class="pv-total-line"><span>부가가치세 (10%)</span><span id="pv-tax">0 원</span></div><div class="pv-total-line pv-total-final"><span>최종 합계액</span><span id="pv-total">0 원</span></div></div></div>
+        
+        <div id="pv-note-wrap" style="margin-bottom:15px;"></div>
+
+        <div class="pv-footer-wrap">
+            <div class="pv-footer-grid">
+                <div class="pv-footer-item pv-footer-left">입금계좌: <span id="pv-ft-bank"></span></div>
+                <div class="pv-footer-item pv-footer-center" id="pv-footer-logo"></div>
+                <div class="pv-footer-item pv-footer-right">E-mail: <span id="pv-ft-email"></span></div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const g=id=>document.getElementById(id);
+const fmt=n=>Math.round(n||0).toLocaleString();
+let currentItems = [];
+let editingId = null;
+
+window.onload = () => {
+    g('q_date').value = new Date().toISOString().substring(0, 10);
+    loadSettings();
+    if (currentItems.length === 0) addItem({name:'홍보영상 제작', spec:'기획/촬영/편집 포함', qty:'', price:''});
+    updateScale();
+    renderSavedList();
+};
+
+function addItem(data){ currentItems.push(data || {name:'', spec:'', qty:'', price:''}); renderItems(); livePreview(); }
+function renderItems(){
+    const b = g('items-body'); b.innerHTML = '';
+    currentItems.forEach((it, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td style="padding:2px"><input type="text" value="${it.name}" placeholder="품목" oninput="currentItems[${i}].name=this.value;livePreview()"></td>
+            <td style="padding:2px"><input type="text" value="${it.spec}" placeholder="상세" oninput="currentItems[${i}].spec=this.value;livePreview()"></td>
+            <td style="padding:2px"><input type="text" value="${it.qty}" placeholder="수량" style="width:50px" oninput="currentItems[${i}].qty=this.value;livePreview()"></td>
+            <td style="padding:2px"><input type="text" value="${it.price}" placeholder="단가" oninput="currentItems[${i}].price=this.value;livePreview()"></td>
+            <td style="padding:2px"><button style="border:none; background:none; color:red; cursor:pointer;" onclick="currentItems.splice(${i},1);renderItems();livePreview()">×</button></td>`;
+        b.appendChild(tr);
+    });
+}
+
+function livePreview(){
+    const s = JSON.parse(localStorage.getItem('ds_settings') || '{}');
+    g('pv-c-name').innerText = g('c_name').value || '거래처명';
+    g('pv-c-rep').innerText = g('c_rep').value || '';
+    g('pv-c-sub').innerText = g('c_etc').value || '';
+    g('pv-q-title').innerText = g('q_title').value || '';
+    g('pv-q-no').innerText = g('q_no').value ? `No. ${g('q_no').value}` : '';
+    g('pv-q-date').innerText = g('q_date').value;
+    g('pv-q-pay').innerText = g('q_pay').value === 'custom' ? g('q_pay_custom').value : g('q_pay').value;
+    g('pv-q-valid').innerText = g('q_valid').value;
+
+    const pvBody = g('pv-items-body'); pvBody.innerHTML = '';
+    let subtotal = 0;
+    currentItems.forEach((it, i) => {
+        const tr = document.createElement('tr');
+        const nQty = parseFloat(it.qty) || 0;
+        const nPrice = parseFloat(it.price) || 0;
+        const lineTotal = nQty * nPrice;
+        if(it.name) subtotal += lineTotal;
+        tr.innerHTML = `<td align="center">${it.name ? i+1 : ''}</td><td>${it.name}</td><td>${it.spec}</td><td align="center">${it.qty}</td><td align="right">${it.price ? fmt(nPrice) : ''}</td><td align="right">${lineTotal ? fmt(lineTotal) : ''}</td>`;
+        pvBody.appendChild(tr);
+    });
+
+    g('pv-subtotal').innerText = fmt(subtotal) + ' 원';
+    g('pv-tax').innerText = fmt(subtotal * 0.1) + ' 원';
+    g('pv-total').innerText = fmt(subtotal * 1.1) + ' 원';
+    g('pv-note-wrap').innerHTML = g('q_note').value ? `<div class="pv-note-box"><div class="pv-note-label">[비고]</div><div class="pv-note-content">${g('q_note').value}</div></div>` : '';
+    g('pv-ft-bank').innerText = s.bank || '';
+    g('pv-ft-email').innerText = s.email || '';
+}
+
+function saveQuote(){
+    const quotes = JSON.parse(localStorage.getItem('ds_quotes') || '[]');
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+    
+    const data = {
+        id: editingId || Date.now(),
+        saveTime: timeStr,
+        date: g('q_date').value, client: g('c_name').value, rep: g('c_rep').value, etc: g('c_etc').value,
+        title: g('q_title').value, no: g('q_no').value, valid: g('q_valid').value,
+        pay: g('q_pay').value, payCustom: g('q_pay_custom').value,
+        items: currentItems, note: g('q_note').value
+    };
+    if(editingId) {
+        const idx = quotes.findIndex(q => q.id === editingId);
+        if(idx !== -1) quotes[idx] = data;
+    } else { quotes.push(data); }
+    localStorage.setItem('ds_quotes', JSON.stringify(quotes));
+    alert('성공적으로 저장되었습니다.');
+    renderSavedList();
+}
+
+function renderSavedList(){
+    const quotes = JSON.parse(localStorage.getItem('ds_quotes') || '[]');
+    const container = g('saved-list-container');
+    container.innerHTML = quotes.length ? '' : '<div style="padding:40px; color:#999; text-align:center;">저장된 견적서가 없습니다.</div>';
+    [...quotes].reverse().forEach(q => {
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `
+            <div class="list-info">
+                <b>${q.client || '거래처명 없음'}</b>
+                <small>저장일시: ${q.saveTime || q.date}</small>
+            </div>
+            <div class="list-actions">
+                <button class="btn btn-accent" style="padding:5px 12px;" onclick="loadQuote(${q.id})">수정</button>
+                <button class="btn" style="color:#e74c3c; padding:5px 12px;" onclick="deleteQuote(${q.id})">삭제</button>
+            </div>`;
+        container.appendChild(item);
+    });
+}
+
+function loadQuote(id){
+    const quotes = JSON.parse(localStorage.getItem('ds_quotes') || '[]');
+    const q = quotes.find(item => item.id === id);
+    if(q){
+        editingId = q.id;
+        g('c_name').value = q.client || ''; g('c_rep').value = q.rep || ''; g('c_etc').value = q.etc || '';
+        g('q_title').value = q.title || ''; g('q_no').value = q.no || ''; g('q_date').value = q.date || '';
+        g('q_valid').value = q.valid || ''; g('q_pay').value = q.pay || ''; g('q_pay_custom').value = q.payCustom || '';
+        g('q_note').value = q.note || '';
+        togglePayCustom(); currentItems = q.items || []; renderItems(); showTab('editor');
+    }
+}
+
+function deleteQuote(id){
+    if(confirm('정말 이 견적서를 삭제하시겠습니까?')){
+        let quotes = JSON.parse(localStorage.getItem('ds_quotes') || '[]');
+        localStorage.setItem('ds_quotes', JSON.stringify(quotes.filter(q => q.id !== id)));
+        renderSavedList();
+    }
+}
+
+function saveSettings(){
+    const s = {
+        name: g('s_name').value, rep: g('s_rep').value, tel: g('s_tel').value,
+        email: g('s_email').value, bank: g('s_bank').value,
+        num: g('s_num').value, addr: g('s_addr').value, t1: g('s_t1').value, t2: g('s_t2').value
+    };
+    localStorage.setItem('ds_settings', JSON.stringify(s));
+    if(window.temp_logo) localStorage.setItem('ds_logo', window.temp_logo);
+    if(window.temp_stamp) localStorage.setItem('ds_stamp', window.temp_stamp);
+    alert('회사 정보가 저장되었습니다.');
+    loadSettings();
+}
+
+function loadSettings(){
+    const s = JSON.parse(localStorage.getItem('ds_settings') || '{}');
+    g('pv-s-name').innerText = s.name || '덕선기획';
+    g('pv-s-rep').innerText = s.rep || '주선영';
+    g('pv-s-details').innerHTML = `사업자번호: ${s.num || ''}<br>업태: ${s.t1 || ''} | 종목: ${s.t2 || ''}<br>${s.addr || ''} | ${s.tel || ''}`;
+    const logo = localStorage.getItem('ds_logo');
+    const stamp = localStorage.getItem('ds_stamp');
+    if(logo) g('pv-footer-logo').innerHTML = `<img src="${logo}" class="pv-footer-logo-img">`;
+    if(stamp) g('pv-stamp-area').innerHTML = `<img src="${stamp}">`;
+    livePreview();
+}
+
+function showTab(n){
+    g('editor-content').style.display = n==='editor'?'block':'none';
+    g('list-content').style.display = n==='list'?'block':'none';
+    g('settings-content').style.display = n==='settings'?'block':'none';
+    g('tab-write').className = n==='editor'?'tab active':'tab';
+    g('tab-list').className = n==='list'?'tab active':'tab';
+    g('tab-settings').className = n==='settings'?'tab active':'tab';
+}
+
+function updateTitleAndPrint() {
+    const dateStr = g('q_date').value.replace(/-/g, '').substring(2);
+    document.title = `견적서${dateStr}_${g('c_name').value || '거래처'}`;
+    window.print();
+}
+
+function updateScale(){
+    const container = g('preview-side');
+    const paper = g('paper-scale');
+    const scale = (container.offsetWidth - 40) / 794; 
+    paper.style.transform = scale < 1 ? `scale(${scale})` : `scale(1)`;
+}
+
+function togglePayCustom() { g('q_pay_custom').style.display = g('q_pay').value === 'custom' ? 'block' : 'none'; }
+function handleFile(input, type) {
+    const reader = new FileReader();
+    reader.onload = (e) => { window['temp_'+type] = e.target.result; };
+    reader.readAsDataURL(input.files[0]);
+}
+function newQuote(){ if(confirm('입력된 모든 내용이 초기화됩니다. 계속할까요?')) { editingId = null; location.reload(); } }
+
+let isResizing = false;
+g('resizer').addEventListener('mousedown', () => isResizing = true);
+document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    g('editor-side').style.width = e.clientX + 'px';
+    updateScale();
+});
+document.addEventListener('mouseup', () => isResizing = false);
+window.addEventListener('resize', updateScale);
+</script>
+</body>
+</html>
