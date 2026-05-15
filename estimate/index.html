@@ -348,7 +348,7 @@ window.deleteQuote = async function(id){
           <div class="pv-co-details" id="pv-s-details"></div>
         </div>
         <div class="pv-meta-section">
-          <div class="pv-client-box"><div class="pv-client-name"><span id="pv-c-name">거래처명</span> 귀하</div><div id="pv-c-rep" style="font-weight:600; margin:4px 0;"></div><div id="pv-c-sub" style="font-size:11px; color:#666; white-space:pre-wrap;"></div></div>
+          <div class="pv-client-box"><div style="font-size:9px; font-weight:700; color:var(--pv); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em;">수신</div><div class="pv-client-name"><span id="pv-c-name">거래처명</span> 귀하</div><div id="pv-c-rep" style="font-weight:600; margin:4px 0;"></div><div id="pv-c-sub" style="font-size:11px; color:#666; white-space:pre-wrap;"></div></div>
           <div class="pv-summary-box">
             <div class="pv-summary-line"><span>명칭</span><b id="pv-q-title"></b></div>
             <div class="pv-summary-line"><span>일자</span><b id="pv-q-date"></b></div>
@@ -447,7 +447,9 @@ function showTab(n){
 
 function updateTitleAndPrint() {
     const dateStr = g('q_date').value.replace(/-/g, '').substring(2);
-    document.title = `견적서${dateStr}_${g('c_name').value || '거래처'}`;
+    const client = g('c_name').value || '거래처';
+    const title = g('q_title').value ? `_${g('q_title').value}` : '';
+    document.title = `견적서${dateStr}_${client}${title}`;
     window.print();
 }
 
