@@ -449,7 +449,9 @@ function updateTitleAndPrint() {
     const dateStr = g('q_date').value.replace(/-/g, '').substring(2);
     const client = g('c_name').value || '거래처';
     const title = g('q_title').value ? `_${g('q_title').value}` : '';
-    document.title = `견적서${dateStr}_${client}${title}`;
+    const fileName = `견적서${dateStr}_${client}${title}`;
+    document.title = fileName;
+    try { navigator.clipboard.writeText(fileName); } catch(e) {}
     window.print();
 }
 
