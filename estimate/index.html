@@ -111,6 +111,7 @@ input, select, textarea { width:100%; padding:10px; border:1px solid var(--borde
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCHe4_wr2Q1ph3bC6eRGieIOotw8e1vZ_o",
@@ -123,7 +124,59 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 const COL = 'estimates';
+
+// 회사정보 저장 (로고/도장 → Firebase Storage, 텍스트 → localStorage)
+window.saveSettings = async function(){
+    const s = {
+        name: g('s_name').value, rep: g('s_rep').value, tel: g('s_tel').value,
+        email: g('s_email').value, bank: g('s_bank').value,
+        num: g('s_num').value, addr: g('s_addr').value, t1: g('s_t1').value, t2: g('s_t2').value
+    };
+    localStorage.setItem('ds_settings', JSON.stringify(s));
+
+    try {
+        if(window.temp_logo) {
+            const logoRef = ref(storage, 'dsfilm/logo.png');
+            await uploadString(logoRef, window.temp_logo, 'data_url');
+        }
+        if(window.temp_stamp) {
+            const stampRef = ref(storage, 'dsfilm/stamp.png');
+            await uploadString(stampRef, window.temp_stamp, 'data_url');
+        }
+    } catch(e) { console.warn('이미지 업로드 실패:', e.message); }
+
+    alert('회사 정보가 저장되었습니다.');
+    loadSettings();
+};
+
+// 회사정보 불러오기 (이미지 → Firebase Storage URL)
+window.loadSettings = async function(){
+    const s = JSON.parse(localStorage.getItem('ds_settings') || '{}');
+    g('pv-s-name').innerText = s.name || '덕선필름';
+    g('pv-s-rep').innerText = s.rep || '주선영';
+    g('pv-s-details').innerHTML = `사업자번호: ${s.num || ''}<br>업태: ${s.t1 || ''} | 종목: ${s.t2 || ''}<br>${s.addr || ''} | ${s.tel || ''}`;
+    g('s_name').value = s.name||''; g('s_rep').value = s.rep||''; g('s_tel').value = s.tel||'';
+    g('s_email').value = s.email||''; g('s_bank').value = s.bank||'';
+    g('s_num').value = s.num||''; g('s_addr').value = s.addr||''; g('s_t1').value = s.t1||''; g('s_t2').value = s.t2||'';
+
+    try {
+        const logoURL = await getDownloadURL(ref(storage, 'dsfilm/logo.png'));
+        g('pv-footer-logo').innerHTML = `<img src="${logoURL}" class="pv-footer-logo-img">`;
+    } catch(e) {
+        const local = localStorage.getItem('ds_logo');
+        if(local) g('pv-footer-logo').innerHTML = `<img src="${local}" class="pv-footer-logo-img">`;
+    }
+    try {
+        const stampURL = await getDownloadURL(ref(storage, 'dsfilm/stamp.png'));
+        g('pv-stamp-area').innerHTML = `<img src="${stampURL}">`;
+    } catch(e) {
+        const local = localStorage.getItem('ds_stamp');
+        if(local) g('pv-stamp-area').innerHTML = `<img src="${local}">`;
+    }
+    livePreview();
+};
 
 window.saveQuote = async function(){
     const now = new Date();
@@ -388,31 +441,6 @@ function livePreview(){
     g('pv-note-wrap').innerHTML = g('q_note').value ? `<div class="pv-note-box"><div class="pv-note-label">[비고]</div><div class="pv-note-content">${g('q_note').value}</div></div>` : '';
     g('pv-ft-bank').innerText = s.bank || '';
     g('pv-ft-email').innerText = s.email || '';
-}
-
-function saveSettings(){
-    const s = {
-        name: g('s_name').value, rep: g('s_rep').value, tel: g('s_tel').value,
-        email: g('s_email').value, bank: g('s_bank').value,
-        num: g('s_num').value, addr: g('s_addr').value, t1: g('s_t1').value, t2: g('s_t2').value
-    };
-    localStorage.setItem('ds_settings', JSON.stringify(s));
-    if(window.temp_logo) localStorage.setItem('ds_logo', window.temp_logo);
-    if(window.temp_stamp) localStorage.setItem('ds_stamp', window.temp_stamp);
-    alert('회사 정보가 저장되었습니다.');
-    loadSettings();
-}
-
-function loadSettings(){
-    const s = JSON.parse(localStorage.getItem('ds_settings') || '{}');
-    g('pv-s-name').innerText = s.name || '덕선기획';
-    g('pv-s-rep').innerText = s.rep || '주선영';
-    g('pv-s-details').innerHTML = `사업자번호: ${s.num || ''}<br>업태: ${s.t1 || ''} | 종목: ${s.t2 || ''}<br>${s.addr || ''} | ${s.tel || ''}`;
-    const logo = localStorage.getItem('ds_logo');
-    const stamp = localStorage.getItem('ds_stamp');
-    if(logo) g('pv-footer-logo').innerHTML = `<img src="${logo}" class="pv-footer-logo-img">`;
-    if(stamp) g('pv-stamp-area').innerHTML = `<img src="${stamp}">`;
-    livePreview();
 }
 
 function showTab(n){
