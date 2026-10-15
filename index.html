@@ -281,9 +281,13 @@ footer{padding:32px 0;font-size:12.5px;color:var(--mid)}
 <footer>
   <div class="wrap foot-in">
     <span id="footCopy">© 2026 덕선필름</span>
-    <span>전북 전주시 · 영상 촬영 및 제작</span>
+    <span class="secret" id="secretTap">전북 전주시 · 영상 촬영 및 제작</span>
   </div>
 </footer>
+
+.secret{cursor:default;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:color .2s}
+.secret.hot{color:var(--ink)}
+
 
 <div class="modal" id="modal">
   <button class="modal-close" id="mClose" aria-label="닫기">×</button>
@@ -500,6 +504,39 @@ fetch(DATA_URL + '?t=' + Date.now())
     $('grid').innerHTML = '<p class="skel">작업물을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>';
     revealAll();
   });
+
+  /* ---------- 숨은 관리자 진입 (푸터 5연타) ---------- */
+(function(){
+  const el = $('secretTap');
+  if (!el) return;
+  const NEED = 5, WINDOW = 2500;
+  let count = 0, timer = null;
+
+  el.addEventListener('click', () => {
+    count++;
+    clearTimeout(timer);
+
+    // 3번째부터 글씨가 진해지면서 반응을 알려줌
+    if (count >= 3) {
+      el.classList.add('hot');
+      el.textContent = `관리자 모드까지 ${NEED - count}회`;
+    }
+
+    if (count >= NEED) {
+      count = 0;
+      el.textContent = '관리자 페이지로 이동합니다';
+      setTimeout(() => { location.href = 'dsfilm_admin_v3.html'; }, 350);
+      return;
+    }
+
+    timer = setTimeout(() => {
+      count = 0;
+      el.classList.remove('hot');
+      el.textContent = '전북 전주시 · 영상 촬영 및 제작';
+    }, WINDOW);
+  });
+})();
+
 </script>
 </body>
 </html>
