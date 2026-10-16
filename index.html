@@ -603,7 +603,8 @@ function initReveal(){
     if(n >= 5){
       el.textContent = '관리자 모드로 이동합니다';
       el.classList.add('hot');
-      setTimeout(() => { location.href = 'dsfilm_admin_v5.html'; }, 350);
+      window.open('dsfilm_admin_v5.html','_blank','noopener');
+      setTimeout(() => { el.textContent = base; el.classList.remove('hot'); n = 0; }, 1200);
       return;
     }
     if(n >= 3){ el.textContent = `관리자 모드까지 ${5 - n}회`; el.classList.add('hot'); }
