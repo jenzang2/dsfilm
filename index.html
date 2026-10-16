@@ -78,16 +78,18 @@ header.solid{background:rgba(255,255,255,.93);backdrop-filter:blur(14px);border-
 
 /* REEL */
 .reel{position:relative;margin-top:76px;width:100%;aspect-ratio:21/9;background:#111;overflow:hidden;cursor:pointer}
-.reel img{width:100%;height:100%;object-fit:cover;opacity:.92;transition:transform .8s cubic-bezier(.22,1,.36,1)}
-.reel:hover img{transform:scale(1.03)}
-.reel::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.5))}
-.reel-label{position:absolute;left:28px;bottom:26px;z-index:2;color:#fff;display:flex;align-items:center;gap:14px;right:28px}
+.reel-media{position:absolute;inset:0;overflow:hidden;background:#111}
+.reel-media img,.reel-media video{width:100%;height:100%;object-fit:cover;opacity:.92}
+.reel-media iframe{position:absolute;top:50%;left:0;width:100%;aspect-ratio:16/9;transform:translateY(-50%);border:0;pointer-events:none;opacity:.92}
+.reel::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.52));z-index:1}
+.reel-label{position:absolute;left:28px;bottom:26px;right:28px;z-index:2;color:#fff;display:flex;align-items:center;gap:14px}
 .reel-play{width:46px;height:46px;border:1px solid rgba(255,255,255,.8);display:grid;place-items:center;flex:0 0 auto;transition:.25s}
 .reel:hover .reel-play{background:#fff;color:#111}
 .reel-play svg{width:13px;height:13px;fill:currentColor}
 .reel-txt small{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.82}
 .reel-txt b{display:block;font-size:14.5px;font-weight:700;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media(max-width:760px){.reel{aspect-ratio:16/10}}
+@media(max-width:760px){.reel{aspect-ratio:16/9;margin-top:52px}}
+
 
 /* STATS */
 .stats{margin-top:88px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr)}
@@ -215,12 +217,14 @@ footer{padding:32px 0;font-size:12.5px;color:var(--mid)}
   </div>
   <div class="wrap">
     <div class="reel rv" id="reel" style="display:none">
-      <img id="reelImg" alt="">
+      <div class="reel-media" id="reelMedia"></div>
       <div class="reel-label">
         <div class="reel-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
         <div class="reel-txt"><small>Showreel</small><b id="reelTitle"></b></div>
       </div>
     </div>
+
+
     <div class="stats rv" id="stats"></div>
   </div>
 </div>
@@ -312,62 +316,44 @@ const ytId = u => { const m = (u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/|
 
 /* ---------- 작업물 순서: workSections 우선, 나머지는 뒤에 ---------- */
 function buildOrder(){
-  const works = D.works || [];
-  const byId = new Map(works.map(w => [w.id, w]));
-  const out = [], used = new Set();
-  (D.workSections || []).forEach(sec => {
-    (sec.workIds || []).forEach(id => {
-      const w = byId.get(id);
-      if (w && !used.has(id)) { out.push(w); used.add(id); }
-    });
-  });
-  works.forEach(w => { if (!used.has(w.id)) out.push(w); });
-  ORDERED = out.filter(w => ytId(w.url));
-}
-
-/* ---------- 상단 메뉴 ---------- */
-function paintNav(){
-  const n = D.nav || {};
-  if (n.logo) $('logoBox').innerHTML = `<img src="${esc(n.logo)}" alt="덕선필름"><small>DUCKSUN FILM</small>`;
-  const items = [
-    { t: n.menu2 || '작업물', h: '#work' },
-    { t: n.menu1 || '서비스', h: '#services' },
-    { t: n.menu3 || '소개',   h: '#about' },
-  ];
-  (n.extraMenus || []).forEach(m => { if (m.name && m.url) items.push({ t: m.name, h: m.url, ext: true }); });
-  const cta = { t: n.menu4 || '문의하기', h: '#contact' };
-
-  $('navLinks').innerHTML =
-    items.map(i => `<a href="${esc(i.h)}"${i.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(noEmo(i.t))}</a>`).join('')
-    + `<a href="${cta.h}" class="nav-cta">${esc(noEmo(cta.t))}</a>`;
-  $('mmenu').innerHTML =
-    items.concat([cta]).map(i => `<a href="${esc(i.h)}"${i.ext ? ' target="_blank" rel="noopener"' : ''}>${esc(noEmo(i.t))}</a>`).join('');
+  ORDERED = (D.works || []).filter(w => ytId(w.url) || /\.mp4($|\?)/i.test(w.url || ''));
 }
 
 /* ---------- 히어로 ---------- */
 function paintHero(){
-  const h = D.hero || {};
+  const h = D.hero || {}, m = D.heroMedia || {};
   if (h.badge) $('heroBadge').textContent = noEmo(h.badge);
   if (h.title) $('heroTitle').textContent = h.title;
   if (h.desc)  $('heroDesc').textContent  = h.desc;
 
   const top = ORDERED[0];
-  if (top) {
-    const id = ytId(top.url);
-    $('reel').style.display = '';
-    $('reel').dataset.id = id;
-    $('reel').dataset.t = top.name || '';
-    $('reelImg').src = `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
-    $('reelImg').onerror = function(){ this.src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`; };
-    $('reelTitle').textContent = noEmo(top.name || '');
+  const url   = (m.videoUrl || '').trim() || (top ? top.url : '');
+  const title = (m.title || '').trim()    || (top ? top.name : '');
+  const mode  = m.mode || 'thumb';
+  const box = $('reel'), media = $('reelMedia');
+
+  if (mode === 'none' || !url) { box.style.display = 'none'; }
+  else {
+    const id = ytId(url);
+    box.style.display = '';
+    box.dataset.id = id; box.dataset.t = title;
+    if (mode === 'video' && /\.mp4($|\?)/i.test(url)) {
+      media.innerHTML = `<video src="${esc(url)}" autoplay muted loop playsinline${m.poster ? ` poster="${esc(m.poster)}"` : ''}></video>`;
+    } else if (mode === 'video' && id) {
+      media.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&iv_load_policy=3" allow="autoplay; encrypted-media" tabindex="-1" aria-hidden="true"></iframe>`;
+    } else if (id) {
+      media.innerHTML = `<img src="https://img.youtube.com/vi/${id}/maxresdefault.jpg" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/${id}/hqdefault.jpg'" alt="">`;
+    }
+    $('reelTitle').textContent = noEmo(title);
   }
 
-  const st = (D.about && D.about.stats) || [];
-  const rows = st.map(s => ({ v: noEmo(s.num), l: s.label })).filter(s => s.v);
-  if (rows.length < 4) rows.push({ v: '전국', l: '출장 촬영 가능' });
+  const rows = ((D.about && D.about.stats) || [])
+    .map(s => ({ v: noEmo(s.num), l: s.label })).filter(s => s.v);
   $('stats').innerHTML = rows.slice(0,4).map(s =>
     `<div class="stat"><b>${esc(s.v)}</b><small>${esc(noEmo(s.l))}</small></div>`).join('');
+  $('stats').style.display = rows.length ? '' : 'none';
 }
+
 
 /* ---------- 필터 · 그리드 ---------- */
 function paintFilters(){
