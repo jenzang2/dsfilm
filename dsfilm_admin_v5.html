@@ -101,6 +101,7 @@ main{max-width:1180px;margin:0 auto;padding:22px 18px 120px}
 .toast.ok{background:var(--ok)}
 .prev{max-width:420px;margin-top:10px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
 code{background:#efefef;padding:2px 6px;border-radius:3px;font-size:12.5px}
+#gate input:-webkit-autofill{-webkit-box-shadow:0 0 0 60px #fff inset!important;-webkit-text-fill-color:#141414!important}
 </style>
 </head>
 <body>
@@ -109,7 +110,7 @@ code{background:#efefef;padding:2px 6px;border-radius:3px;font-size:12.5px}
   <div class="box">
     <h1>덕선필름 관리자</h1>
     <p>접근 암호를 입력하세요</p>
-    <input type="password" id="pw" placeholder="암호" autocomplete="current-password">
+    <input type="password" id="pw" placeholder="암호" name="ds-no-fill" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')">
     <button class="btn" id="pwBtn">들어가기</button>
     <a class="sub" href="estimate/">견적서 작성하러 가기</a>
   </div>
