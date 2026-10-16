@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>덕선필름 관리자 v5</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#141414;--mid:#767676;--line:#e4e4e4;--wash:#f6f6f5;--ok:#14733a;--warn:#b3261e}
+body{font-family:'Pretendard Variable',Pretendard,sans-serif;background:var(--wash);color:var(--ink);line-height:1.55;font-size:14px;-webkit-text-size-adjust:100%}
+img{display:block;max-width:100%}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);background:#fff;border-radius:4px;color:var(--ink);resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--ink);outline-offset:-1px}
+textarea{min-height:88px;line-height:1.7}
+label{display:block;font-size:11.5px;font-weight:700;color:var(--mid);margin-bottom:5px}
+.btn{padding:10px 18px;border:1px solid var(--ink);background:#fff;border-radius:4px;font-size:13.5px;font-weight:700;transition:.15s;white-space:nowrap;display:inline-block;text-align:center}
+.btn:hover{background:var(--ink);color:#fff}
+.btn.fill{background:var(--ink);color:#fff}
+.btn.fill:hover{opacity:.82}
+.btn.sm{padding:6px 11px;font-size:12px}
+.btn.ghost{border-color:var(--line);color:var(--mid)}
+.btn.ghost:hover{background:#ececec;color:var(--ink)}
+.btn.danger{border-color:#e3b9b5;color:var(--warn)}
+.btn.danger:hover{background:var(--warn);color:#fff;border-color:var(--warn)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+#gate{position:fixed;inset:0;background:#141414;display:grid;place-items:center;z-index:999;padding:24px}
+#gate .box{width:100%;max-width:320px;text-align:center;color:#fff}
+#gate h1{font-size:19px;font-weight:800;margin-bottom:5px}
+#gate p{font-size:12.5px;color:#8c8c8c;margin-bottom:20px}
+#gate input{text-align:center;margin-bottom:9px;color:#141414;background:#fff;caret-color:#141414;-webkit-text-fill-color:#141414}
+#gate .btn{width:100%;background:#fff;border-color:#fff}
+#gate .sub{margin-top:12px;font-size:12.5px;color:#8c8c8c;text-decoration:underline;display:inline-block}
+
+header.top{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:0 18px;height:60px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-size:15px;font-weight:800;white-space:nowrap}
+.brand small{font-weight:600;color:var(--mid);margin-left:6px;font-size:10.5px;letter-spacing:.1em}
+.top-act{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+main{max-width:1180px;margin:0 auto;padding:22px 18px 120px}
+
+.tabs{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap}
+.tabs button{padding:8px 15px;border:1px solid var(--line);background:#fff;border-radius:4px;font-size:13px;font-weight:600;color:var(--mid)}
+.tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.panel{display:none}.panel.on{display:block}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:18px;margin-bottom:13px}
+.card h2{font-size:14.5px;font-weight:800;margin-bottom:3px}
+.hint{font-size:12.5px;color:var(--mid);margin-bottom:14px;line-height:1.7}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
+.row.one{grid-template-columns:1fr}
+.row.auto{grid-template-columns:1fr auto}
+@media(max-width:720px){.row{grid-template-columns:1fr}}
+
+/* 카테고리 */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 4px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:4px;background:#fff;font-size:13px;font-weight:600}
+.chip b{font-weight:700}
+.chip i{font-style:normal;color:var(--mid);font-size:11.5px}
+.chip button{border:none;background:none;color:var(--mid);font-size:15px;line-height:1;padding:0 1px}
+.chip button:hover{color:var(--warn)}
+.chip.fixed{background:var(--wash);color:var(--mid)}
+.catdesc{margin-top:14px}
+.catdesc .one{margin-bottom:10px}
+
+/* 작업물 필터 */
+.filterbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.filterbar button{padding:8px 14px;border:1px solid var(--line);background:#fff;border-radius:4px;font-size:12.5px;font-weight:600;color:var(--mid)}
+.filterbar button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.filterbar button i{font-style:normal;opacity:.65;margin-left:4px;font-size:11.5px}
+
+/* 작업물 바둑판 */
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.wcard{background:#fff;border:1px solid var(--line);border-radius:6px;padding:11px;position:relative}
+.wcard.drag{opacity:.4}
+.wcard.over{outline:2px solid var(--ink);outline-offset:-1px}
+.wthumb{aspect-ratio:16/9;background:#eee;border-radius:3px;overflow:hidden;margin-bottom:9px;position:relative}
+.wthumb img{width:100%;height:100%;object-fit:cover}
+.wno{position:absolute;left:0;top:0;background:rgba(0,0,0,.72);color:#fff;font-size:11px;font-weight:700;padding:3px 7px}
+.wcard input,.wcard select{padding:8px 10px;font-size:13px;margin-bottom:7px}
+.wact{display:flex;gap:5px;flex-wrap:wrap}
+.wact .btn{flex:1;min-width:52px}
+.whandle{cursor:grab;color:var(--mid);font-size:12px;font-weight:700;padding:2px 0 7px;user-select:none}
+@media(max-width:980px){.wgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.wgrid{grid-template-columns:1fr}}
+
+/* 공용 리스트 */
+.item{background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px;margin-bottom:9px}
+.item .row{margin-bottom:9px}
+.item .row:last-child{margin-bottom:0}
+
+.savebar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 18px;z-index:60}
+.savebar-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.savebar small{font-size:12px;color:var(--mid)}
+.toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,16px);background:#141414;color:#fff;padding:12px 20px;border-radius:5px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--warn)}
+.toast.ok{background:var(--ok)}
+.prev{max-width:420px;margin-top:10px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+code{background:#efefef;padding:2px 6px;border-radius:3px;font-size:12.5px}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="box">
+    <h1>덕선필름 관리자</h1>
+    <p>접근 암호를 입력하세요</p>
+    <input type="password" id="pw" placeholder="암호" autocomplete="current-password">
+    <button class="btn" id="pwBtn">들어가기</button>
+    <a class="sub" href="estimate/">견적서 작성하러 가기</a>
+  </div>
+</div>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">덕선필름<small>ADMIN v5</small></div>
+    <div class="top-act">
+      <a class="btn sm ghost" href="estimate/" target="_blank" rel="noopener">견적서</a>
+      <a class="btn sm ghost" href="https://www.youtube.com/@ds-film" target="_blank" rel="noopener">유튜브</a>
+      <a class="btn sm ghost" href="/" target="_blank" rel="noopener">사이트</a>
+      <button class="btn sm ghost" id="reloadBtn">다시 불러오기</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="tabs" id="tabs">
+    <button class="on" data-p="hero">첫 화면</button>
+    <button data-p="works">작업물</button>
+    <button data-p="cats">카테고리</button>
+    <button data-p="svc">서비스</button>
+    <button data-p="about">소개</button>
+    <button data-p="contact">문의 · 하단</button>
+    <button data-p="view">섹션 표시</button>
+    <button data-p="setup">연결 설정</button>
+  </div>
+
+  <!-- 첫 화면 -->
+  <section class="panel on" id="p-hero">
+    <div class="card">
+      <h2>첫 화면 문구</h2>
+      <p class="hint">큰 제목은 줄바꿈 그대로 사이트에 나옵니다. 세 줄이 가장 보기 좋아요.</p>
+      <div class="row one"><div><label>작은 라벨</label><input id="hBadge" placeholder="Jeonbuk, Korea"></div></div>
+      <div class="row one"><div><label>큰 제목</label><textarea id="hTitle"></textarea></div></div>
+      <div class="row one"><div><label>설명</label><textarea id="hDesc"></textarea></div></div>
+    </div>
+    <div class="card">
+      <h2>대표 영상 (움직이는 첫 화면)</h2>
+      <p class="hint">자동재생을 고르면 소리 없이 반복 재생됩니다. 자막·로고 없는 드론 컷이 제일 잘 어울려요. 비워두면 작업물 맨 위 영상이 들어갑니다.</p>
+      <div class="row">
+        <div><label>표시 방식</label>
+          <select id="hMode">
+            <option value="video">자동재생 (움직임)</option>
+            <option value="thumb">정지 이미지</option>
+            <option value="none">사용 안 함</option>
+          </select>
+        </div>
+        <div><label>표시될 제목</label><input id="hvTitle" placeholder="덕선필름 2026 하이라이트"></div>
+      </div>
+      <div class="row one"><div><label>유튜브 주소 또는 mp4 주소</label><input id="hvUrl" placeholder="https://www.youtube.com/watch?v=..."></div></div>
+      <div class="prev" id="hPrev"></div>
+    </div>
+    <div class="card">
+      <h2>숫자 지표</h2>
+      <p class="hint">첫 화면 아래 가로줄에 들어갑니다. 최대 4개까지 나옵니다.</p>
+      <div id="statList"></div>
+      <button class="btn sm" id="statAdd">지표 추가</button>
+    </div>
+  </section>
+
+  <!-- 작업물 -->
+  <section class="panel" id="p-works">
+    <div class="card">
+      <h2>작업물 추가</h2>
+      <p class="hint">유튜브 주소를 붙여넣고 추가를 누르면 제목을 자동으로 가져옵니다.</p>
+      <div class="row auto">
+        <input id="addUrl" placeholder="https://www.youtube.com/watch?v=...">
+        <button class="btn fill" id="addBtn">추가</button>
+      </div>
+    </div>
+    <div class="filterbar" id="wFilter"></div>
+    <div class="wgrid" id="wGrid"></div>
+  </section>
+
+  <!-- 카테고리 -->
+  <section class="panel" id="p-cats">
+    <div class="card">
+      <h2>카테고리 관리</h2>
+      <p class="hint">사이트 작업물 위에 뜨는 필터 버튼입니다. 괄호 안 숫자는 현재 등록된 영상 수예요. 영상이 들어있는 카테고리는 지울 수 없습니다.</p>
+      <div class="row auto">
+        <input id="catNew" placeholder="카테고리 이름 입력 후 Enter">
+        <button class="btn" id="catAdd">추가</button>
+      </div>
+      <div class="chips" id="catChips"></div>
+      <div class="catdesc" id="catDescs"></div>
+    </div>
+  </section>
+
+  <!-- 서비스 -->
+  <section class="panel" id="p-svc">
+    <div class="card">
+      <h2>제작 범위</h2>
+      <p class="hint">사이트에 01, 02 번호가 붙어 순서대로 나옵니다.</p>
+      <div id="svcList"></div>
+      <button class="btn sm" id="svcAdd">항목 추가</button>
+    </div>
+  </section>
+
+  <!-- 소개 -->
+  <section class="panel" id="p-about">
+    <div class="card">
+      <h2>소개 글</h2>
+      <div class="row one"><div><textarea id="aText" style="min-height:160px"></textarea></div></div>
+    </div>
+    <div class="card">
+      <h2>거래처 · 태그</h2>
+      <p class="hint">쉼표로 구분해서 적으면 됩니다. 지자체·기관 이름을 넣으면 신뢰도가 확 올라가요.</p>
+      <div class="row one"><div><textarea id="aTags"></textarea></div></div>
+    </div>
+    <div class="card">
+      <h2>진행 과정</h2>
+      <p class="hint">소개 옆에 표로 나옵니다. 비워두면 표가 사라집니다.</p>
+      <div id="procList"></div>
+      <button class="btn sm" id="procAdd">항목 추가</button>
+    </div>
+  </section>
+
+  <!-- 문의 -->
+  <section class="panel" id="p-contact">
+    <div class="card">
+      <h2>연락처</h2>
+      <div class="row">
+        <div><label>전화</label><input id="cPhone"></div>
+        <div><label>이메일</label><input id="cEmail"></div>
+      </div>
+      <div class="row">
+        <div><label>카카오톡 채널 주소</label><input id="cKakao" placeholder="https://pf.kakao.com/..."></div>
+        <div><label>유튜브 주소</label><input id="cYoutube" placeholder="https://www.youtube.com/@ds-film"></div>
+      </div>
+      <div class="row one"><div><label>문의 섹션 설명</label><textarea id="cDesc"></textarea></div></div>
+    </div>
+    <div class="card">
+      <h2>맨 아래 문구</h2>
+      <div class="row one"><div><label>저작권 표기</label><input id="fCopy" placeholder="© 2026 덕선필름"></div></div>
+    </div>
+  </section>
+
+  <!-- 섹션 표시 -->
+  <section class="panel" id="p-view">
+    <div class="card">
+      <h2>섹션 표시</h2>
+      <p class="hint">끄면 사이트에서 해당 구역이 통째로 사라집니다.</p>
+      <div id="visList"></div>
+    </div>
+  </section>
+
+  <!-- 연결 설정 -->
+  <section class="panel" id="p-setup">
+    <div class="card">
+      <h2>깃허브 연결</h2>
+      <p class="hint">토큰은 이 브라우저에만 저장됩니다. 깃허브 Settings → Developer settings → Personal access tokens → Fine-grained 에서 dsfilm 저장소만 선택하고 Contents를 Read and write로 주면 됩니다.</p>
+      <div class="row">
+        <div><label>계정</label><input id="ghOwner" value="jenzang2"></div>
+        <div><label>저장소</label><input id="ghRepo" value="dsfilm"></div>
+      </div>
+      <div class="row">
+        <div><label>브랜치</label><input id="ghBranch" value="main"></div>
+        <div><label>파일 경로</label><input id="ghPath" value="dsfilm_data.json"></div>
+      </div>
+      <div class="row one"><div><label>토큰</label><input id="ghToken" type="password" placeholder="github_pat_..."></div></div>
+      <div class="row auto">
+        <small class="hint" style="margin:0" id="ghState">연결 상태 확인 전</small>
+        <button class="btn sm" id="ghCheck">연결 확인</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>접근 암호 변경</h2>
+      <div class="row auto">
+        <input id="newPw" type="password" placeholder="새 암호 (4자 이상)">
+        <button class="btn sm" id="pwChange">변경</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="savebar">
+  <div class="savebar-in">
+    <small id="saveInfo">불러오는 중…</small>
+    <div style="display:flex;gap:7px">
+      <button class="btn sm ghost" id="dlBtn">파일로 받기</button>
+      <button class="btn fill" id="saveBtn">저장하기</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ytId = u => { const m=String(u||'').match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/); return m?m[1]:''; };
+let D = {}, dirty = false, SHA = '', curCat = '전체';
+
+function toast(msg, kind){
+  const t = $('toast');
+  t.textContent = msg; t.className = 'toast on ' + (kind||'');
+  clearTimeout(t._t); t._t = setTimeout(()=>{ t.className='toast'; }, 2600);
+}
+function mark(){ dirty = true; $('saveInfo').textContent = '저장하지 않은 변경이 있습니다'; }
+
+/* ---------- 암호 ---------- */
+const DEFAULT_PW = 'ducksun2026';
+function hash(s){ let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0; return String(h); }
+function pwOk(v){ const saved = localStorage.getItem('ds5_pwhash') || hash(DEFAULT_PW); return hash(v) === saved; }
+$('pwBtn').onclick = () => {
+  if(pwOk($('pw').value)){ $('gate').style.display='none'; load(); }
+  else { toast('암호가 맞지 않습니다','err'); $('pw').value=''; $('pw').focus(); }
+};
+$('pw').addEventListener('keydown', e => { if(e.key==='Enter') $('pwBtn').click(); });
+$('pw').focus();
+$('pwChange').onclick = () => {
+  const v = $('newPw').value.trim();
+  if(v.length < 4) return toast('4자 이상 입력하세요','err');
+  localStorage.setItem('ds5_pwhash', hash(v)); $('newPw').value='';
+  toast('암호를 변경했습니다','ok');
+};
+
+/* ---------- 탭 ---------- */
+$('tabs').onclick = e => {
+  const b = e.target.closest('button'); if(!b) return;
+  [...$('tabs').children].forEach(x => x.classList.toggle('on', x===b));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p'+'-'+b.dataset.p));
+  scrollTo(0,0);
+};
+
+/* ---------- 불러오기 ---------- */
+function load(){
+  fetch('dsfilm_data.json?t='+Date.now()).then(r=>r.json()).then(j=>{
+    D = j || {}; fill(); dirty=false;
+    $('saveInfo').textContent = '불러왔습니다 · 작업물 ' + ((D.works||[]).length) + '개';
+  }).catch(()=> toast('데이터를 불러오지 못했습니다','err'));
+}
+$('reloadBtn').onclick = () => {
+  if(dirty && !confirm('저장하지 않은 변경이 사라집니다. 계속할까요?')) return;
+  load();
+};
+
+/* ---------- 카테고리 ---------- */
+const CAT_DESC_PRESET = {
+  '행사·축제 스케치':'현장의 열기와 하루의 흐름을 그대로 기록합니다.',
+  '웨딩':'다시 오지 않는 하루를 두 사람의 시선으로 남깁니다.',
+  '기업·홍보':'브랜드가 하고 싶은 말을 보는 사람의 언어로 바꿉니다.',
+  '공모전':'주제에 대한 해석과 연출로 승부한 작업들입니다.',
+  'TV스팟광고':'짧은 시간 안에 핵심만 남기는 송출용 광고입니다.',
+  '기타':'분류에 담기지 않는 다양한 시도들입니다.'
+};
+function cats(){
+  const list = Array.isArray(D.categories) ? D.categories.filter(c=>c && c!=='전체') : [];
+  (D.works||[]).forEach(w => { const c = w.cat||'기타'; if(!list.includes(c)) list.push(c); });
+  return list;
+}
+function countOf(c){ return (D.works||[]).filter(w => (w.cat||'기타')===c).length; }
+function paintCats(){
+  const list = cats();
+  $('catChips').innerHTML = '<span class="chip fixed"><b>전체</b></span>' + list.map(c =>
+    `<span class="chip"><b>${esc(c)}</b><i>${countOf(c)}</i>${countOf(c)?'':`<button data-del="${esc(c)}" title="삭제">&times;</button>`}</span>`).join('');
+  $('catChips').querySelectorAll('button[data-del]').forEach(b => {
+    b.onclick = () => {
+      const c = b.dataset.del;
+      D.categories = cats().filter(x => x !== c);
+      if(D.catMeta) delete D.catMeta[c];
+      mark(); paintCats(); paintWorks();
+    };
+  });
+  D.catMeta = D.catMeta || {};
+  $('catDescs').innerHTML = list.map(c => {
+    const cur = (D.catMeta[c] && D.catMeta[c].desc) || '';
+    return `<div class="one"><label>${esc(c)} 설명</label>
+      <input data-cat="${esc(c)}" value="${esc(cur)}" placeholder="${esc(CAT_DESC_PRESET[c]||'한 문장으로 적어주세요')}"></div>`;
+  }).join('');
+  $('catDescs').querySelectorAll('input[data-cat]').forEach(i => {
+    i.oninput = () => {
+      const c = i.dataset.cat;
+      D.catMeta[c] = D.catMeta[c] || {};
+      D.catMeta[c].desc = i.value; mark();
+    };
+  });
+}
+function addCat(){
+  const v = $('catNew').value.trim();
+  if(!v) return;
+  if(cats().includes(v)) return toast('이미 있는 카테고리입니다','err');
+  D.categories = cats().concat([v]);
+  D.catMeta = D.catMeta || {};
+  if(CAT_DESC_PRESET[v]) D.catMeta[v] = { desc: CAT_DESC_PRESET[v] };
+  $('catNew').value=''; mark(); paintCats(); paintWorks();
+}
+$('catAdd').onclick = addCat;
+$('catNew').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); addCat(); } });
+
+/* ---------- 작업물 ---------- */
+function paintFilter(){
+  const list = cats();
+  const total = (D.works||[]).length;
+  $('wFilter').innerHTML = [['전체',total]].concat(list.map(c=>[c,countOf(c)]))
+    .map(([c,n]) => `<button data-c="${esc(c)}"${c===curCat?' class="on"':''}>${esc(c)}<i>${n}</i></button>`).join('');
+  $('wFilter').querySelectorAll('button').forEach(b => {
+    b.onclick = () => { curCat = b.dataset.c; paintWorks(); };
+  });
+}
+function paintWorks(){
+  paintFilter();
+  const all = D.works || [];
+  const opts = cats();
+  const html = all.map((w,i) => {
+    if(curCat !== '전체' && (w.cat||'기타') !== curCat) return '';
+    const id = ytId(w.url);
+    return `<div class="wcard" draggable="true" data-i="${i}">
+      <div class="whandle">⠿ 순서 ${i+1}</div>
+      <div class="wthumb"><span class="wno">${i+1}</span>${id?`<img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" alt="" onerror="this.style.display='none'">`:''}</div>
+      <input data-f="title" value="${esc(w.title||w.name||'')}" placeholder="제목">
+      <select data-f="cat">${opts.map(c=>`<option${(w.cat||'기타')===c?' selected':''}>${esc(c)}</option>`).join('')}</select>
+      <input data-f="url" value="${esc(w.url||'')}" placeholder="유튜브 주소">
+      <div class="wact">
+        <button class="btn sm ghost" data-a="top">맨 위</button>
+        <button class="btn sm ghost" data-a="up">↑</button>
+        <button class="btn sm ghost" data-a="down">↓</button>
+        <button class="btn sm danger" data-a="del">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+  $('wGrid').innerHTML = html || '<div class="hint">이 카테고리에 등록된 영상이 없습니다.</div>';
+  bindWorks();
+}
+function bindWorks(){
+  $('wGrid').querySelectorAll('.wcard').forEach(card => {
+    const i = +card.dataset.i;
+    card.querySelectorAll('[data-f]').forEach(el => {
+      const ev = el.tagName==='SELECT' ? 'change' : 'input';
+      el.addEventListener(ev, () => {
+        D.works[i][el.dataset.f] = el.value; mark();
+        if(el.dataset.f==='cat'){ paintWorks(); paintCats(); }
+      });
+    });
+    card.querySelectorAll('[data-a]').forEach(b => {
+      b.onclick = () => {
+        const a = b.dataset.a, arr = D.works;
+        if(a==='del'){ if(!confirm('이 작업물을 삭제할까요?')) return; arr.splice(i,1); }
+        if(a==='top' && i>0){ arr.unshift(arr.splice(i,1)[0]); }
+        if(a==='up' && i>0){ [arr[i-1],arr[i]]=[arr[i],arr[i-1]]; }
+        if(a==='down' && i<arr.length-1){ [arr[i+1],arr[i]]=[arr[i],arr[i+1]]; }
+        mark(); paintWorks(); paintCats();
+      };
+    });
+    card.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', i); card.classList.add('drag'); });
+    card.addEventListener('dragend', () => card.classList.remove('drag'));
+    card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('over'); });
+    card.addEventListener('dragleave', () => card.classList.remove('over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault(); card.classList.remove('over');
+      const from = +e.dataTransfer.getData('text/plain'), to = i;
+      if(isNaN(from) || from===to) return;
+      if(curCat !== '전체'){ toast("순서는 '전체'에서 바꿔주세요",'err'); return; }
+      const arr = D.works; arr.splice(to, 0, arr.splice(from,1)[0]);
+      mark(); paintWorks();
+    });
+  });
+}
+$('addBtn').onclick = async () => {
+  const url = $('addUrl').value.trim();
+  if(!url) return;
+  const id = ytId(url);
+  if(!id) return toast('유튜브 주소가 아닙니다','err');
+  let title = '';
+  try{
+    const r = await fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v='+id);
+    title = (await r.json()).title || '';
+  }catch(e){}
+  D.works = D.works || [];
+  D.works.unshift({ id: Date.now(), title: title || '제목을 입력하세요', cat: curCat==='전체' ? (cats()[0]||'기타') : curCat, url });
+  $('addUrl').value=''; mark(); paintWorks(); paintCats();
+  toast('추가했습니다. 저장을 눌러주세요','ok');
+};
+$('addUrl').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); $('addBtn').click(); } });
+
+/* ---------- 첫 화면 ---------- */
+function paintHeroPrev(){
+  const id = ytId($('hvUrl').value);
+  $('hPrev').innerHTML = id ? `<img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" alt="">` : '';
+}
+function paintStats(){
+  const arr = (D.about && D.about.stats) || [];
+  $('statList').innerHTML = arr.map((s,i)=>
+    `<div class="item"><div class="row three" style="grid-template-columns:1fr 2fr auto;gap:9px">
+      <input data-s="${i}" data-f="num" value="${esc(s.num||s.value||'')}" placeholder="150건 이상">
+      <input data-s="${i}" data-f="label" value="${esc(s.label||'')}" placeholder="누적 제작">
+      <button class="btn sm danger" data-sdel="${i}">삭제</button>
+    </div></div>`).join('');
+  $('statList').querySelectorAll('input[data-s]').forEach(el => {
+    el.oninput = () => { D.about.stats[+el.dataset.s][el.dataset.f] = el.value; mark(); };
+  });
+  $('statList').querySelectorAll('[data-sdel]').forEach(b => {
+    b.onclick = () => { D.about.stats.splice(+b.dataset.sdel,1); mark(); paintStats(); };
+  });
+}
+$('statAdd').onclick = () => {
+  D.about = D.about || {}; D.about.stats = D.about.stats || [];
+  D.about.stats.push({ num:'', label:'' }); mark(); paintStats();
+};
+
+/* ---------- 서비스 / 진행과정 / 표시 ---------- */
+function paintSvc(){
+  const arr = D.services || [];
+  $('svcList').innerHTML = arr.map((s,i)=>
+    `<div class="item">
+      <div class="row auto"><input data-v="${i}" data-f="title" value="${esc(s.title||'')}" placeholder="제목">
+      <button class="btn sm danger" data-vdel="${i}">삭제</button></div>
+      <div class="row one"><textarea data-v="${i}" data-f="desc" placeholder="설명">${esc(s.desc||'')}</textarea></div>
+    </div>`).join('');
+  $('svcList').querySelectorAll('[data-v]').forEach(el => {
+    el.oninput = () => { D.services[+el.dataset.v][el.dataset.f] = el.value; mark(); };
+  });
+  $('svcList').querySelectorAll('[data-vdel]').forEach(b => {
+    b.onclick = () => { D.services.splice(+b.dataset.vdel,1); mark(); paintSvc(); };
+  });
+}
+$('svcAdd').onclick = () => { D.services = D.services||[]; D.services.push({title:'',desc:''}); mark(); paintSvc(); };
+
+function paintProc(){
+  const arr = (D.about && D.about.process) || [];
+  $('procList').innerHTML = arr.map((p,i)=>
+    `<div class="item"><div class="row three" style="grid-template-columns:1fr 2fr auto;gap:9px">
+      <input data-p="${i}" data-f="title" value="${esc(p.title||'')}" placeholder="촬영 장비">
+      <input data-p="${i}" data-f="desc" value="${esc(p.desc||'')}" placeholder="미러리스 · 드론 · 짐벌">
+      <button class="btn sm danger" data-pdel="${i}">삭제</button>
+    </div></div>`).join('');
+  $('procList').querySelectorAll('[data-p]').forEach(el => {
+    el.oninput = () => { D.about.process[+el.dataset.p][el.dataset.f] = el.value; mark(); };
+  });
+  $('procList').querySelectorAll('[data-pdel]').forEach(b => {
+    b.onclick = () => { D.about.process.splice(+b.dataset.pdel,1); mark(); paintProc(); };
+  });
+}
+$('procAdd').onclick = () => {
+  D.about = D.about||{}; D.about.process = D.about.process||[];
+  D.about.process.push({title:'',desc:''}); mark(); paintProc();
+};
+
+function paintVis(){
+  const v = D.sectionVisibility = D.sectionVisibility || {};
+  const map = { work:'작업물', services:'제작 범위', about:'소개', contact:'문의' };
+  $('visList').innerHTML = Object.keys(map).map(k =>
+    `<div class="row auto" style="align-items:center">
+      <span style="font-weight:600">${map[k]}</span>
+      <button class="btn sm ${v[k]===false?'ghost':'fill'}" data-vis="${k}">${v[k]===false?'숨김':'표시'}</button>
+    </div>`).join('');
+  $('visList').querySelectorAll('[data-vis]').forEach(b => {
+    b.onclick = () => { const k=b.dataset.vis; v[k] = (v[k]===false); mark(); paintVis(); };
+  });
+}
+
+/* ---------- 채우기 ---------- */
+function fill(){
+  const h = D.hero||{}, m = D.heroMedia||{}, a = D.about||{}, c = D.contact||{}, n = D.nav||{};
+  $('hBadge').value = h.badge||''; $('hTitle').value = h.title||''; $('hDesc').value = h.desc||'';
+  $('hMode').value = m.mode||'thumb'; $('hvTitle').value = m.title||''; $('hvUrl').value = m.videoUrl||'';
+  paintHeroPrev();
+  $('aText').value = a.text || a.desc || a.intro || '';
+  const tg = a.tags || a.clients || [];
+  $('aTags').value = tg.map(t => typeof t==='string'?t:(t.name||'')).join(', ');
+  $('cPhone').value = c.phone||''; $('cEmail').value = c.email||'';
+  $('cDesc').value = c.desc||'';
+  const km = (n.extraMenus||[]).find(x => x && /카카오/.test(x.name||''));
+  $('cKakao').value = (km && km.url) || c.kakao || '';
+  $('cYoutube').value = c.youtube || 'https://www.youtube.com/@ds-film';
+  $('fCopy').value = (D.footer && D.footer.copy) || '© 2026 덕선필름';
+  paintCats(); paintWorks(); paintStats(); paintSvc(); paintProc(); paintVis();
+  const s = JSON.parse(localStorage.getItem('ds5_gh')||'{}');
+  if(s.owner) $('ghOwner').value=s.owner;
+  if(s.repo) $('ghRepo').value=s.repo;
+  if(s.branch) $('ghBranch').value=s.branch;
+  if(s.path) $('ghPath').value=s.path;
+  if(s.token) $('ghToken').value=s.token;
+}
+['hBadge','hTitle','hDesc','hMode','hvTitle','hvUrl','aText','aTags','cPhone','cEmail','cDesc','cKakao','cYoutube','fCopy']
+  .forEach(id => { const el=$(id); el.addEventListener('input', mark); el.addEventListener('change', mark); });
+$('hvUrl').addEventListener('input', paintHeroPrev);
+
+function collect(){
+  D.hero = Object.assign({}, D.hero, { badge:$('hBadge').value, title:$('hTitle').value, desc:$('hDesc').value });
+  D.heroMedia = Object.assign({}, D.heroMedia, { mode:$('hMode').value, title:$('hvTitle').value, videoUrl:$('hvUrl').value });
+  D.about = Object.assign({}, D.about, { text:$('aText').value });
+  D.about.tags = $('aTags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  D.contact = Object.assign({}, D.contact, {
+    phone:$('cPhone').value, email:$('cEmail').value, desc:$('cDesc').value,
+    kakao:$('cKakao').value, youtube:$('cYoutube').value
+  });
+  D.nav = D.nav || {};
+  const ex = (D.nav.extraMenus||[]).filter(x => x && !/카카오/.test(x.name||''));
+  if($('cKakao').value.trim()) ex.push({ name:'카카오톡 문의', url:$('cKakao').value.trim() });
+  D.nav.extraMenus = ex;
+  D.footer = Object.assign({}, D.footer, { copy:$('fCopy').value });
+  D.categories = cats();
+  D.workSections = [];
+  (D.works||[]).forEach(w => { if(!w.id) w.id = Date.now() + Math.floor(Math.random()*1000); });
+  return D;
+}
+
+/* ---------- 저장 ---------- */
+function b64(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+function ghConf(){
+  const conf = { owner:$('ghOwner').value.trim(), repo:$('ghRepo').value.trim(),
+    branch:$('ghBranch').value.trim()||'main', path:$('ghPath').value.trim()||'dsfilm_data.json',
+    token:$('ghToken').value.trim() };
+  localStorage.setItem('ds5_gh', JSON.stringify(conf));
+  return conf;
+}
+$('ghCheck').onclick = async () => {
+  const g = ghConf();
+  if(!g.token) return toast('토큰을 입력하세요','err');
+  try{
+    const r = await fetch(`https://api.github.com/repos/${g.owner}/${g.repo}/contents/${g.path}?ref=${g.branch}`,
+      { headers:{ Authorization:'Bearer '+g.token, Accept:'application/vnd.github+json' } });
+    if(!r.ok) throw new Error(r.status);
+    const j = await r.json(); SHA = j.sha;
+    $('ghState').textContent = '연결 정상 · 파일 확인됨';
+    toast('연결 정상','ok');
+  }catch(e){ $('ghState').textContent = '연결 실패 ('+e.message+')'; toast('연결 실패','err'); }
+};
+$('dlBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify(collect(),null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'dsfilm_data.json'; a.click();
+};
+$('saveBtn').onclick = async () => {
+  const g = ghConf();
+  const body = JSON.stringify(collect(), null, 2);
+  if(!g.token){ toast('토큰이 없어 파일로 받습니다','err'); return $('dlBtn').click(); }
+  $('saveBtn').disabled = true; $('saveInfo').textContent = '저장 중…';
+  try{
+    const head = { Authorization:'Bearer '+g.token, Accept:'application/vnd.github+json' };
+    const cur = await fetch(`https://api.github.com/repos/${g.owner}/${g.repo}/contents/${g.path}?ref=${g.branch}`, {headers:head});
+    if(cur.ok) SHA = (await cur.json()).sha;
+    const r = await fetch(`https://api.github.com/repos/${g.owner}/${g.repo}/contents/${g.path}`, {
+      method:'PUT', headers:Object.assign({'Content-Type':'application/json'},head),
+      body: JSON.stringify({ message:'데이터 업데이트 (관리자 v5)', content:b64(body), sha:SHA||undefined, branch:g.branch })
+    });
+    if(!r.ok){
+      const t = await r.text();
+      throw new Error(r.status===409 ? '다른 곳에서 먼저 저장됨 · 다시 불러오기 후 재시도' : r.status+' '+t.slice(0,80));
+    }
+    SHA = (await r.json()).content.sha;
+    dirty = false; $('saveInfo').textContent = '저장 완료 · 1~2분 뒤 사이트에 반영됩니다';
+    toast('저장했습니다','ok');
+  }catch(e){
+    $('saveInfo').textContent = '저장 실패'; toast(e.message,'err');
+  }
+  $('saveBtn').disabled = false;
+};
+addEventListener('beforeunload', e => { if(dirty){ e.preventDefault(); e.returnValue=''; } });
+</script>
+</body>
+</html>
